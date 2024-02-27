@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using Discord;
+﻿using Discord;
 using Discord.WebSocket;
 using System.Text;
 
@@ -8,12 +7,15 @@ namespace BossBot
     public class DiscordRuntime
     {
         private readonly DiscordSocketClient _client;
-        private readonly BossData _bossData = new();
+        private readonly BossData _bossData;
         private readonly Options _options;
         private readonly Dictionary<ulong, DateTimeOffset> _lastReadMessage = new();
+        private readonly DateTimeHelper _dateTimeHelper;
+        
         public DiscordRuntime(Options options)
         {
             _options = options;
+            _dateTimeHelper = new DateTimeHelper(_options.TimeZone);
             
             _client = new DiscordSocketClient();
             
@@ -82,7 +84,7 @@ namespace BossBot
                         foreach (var item in dic[i])
                         {
                             var nextRespawnTime = item.KillTime.AddHours(item.RespawnTime);
-                            var timeToRespawn = nextRespawnTime - DateTimeMsc.CurrentTimeMcs;
+                            var timeToRespawn = nextRespawnTime - _dateTimeHelper.CurrentTime;
                             builder.AppendLine($"Босс **{StringHelper.PopulateWithWhiteSpaces(item.Id.ToString(), 2)}** **{item.NickName.ToUpper()}** не был залогирован. Новое время {nextRespawnTime:HH:mm} через {timeToRespawn.ToString(@"hh\:mm")}");
                         }
                         var channel = _client.GetChannel(i) as ITextChannel;
@@ -107,7 +109,7 @@ namespace BossBot
                         foreach (var item in dictionary[i])
                         {
                             var nextRespawnTime = item.KillTime.AddHours(item.RespawnTime);
-                            var timeToRespawn = nextRespawnTime - DateTimeMsc.CurrentTimeMcs;
+                            var timeToRespawn = nextRespawnTime - _dateTimeHelper.CurrentTime;
                             builder.AppendLine($"**{StringHelper.PopulateWithWhiteSpaces(item.Id.ToString(), 2)}**|{nextRespawnTime:HH:mm}|**{item.NickName.ToUpper()}**| через {timeToRespawn.ToString(@"hh\:mm")}");
                         }
                         var channel = _client.GetChannel(i) as ITextChannel;
@@ -235,7 +237,7 @@ namespace BossBot
                 else
                 {
                     var nextRespawnTime = boss.KillTime.AddHours(boss.RespawnTime);
-                    var timeToRespawn = nextRespawnTime - DateTimeMsc.CurrentTimeMcs;
+                    var timeToRespawn = nextRespawnTime - _dateTimeHelper.CurrentTime;
                     
                     var msg = $"Босс убит **{boss.Id}** **{boss.NickName.ToUpper()}** респавн {nextRespawnTime:HH:mm} через {timeToRespawn.ToString(@"hh\:mm")}";
                     return channel.SendMessageAsync(msg);
@@ -256,7 +258,7 @@ namespace BossBot
                         return null;
                     }
 
-                    if (dateTime > DateTimeMsc.CurrentTimeMcs.AddHours(1))
+                    if (dateTime > _dateTimeHelper.CurrentTime.AddHours(1))
                         dateTime = dateTime.AddDays(-1);
                     return dateTime;
                 case 4:
@@ -277,7 +279,7 @@ namespace BossBot
             foreach (var model in models)
             {
                 var nextRespawnTime = model.KillTime.AddHours(model.RespawnTime);
-                var timeToRespawn = nextRespawnTime - DateTimeMsc.CurrentTimeMcs;
+                var timeToRespawn = nextRespawnTime - _dateTimeHelper.CurrentTime;
                 builder.AppendLine($"**{StringHelper.PopulateWithWhiteSpaces(model.Id.ToString(), 2)}**|{nextRespawnTime:HH:mm}|**{StringHelper.PopulateWithWhiteSpaces(model.NickName.ToUpper(), maxLength)}** через {timeToRespawn.ToString(@"hh\:mm")}");
             }
 

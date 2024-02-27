@@ -8,9 +8,11 @@ namespace BossBot
         private readonly BossDataSource _bossData = new();
         private List<BossDbModel> _bossCache;
         private readonly List<int> _mentionedBosses = new();
+        private readonly DateTimeHelper _dateTimeHelper;
 
-        public BossData()
+        public BossData(Options options)
         {
+            _dateTimeHelper = new DateTimeHelper(options.TimeZone);
             var needPopulateTable = _bossData.DatabaseIsCreated;
             _bossData.Database.EnsureCreated();
             if (!needPopulateTable)
@@ -46,7 +48,7 @@ namespace BossBot
         private bool IsBossPostpone(BossInformationDbModel info)
         {
             var nextRespawnTime = info.KillTime.AddHours(GetBossModelById(info.BossId).RespawnTime).AddMinutes(5);
-            return DateTimeMsc.CurrentTimeMcs > nextRespawnTime;
+            return _dateTimeHelper.CurrentTime > nextRespawnTime;
         }
 
 
@@ -118,7 +120,7 @@ namespace BossBot
                 .Include(bossInformationDbModel => bossInformationDbModel.Boss).ToList();
             bossInfo.ForEach(info =>
             {
-                if (info.KillTime.AddHours(info.Boss.RespawnTime) < DateTimeMsc.CurrentTimeMcs.AddMinutes(5) &&
+                if (info.KillTime.AddHours(info.Boss.RespawnTime) < _dateTimeHelper.CurrentTime.AddMinutes(5) &&
                     !_mentionedBosses.Contains(info.Id))
                 {
                     _mentionedBosses.Add(info.Id);
