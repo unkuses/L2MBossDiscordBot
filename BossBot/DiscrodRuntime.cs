@@ -11,14 +11,14 @@ namespace BossBot
         private readonly Options _options;
         private readonly Dictionary<ulong, DateTimeOffset> _lastReadMessage = new();
         private readonly DateTimeHelper _dateTimeHelper;
-        
+
         public DiscordRuntime(Options options)
         {
             _options = options;
             _dateTimeHelper = new DateTimeHelper(_options.TimeZone);
-            
+
             _client = new DiscordSocketClient();
-            
+
             _client.MessageReceived += Discord_MessageReceived;
             _client.Log += Client_Log;
             _client.LoggedIn += Client_LoggedIn;
@@ -46,7 +46,7 @@ namespace BossBot
         private async Task Discord_MessageReceived(SocketMessage arg)
         {
             var messages = await arg.Channel.GetMessagesAsync(10).ToListAsync();
-            if(messages != null)
+            if (messages != null)
             {
                 messages.ForEach(x =>
                 {
@@ -63,35 +63,40 @@ namespace BossBot
 
         private Task MaintenanceTask()
         {
-            while(true)
+            while (true)
             {
                 var postponeBosses = _bossData.GetAndUpdateAllPostponeBosses();
                 var appendBosses = _bossData.GetAllAppendingBosses();
-                if(postponeBosses.Count > 0)
+                if (postponeBosses.Count > 0)
                 {
                     Dictionary<ulong, IList<BossModel>> dic = new();
                     foreach (var postponeBoss in postponeBosses)
                     {
-                        if(!dic.ContainsKey(postponeBoss.ChatId.Value))
+                        if (!dic.ContainsKey(postponeBoss.ChatId.Value))
                         {
                             dic[postponeBoss.ChatId.Value] = new List<BossModel>();
                         }
+
                         dic[postponeBoss.ChatId.Value].Add(postponeBoss);
                     }
-                    foreach(var i in dic.Keys)
+
+                    foreach (var i in dic.Keys)
                     {
                         StringBuilder builder = new StringBuilder();
                         foreach (var item in dic[i])
                         {
                             var nextRespawnTime = item.KillTime.AddHours(item.RespawnTime);
                             var timeToRespawn = nextRespawnTime - _dateTimeHelper.CurrentTime;
-                            builder.AppendLine($"Босс **{StringHelper.PopulateWithWhiteSpaces(item.Id.ToString(), 2)}** **{item.NickName.ToUpper()}** не был залогирован. Новое время {nextRespawnTime:HH:mm} через {timeToRespawn.ToString(@"hh\:mm")}");
+                            builder.AppendLine(
+                                $"Босс **{StringHelper.PopulateWithWhiteSpaces(item.Id.ToString(), 2)}** **{item.NickName.ToUpper()}** не был залогирован. Новое время {nextRespawnTime:HH:mm} через {timeToRespawn.ToString(@"hh\:mm")}");
                         }
+
                         var channel = _client.GetChannel(i) as ITextChannel;
                         channel?.SendMessageAsync(builder.ToString());
                     }
                 }
-                if(appendBosses.Count > 0)
+
+                if (appendBosses.Count > 0)
                 {
                     Dictionary<ulong, IList<BossModel>> dictionary = new();
                     foreach (var appendBoss in appendBosses)
@@ -100,8 +105,10 @@ namespace BossBot
                         {
                             dictionary[appendBoss.ChatId.Value] = new List<BossModel>();
                         }
+
                         dictionary[appendBoss.ChatId.Value].Add(appendBoss);
                     }
+
                     foreach (var i in dictionary.Keys)
                     {
                         StringBuilder builder = new StringBuilder();
@@ -110,13 +117,16 @@ namespace BossBot
                         {
                             var nextRespawnTime = item.KillTime.AddHours(item.RespawnTime);
                             var timeToRespawn = nextRespawnTime - _dateTimeHelper.CurrentTime;
-                            builder.AppendLine($"**{StringHelper.PopulateWithWhiteSpaces(item.Id.ToString(), 2)}**|{nextRespawnTime:HH:mm}|**{item.NickName.ToUpper()}**| через {timeToRespawn.ToString(@"hh\:mm")}");
+                            builder.AppendLine(
+                                $"**{StringHelper.PopulateWithWhiteSpaces(item.Id.ToString(), 2)}**|{nextRespawnTime:HH:mm}|**{item.NickName.ToUpper()}**| через {timeToRespawn.ToString(@"hh\:mm")} | {item.Chance}");
                         }
+
                         var channel = _client.GetChannel(i) as ITextChannel;
                         channel?.SendMessageAsync(builder.ToString());
                     }
                 }
-                Thread.Sleep(60*1000);
+
+                Thread.Sleep(60 * 1000);
             }
         }
 
@@ -124,19 +134,21 @@ namespace BossBot
         {
             if (channel.Name != _options.ChatName || message == null || !message.StartsWith("!"))
                 return Task.CompletedTask;
-            
+
             var messageParts = message.Remove(0, 1).Split(" ");
-            if(messageParts.Any())
+            if (messageParts.Any())
             {
-                switch(messageParts[0])
+                switch (messageParts[0])
                 {
                     case "?":
-                        GetAllBossInformation(channel); break;
+                        GetAllBossInformation(channel);
+                        break;
                     case "??":
-                        GetAllNotLoggedBosses(channel); break;
+                        GetAllNotLoggedBosses(channel);
+                        break;
                     case "l":
                     case "л":
-                        
+
                         if (messageParts.Length == 1 || !int.TryParse(messageParts[1], out var count))
                         {
                             GetBossInformation(channel);
@@ -145,6 +157,7 @@ namespace BossBot
                         {
                             GetFirstLoggedBossInfo(channel, count);
                         }
+
                         break;
                     case "k":
                     case "к":
@@ -155,10 +168,9 @@ namespace BossBot
                         break;
                     default:
                         break;
-                              
                 }
             }
-            
+
             return Task.CompletedTask;
         }
 
@@ -170,6 +182,7 @@ namespace BossBot
             {
                 str.Append($"**{item.NickName.ToUpper()}**:**{item.Id}**, ");
             }
+
             return channel.SendMessageAsync(str.ToString());
         }
 
@@ -181,6 +194,7 @@ namespace BossBot
             {
                 str.Append($"**{item.NickName.ToUpper()}**:**{item.Id}**, ");
             }
+
             channel.SendMessageAsync(str.ToString());
             return Task.CompletedTask;
         }
@@ -188,30 +202,33 @@ namespace BossBot
         private Task GetBossInformation(ISocketMessageChannel channel)
         {
             var bosses = _bossData.GetAllLoggedBossInfo(channel.Id);
-            return channel.SendMessageAsync(PopulateBossInformationString(bosses));
+            var messages = PopulateBossInformationString(bosses);
+            messages.ForEach(m => { channel.SendMessageAsync(m.ToString()); });
+            return Task.CompletedTask;
         }
 
         private Task GetFirstLoggedBossInfo(ISocketMessageChannel channel, int count)
         {
-            
             if (count <= 0)
             {
                 return Task.CompletedTask;
             }
+
             var bosses = _bossData.GetFirstLoggedBossInfo(channel.Id, count);
-            return channel.SendMessageAsync(PopulateBossInformationString(bosses));
+            var messages = PopulateBossInformationString(bosses);
+            messages.ForEach(m => { channel.SendMessageAsync(m.ToString()); });
+            return Task.CompletedTask;
         }
 
         private Task GetBossListWithKillTime(ISocketMessageChannel channel)
         {
-            
             var bossListWithKillTime = GetAllBossStatus(_bossData.GetAllLoggedBossInfo(channel.Id));
             return channel.SendMessageAsync(bossListWithKillTime);
         }
 
         private Task LogKillBossTime(ISocketMessageChannel channel, string[] message)
         {
-            if(message.Length < 2) 
+            if (message.Length < 2)
             {
                 channel.SendMessageAsync("Не правильный формат");
             }
@@ -222,6 +239,7 @@ namespace BossBot
                     channel.SendMessageAsync("Не правильный формат");
                     return Task.CompletedTask;
                 }
+
                 var dateTime = ParseDateTimeParameters(message);
                 if (!dateTime.HasValue)
                 {
@@ -230,7 +248,7 @@ namespace BossBot
                 }
 
                 var boss = _bossData.LogKillBossInformation(channel.Id, id, dateTime.Value);
-                if(boss == null)
+                if (boss == null)
                 {
                     return channel.SendMessageAsync($"Босс с номером {id} не был найден");
                 }
@@ -238,11 +256,13 @@ namespace BossBot
                 {
                     var nextRespawnTime = boss.KillTime.AddHours(boss.RespawnTime);
                     var timeToRespawn = nextRespawnTime - _dateTimeHelper.CurrentTime;
-                    
-                    var msg = $"Босс убит **{boss.Id}** **{boss.NickName.ToUpper()}** респавн {nextRespawnTime:HH:mm} через {timeToRespawn.ToString(@"hh\:mm")}";
+
+                    var msg =
+                        $"Босс убит **{boss.Id}** **{boss.NickName.ToUpper()}** респавн {nextRespawnTime:HH:mm} через {timeToRespawn.ToString(@"hh\:mm")}";
                     return channel.SendMessageAsync(msg);
                 }
             }
+
             return Task.CompletedTask;
         }
 
@@ -266,24 +286,33 @@ namespace BossBot
                     {
                         return null;
                     }
+
                     return dateTime;
                 default:
                     return null;
             }
         }
 
-        private string PopulateBossInformationString(IList<BossModel> models)
+        private List<StringBuilder> PopulateBossInformationString(IList<BossModel> models)
         {
-            StringBuilder builder = new ();
+            List<StringBuilder> builders = new();
+            var stringBuilder = new StringBuilder();
+            builders.Add(stringBuilder);
             int maxLength = models.Max(x => x.NickName.Length);
             foreach (var model in models)
             {
                 var nextRespawnTime = model.KillTime.AddHours(model.RespawnTime);
                 var timeToRespawn = nextRespawnTime - _dateTimeHelper.CurrentTime;
-                builder.AppendLine($"**{StringHelper.PopulateWithWhiteSpaces(model.Id.ToString(), 2)}**|{nextRespawnTime:HH:mm}|**{StringHelper.PopulateWithWhiteSpaces(model.NickName.ToUpper(), maxLength)}** через {timeToRespawn.ToString(@"hh\:mm")}");
+                var str = $"**{StringHelper.PopulateWithWhiteSpaces(model.Id.ToString(), 2)}**|{nextRespawnTime:HH:mm}|**{StringHelper.PopulateWithWhiteSpaces(model.NickName.ToUpper(), maxLength)}** через {timeToRespawn.ToString(@"hh\:mm")} | {model.Chance}");
+                if (stringBuilder.Length + str.Length > 2000)
+                {
+                    stringBuilder = new StringBuilder();
+                }
+
+                stringBuilder.AppendLine(str);
             }
 
-            return builder.ToString();
+            return builders;
         }
 
         private string GetAllBossStatus(IList<BossModel> models)
@@ -293,6 +322,7 @@ namespace BossBot
             {
                 statusBuilder.AppendLine($"!k {model.Id} {model.KillTime:yyyy-MM-dd HH:mm}");
             }
+
             return statusBuilder.ToString();
         }
     }
