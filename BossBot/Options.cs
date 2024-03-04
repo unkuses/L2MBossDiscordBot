@@ -1,11 +1,11 @@
 ﻿namespace BossBot
 {
-    public class Options
+    public class Options(string chatName, string botToken, string timeZone = "Russian Standard Time")
     {
-        public string ChatName { get; set; }
-        
-        public string BotToken { get; set; }
-        
-        public string TimeZone { get; set; }
+        public string ChatName { get; set; } = chatName;
+
+        public string BotToken { get; set; } = botToken;
+
+        public string TimeZone { get; set; } = timeZone;
     }
 }

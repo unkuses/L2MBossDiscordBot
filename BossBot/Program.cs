@@ -6,7 +6,18 @@ internal class Program
 {
     private static void Main(string[] args)
     {
-        var options = JsonConvert.DeserializeObject<Options>(File.ReadAllText("Options.ini"));
+        var botTok = Environment.GetEnvironmentVariable("BotKey");
+        var chatName = Environment.GetEnvironmentVariable("ChatBotName");
+        Options options;
+        if (!string.IsNullOrWhiteSpace(botTok) && string.IsNullOrWhiteSpace(chatName))
+        {
+            options = new Options(chatName, botTok);
+        }
+        else
+        {
+            options = JsonConvert.DeserializeObject<Options>(File.ReadAllText("Options.ini"));
+        }
+
         if (options == null || String.IsNullOrWhiteSpace(options.BotToken) ||
             String.IsNullOrWhiteSpace(options.ChatName))
         {

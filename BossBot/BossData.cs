@@ -6,7 +6,7 @@ namespace BossBot
     public class BossData
     {
         private readonly BossDataSource _bossData = new();
-        private List<BossDbModel> _bossCache;
+        private List<BossDbModel>? _bossCache = null;
         private readonly List<int> _mentionedBosses = new();
         private readonly DateTimeHelper _dateTimeHelper;
 
@@ -128,6 +128,36 @@ namespace BossBot
                 }
             });
             return list;
+        }
+
+        public void ClearAllBossInformation(ulong chatId)
+        {
+            _bossData.BossInformationDbModels.RemoveRange(
+                _bossData.BossInformationDbModels.Where(info => info.ChatId == chatId));
+            _bossData.SaveChangesAsync();
+        }
+
+        public void ServerRestarted(ulong chatId)
+        {
+            _bossData.BossInformationDbModels.RemoveRange(
+                _bossData.BossInformationDbModels.Where(info => info.ChatId == chatId));
+            _bossData.SaveChangesAsync();
+        }
+
+        public Task PredictedTimeAfterRestart(ulong chatId, DateTime restartTime)
+        {
+            var bossInfo = _bossData.BossInformationDbModels.Where(info => info.ChatId == chatId);
+            var notLoggedBosses = BossModelsCache.Where(b => !bossInfo.Any(info => info.BossId == b.ID));
+            var bossInfos = notLoggedBosses.Select(boss => new BossInformationDbModel()
+            {
+                Boss = boss,
+                BossId = boss.ID, ChatId = chatId,
+                KillTime = boss.RestartRespawnTime != 0
+                    ? restartTime.AddHours(boss.RespawnTime)
+                    : restartTime.AddHours(boss.RestartRespawnTime)
+            }).ToList();
+            _bossData.BossInformationDbModels.AddRange(bossInfos);
+            return _bossData.SaveChangesAsync();
         }
     }
 }
