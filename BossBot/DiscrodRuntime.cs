@@ -3,7 +3,6 @@ using Discord.WebSocket;
 using System.Text;
 using BossBot.Commands;
 using BossBot.Interfaces;
-using static System.Net.Mime.MediaTypeNames;
 using System.Text.RegularExpressions;
 
 namespace BossBot
@@ -16,6 +15,7 @@ namespace BossBot
         private readonly Dictionary<ulong, DateTimeOffset> _lastReadMessage = new();
         private readonly DateTimeHelper _dateTimeHelper;
         private readonly List<ICommand> _commands = [];
+        private readonly Logger _logger = new();
 
         public DiscordRuntime(Options? options)
         {
@@ -34,23 +34,14 @@ namespace BossBot
                 new GetAllNotLoggedBossesCommand(_bossData),
                 new GetAllBossInformationCommand(_bossData),
                 new LogKillBossCommand(_bossData, _dateTimeHelper),
-                //new HelpCommand(),
                 new ClearBossCommand(_bossData),
                 new RestartTimeCommand(_bossData, _dateTimeHelper)
             });
         }
 
-        private Task Client_LoggedIn()
-        {
-            Console.WriteLine("LoggedIn");
-            return Task.CompletedTask;
-        }
+        private Task Client_LoggedIn() => _logger.WriteLog("LoggedIn");
 
-        private Task Client_Log(LogMessage arg)
-        {
-            Console.WriteLine(arg.Message);
-            return Task.CompletedTask;
-        }
+        private Task Client_Log(LogMessage arg) => _logger.WriteLog(arg.Message);
 
         private void Test()
         {
