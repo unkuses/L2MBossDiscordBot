@@ -1,4 +1,5 @@
-﻿using BossBot.Interfaces;
+﻿using System.Text;
+using BossBot.Interfaces;
 using Discord.WebSocket;
 
 namespace BossBot.Commands
@@ -7,44 +8,44 @@ namespace BossBot.Commands
     {
         public string[] Keys { get; } = ["k", "к"];
 
-        public Task ExecuteAsync(ISocketMessageChannel channel, string[] commands)
+        public Task<IEnumerable<string>> ExecuteAsync(ulong chatId, string[] commands)
         {
+            List<StringBuilder> stringBuilders = new List<StringBuilder>();
+            StringBuilder sb = new StringBuilder();
+            stringBuilders.Add(sb);
             if (commands.Length < 2)
             {
-                channel.SendMessageAsync("Не правильный формат");
+                sb.AppendLine("Не правильный формат");
             }
             else
             {
                 if (!int.TryParse(commands[1], out var id))
                 {
-                    channel.SendMessageAsync("Не правильный формат");
-                    return Task.CompletedTask;
+                    sb.AppendLine("Не правильный формат");
                 }
 
                 var dateTime = ParseDateTimeParameters(commands);
                 if (!dateTime.HasValue)
                 {
-                    channel.SendMessageAsync("Не правильный формат");
-                    return Task.CompletedTask;
+                    sb.AppendLine("Не правильный формат");
                 }
 
-                var boss = bossData.LogKillBossInformation(channel.Id, id, dateTime.Value);
+                var boss = bossData.LogKillBossInformation(chatId, id, dateTime.Value);
                 if (boss == null)
                 {
-                    return channel.SendMessageAsync($"Босс с номером {id} не был найден");
+                    sb.AppendLine($"Босс с номером {id} не был найден");
                 }
                 else
                 {
                     var nextRespawnTime = boss.KillTime.AddHours(boss.RespawnTime);
                     var timeToRespawn = nextRespawnTime - dateTimeHelper.CurrentTime;
 
-                    var msg =
-                        $"Босс убит **{boss.Id}** **{boss.NickName.ToUpper()}** респавн {nextRespawnTime:HH:mm} через {timeToRespawn.ToString(@"hh\:mm")}";
-                    return channel.SendMessageAsync(msg);
+                    sb.AppendLine(
+                        $"Босс убит **{boss.Id}** **{boss.NickName.ToUpper()}** респавн {nextRespawnTime:HH:mm} через {timeToRespawn.ToString(@"hh\:mm")}");
                 }
             }
 
-            return Task.CompletedTask;
+            return Task.FromResult(stringBuilders.Select(s => s.ToString()));
         }
 
         private DateTime? ParseDateTimeParameters(string[] parameters)

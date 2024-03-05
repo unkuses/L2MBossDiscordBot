@@ -8,10 +8,10 @@ namespace BossBot.Commands
         public string[] Keys { get; } = ["c", "о"];
 
 
-        public Task ExecuteAsync(ISocketMessageChannel channel, string[] commands)
+        public Task<IEnumerable<string>> ExecuteAsync(ulong chatId, string[] commands)
         {
-            bossData.ClearAllBossInformation(channel.Id);
-            return Task.CompletedTask;
+            bossData.ClearAllBossInformation(chatId);
+            return Task.FromResult(Enumerable.Empty<string>());
         }
     }
 }

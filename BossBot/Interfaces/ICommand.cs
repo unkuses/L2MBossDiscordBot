@@ -5,6 +5,6 @@ namespace BossBot.Interfaces
     public interface ICommand
     {
         string[] Keys { get; }
-        Task ExecuteAsync(ISocketMessageChannel channel, string[] commands);
+        Task<IEnumerable<string>> ExecuteAsync(ulong chatId, string[] commands);
     }
 }

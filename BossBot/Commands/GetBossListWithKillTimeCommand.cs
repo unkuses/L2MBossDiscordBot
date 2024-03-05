@@ -8,21 +8,26 @@ namespace BossBot.Commands
     {
         public string[] Keys { get; } = ["kl"];
 
-        public Task ExecuteAsync(ISocketMessageChannel channel, string[] commands)
-        {
-            var bossListWithKillTime = GetAllBossStatus(bossData.GetAllLoggedBossInfo(channel.Id));
-            return channel.SendMessageAsync(bossListWithKillTime);
-        }
+        public Task<IEnumerable<string>> ExecuteAsync(ulong chatId, string[] commands) =>
+            GetAllBossStatus(bossData.GetAllLoggedBossInfo(chatId));
 
-        private string GetAllBossStatus(IList<BossModel> models)
+        private Task<IEnumerable<string>> GetAllBossStatus(IList<BossModel> models)
         {
+            var stringBuilders = new List<StringBuilder>();
             StringBuilder statusBuilder = new StringBuilder();
+            stringBuilders.Add(statusBuilder);
             foreach (var model in models)
             {
-                statusBuilder.AppendLine($"!k {model.Id} {model.KillTime:yyyy-MM-dd HH:mm}");
+                var str = $"!k {model.Id} {model.KillTime:yyyy-MM-dd HH:mm}";
+                if (statusBuilder.Length + str.Length > 2000)
+                {
+                    statusBuilder = new StringBuilder();
+                }
+
+                statusBuilder.AppendLine(str);
             }
 
-            return statusBuilder.ToString();
+            return Task.FromResult(stringBuilders.Select(s => s.ToString()));
         }
     }
 }

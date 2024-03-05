@@ -34,7 +34,7 @@ namespace BossBot
                 new GetAllNotLoggedBossesCommand(_bossData),
                 new GetAllBossInformationCommand(_bossData),
                 new LogKillBossCommand(_bossData, _dateTimeHelper),
-                new HelpCommand(),
+                //new HelpCommand(),
                 new ClearBossCommand(_bossData),
                 new RestartTimeCommand(_bossData, _dateTimeHelper)
             });
@@ -155,12 +155,13 @@ namespace BossBot
             }
         }
 
-        private Task ProcessMessage(string? message, ISocketMessageChannel channel)
+        private async Task ProcessMessage(string? message, ISocketMessageChannel channel)
         {
             if (channel.Name != _options.ChatName || message == null)
-                return Task.CompletedTask;
+                return;
 
             var lines = Regex.Split(message, "\r\n|\r|\n");
+            var answers = new List<string>();
             foreach (var line in lines)
             {
                 if(!line.StartsWith("!"))
@@ -169,12 +170,35 @@ namespace BossBot
                 var messageParts = line.Remove(0, 1).Split(' ');
                 if (messageParts.Any())
                 {
-                    _commands.FirstOrDefault(c => c.Keys.Contains(messageParts[0]))
-                        ?.ExecuteAsync(channel, messageParts);
+                    var command = _commands.FirstOrDefault(c => c.Keys.Contains(messageParts[0]));
+                    if(command == null)
+                        continue;
+                    var result = await command.ExecuteAsync(channel.Id, messageParts);
+                    answers.AddRange(result);
                 }
             }
 
-            return Task.CompletedTask;
+            if (answers.Count > 0)
+            {
+                ProcessAnswers(channel, answers);
+            }
+            return;
+        }
+
+        private Task ProcessAnswers(ISocketMessageChannel channel, List<string> answers)
+        {
+            StringBuilder builder = new StringBuilder();
+            foreach (var answer in answers)
+            {
+                if (builder.Length + answer.Length > 2000)
+                {
+                    channel.SendMessageAsync(builder.ToString());
+                    builder.Clear();
+                }
+
+                builder.AppendLine(answer);
+            }
+            return channel.SendMessageAsync(builder.ToString());
         }
     }
 }

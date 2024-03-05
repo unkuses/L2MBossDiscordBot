@@ -7,17 +7,18 @@ namespace BossBot.Commands
     public class GetAllNotLoggedBossesCommand(BossData bossData) : ICommand
     {
         public string[] Keys { get; } = ["??"];
-        public Task ExecuteAsync(ISocketMessageChannel channel, string[] commands)
+        public Task<IEnumerable<string>> ExecuteAsync(ulong chatId, string[] commands)
         {
-            var list = bossData.GetAllNotLoggedBossInformation(channel.Id);
+            var list = bossData.GetAllNotLoggedBossInformation(chatId);
+            var stringBuilders = new List<StringBuilder>();
             var str = new StringBuilder();
+            stringBuilders.Add(str);
             foreach (var item in list)
             {
                 str.Append($"**{item.NickName.ToUpper()}**:**{item.Id}**, ");
             }
 
-            channel.SendMessageAsync(str.ToString());
-            return Task.CompletedTask;
+            return Task.FromResult(stringBuilders.Select(s => s.ToString()));
         }
     }
 }

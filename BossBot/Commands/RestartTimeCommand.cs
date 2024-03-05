@@ -1,20 +1,24 @@
 ﻿using BossBot.Interfaces;
-using Discord.WebSocket;
 
 namespace BossBot.Commands
 {
     public class RestartTimeCommand(BossData bossData, DateTimeHelper dateTimeHelper) : ICommand
     {
         public string[] Keys { get; } = ["r", "р"];
-        public Task ExecuteAsync(ISocketMessageChannel channel, string[] commands)
+        public Task<IEnumerable<string>> ExecuteAsync(ulong chatId, string[] commands)
         {
+            var list = new List<string>();
             var time = ParseDateTimeParameters(commands);
             if (!time.HasValue)
             {
-                channel.SendMessageAsync("Не правильный формат");
-                return Task.CompletedTask;
+                list.Add("Не правильный формат");
             }
-            return bossData.PredictedTimeAfterRestart(channel.Id, time.Value);
+            else
+            {
+                bossData.PredictedTimeAfterRestart(chatId, time.Value);
+            }
+
+            return Task.FromResult(list.Select(s => s));
         }
 
         private DateTime? ParseDateTimeParameters(string[] parameters)

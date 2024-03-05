@@ -28,9 +28,4 @@
     <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="2.1.8" />
     <PackageReference Include="SQLitePCLRaw.provider.e_sqlite3" Version="2.1.8" />
   </ItemGroup>
-
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy &quot;$(ProjectDir)\options.ini&quot; &quot;$(ProjectDir)\$(OutDir)&quot;" />
-  </Target>
-
 </Project>

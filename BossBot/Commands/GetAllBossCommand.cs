@@ -11,40 +11,36 @@ namespace BossBot.Commands
             "l", "л"
         ]; 
         
-        public Task ExecuteAsync(ISocketMessageChannel channel, string[] commands)
+        public Task<IEnumerable<string>> ExecuteAsync(ulong chatId, string[] commands)
         {
             if (commands.Length == 1 || !int.TryParse(commands[1], out var count))
             {
-                return GetBossInformation(channel);
+                return GetBossInformation(chatId);
             }
             else
             {
-                return GetFirstLoggedBossInfo(channel, count);
+                return GetFirstLoggedBossInfo(chatId, count);
             }
         }
 
-        private Task GetBossInformation(ISocketMessageChannel channel)
+        private Task<IEnumerable<string>> GetBossInformation(ulong chatId)
         {
-            var bosses = bossData.GetAllLoggedBossInfo(channel.Id);
-            var messages = PopulateBossInformationString(bosses);
-            messages.ForEach(m => { channel.SendMessageAsync(m.ToString()); });
-            return Task.CompletedTask;
+            var bosses = bossData.GetAllLoggedBossInfo(chatId);
+            return PopulateBossInformationString(bosses);
         }
 
-        private Task GetFirstLoggedBossInfo(ISocketMessageChannel channel, int count)
+        private Task<IEnumerable<string>> GetFirstLoggedBossInfo(ulong chatId, int count)
         {
             if (count <= 0)
             {
-                return Task.CompletedTask;
+                return Task.FromResult(Enumerable.Empty<string>());
             }
 
-            var bosses = bossData.GetFirstLoggedBossInfo(channel.Id, count);
-            var messages = PopulateBossInformationString(bosses);
-            messages.ForEach(m => { channel.SendMessageAsync(m.ToString()); });
-            return Task.CompletedTask;
+            var bosses = bossData.GetFirstLoggedBossInfo(chatId, count);
+            return PopulateBossInformationString(bosses);
         }
 
-        private List<StringBuilder> PopulateBossInformationString(IList<BossModel> models)
+        private Task<IEnumerable<string>> PopulateBossInformationString(IList<BossModel> models)
         {
             List<StringBuilder> builders = new();
             var stringBuilder = new StringBuilder();
@@ -63,7 +59,7 @@ namespace BossBot.Commands
                 stringBuilder.AppendLine(str);
             }
 
-            return builders;
+            return Task.FromResult(builders.Select(b => b.ToString()));
         }
     }
 }
