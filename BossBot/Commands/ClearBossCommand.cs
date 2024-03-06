@@ -11,7 +11,8 @@ namespace BossBot.Commands
         public Task<IEnumerable<string>> ExecuteAsync(ulong chatId, string[] commands)
         {
             bossData.ClearAllBossInformation(chatId);
-            return Task.FromResult(Enumerable.Empty<string>());
+            List<string> answer = ["Все тайминги были сброшены"];
+            return Task.FromResult(answer.Select(s => s));
         }
     }
 }

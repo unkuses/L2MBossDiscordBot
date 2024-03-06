@@ -54,7 +54,7 @@ namespace BossBot
 
         public IList<BossModel> GetAllNotLoggedBossInformation(ulong chatId)
             => _bossData.BossDbModels
-                .Where(b => _bossData.BossInformationDbModels.All(info => info.ChatId == chatId && info.BossId != b.ID))
+                .Where(b => _bossData.BossInformationDbModels.Any(info => info.ChatId == chatId && info.BossId != b.ID))
                 .Select(b => new BossModel(b)).ToList();
 
         public BossModel LogKillBossInformation(ulong chatId, int bossId, DateTime time)
@@ -131,13 +131,6 @@ namespace BossBot
         }
 
         public void ClearAllBossInformation(ulong chatId)
-        {
-            _bossData.BossInformationDbModels.RemoveRange(
-                _bossData.BossInformationDbModels.Where(info => info.ChatId == chatId));
-            _bossData.SaveChangesAsync();
-        }
-
-        public void ServerRestarted(ulong chatId)
         {
             _bossData.BossInformationDbModels.RemoveRange(
                 _bossData.BossInformationDbModels.Where(info => info.ChatId == chatId));
