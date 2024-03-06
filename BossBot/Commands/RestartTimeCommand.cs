@@ -10,7 +10,12 @@ namespace BossBot.Commands
         public Task<IEnumerable<string>> ExecuteAsync(ulong chatId, string[] commands)
         {
             var list = new List<string>();
-            var time = ParseDateTimeParameters(commands);
+            if (commands.Length is 1 or > 3)
+            {
+                list.Add("Не правильный формат");
+                return Task.FromResult(list.Select(s => s));
+            }
+            var time = commands.Length == 2 ? dateTimeHelper.ParseCommand(commands[1]) : dateTimeHelper.ParseCommand(commands[1], commands[2]);
             if (!time.HasValue)
             {
                 list.Add("Не правильный формат");
@@ -19,31 +24,6 @@ namespace BossBot.Commands
 
             bossData.PredictedTimeAfterRestart(chatId, time.Value);
             return GetBossInformation(chatId);
-        }
-
-        private DateTime? ParseDateTimeParameters(string[] parameters)
-        {
-            switch (parameters.Length)
-            {
-                case 2:
-                    if (!DateTime.TryParse(parameters[1], out var dateTime))
-                    {
-                        return null;
-                    }
-
-                    if (dateTime > dateTimeHelper.CurrentTime.AddHours(1))
-                        dateTime = dateTime.AddDays(-1);
-                    return dateTime;
-                case 3:
-                    if (!DateTime.TryParse($"{parameters[1]} {parameters[2]}", out dateTime))
-                    {
-                        return null;
-                    }
-
-                    return dateTime;
-                default:
-                    return null;
-            }
         }
 
         private Task<IEnumerable<string>> GetBossInformation(ulong chatId)

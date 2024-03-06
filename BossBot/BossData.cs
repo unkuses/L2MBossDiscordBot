@@ -141,12 +141,14 @@ namespace BossBot
         {
             var bossInfo = _bossData.BossInformationDbModels.Where(info => info.ChatId == chatId);
             var notLoggedBosses = BossModelsCache.Where(b => !bossInfo.Any(info => info.BossId == b.ID));
+            List<BossInformationDbModel> bossInformation = new List<BossInformationDbModel>();
             var bossInfos = notLoggedBosses.Select(boss => new BossInformationDbModel()
             {
                 Boss = boss,
-                BossId = boss.ID, ChatId = chatId,
-                KillTime = boss.RestartRespawnTime != 0
-                    ? restartTime.AddHours(boss.RespawnTime)
+                BossId = boss.ID,
+                ChatId = chatId,
+                KillTime = boss.RestartRespawnTime == 0
+                    ? restartTime
                     : restartTime.AddHours(boss.RestartRespawnTime)
             }).ToList();
             _bossData.BossInformationDbModels.AddRange(bossInfos);

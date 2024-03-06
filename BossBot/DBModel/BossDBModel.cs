@@ -30,7 +30,7 @@ namespace BossBot.DBModel
         public required int RespawnTime { get; set; }
         public required string Location { get; set; }
 
-        [DefaultValue(4)] public required int RestartRespawnTime { get; set; }
+        [DefaultValue(0)] public required int RestartRespawnTime { get; set; }
         public ICollection<BossInformationDbModel> BossInformationDbModels { get; set; }
     }
 }

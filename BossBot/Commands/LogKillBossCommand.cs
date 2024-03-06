@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Collections.Generic;
+using System.Text;
 using BossBot.Interfaces;
 using Discord.WebSocket;
 
@@ -13,7 +14,7 @@ namespace BossBot.Commands
             List<StringBuilder> stringBuilders = new List<StringBuilder>();
             StringBuilder sb = new StringBuilder();
             stringBuilders.Add(sb);
-            if (commands.Length < 2)
+            if (commands.Length is 1 or > 4)
             {
                 sb.AppendLine("Не правильный формат");
             }
@@ -24,12 +25,14 @@ namespace BossBot.Commands
                     sb.AppendLine("Не правильный формат");
                 }
 
-                var dateTime = ParseDateTimeParameters(commands);
+                var dateTime = commands.Length == 3 ? dateTimeHelper.ParseCommand(commands[2]) : dateTimeHelper.ParseCommand(commands[2], commands[3]);
                 if (!dateTime.HasValue)
                 {
                     sb.AppendLine("Не правильный формат");
                 }
 
+                if (dateTime > dateTimeHelper.CurrentTime.AddHours(1))
+                    dateTime = dateTime.Value.AddDays(-1);
                 var boss = bossData.LogKillBossInformation(chatId, id, dateTime.Value);
                 if (boss == null)
                 {
@@ -46,33 +49,6 @@ namespace BossBot.Commands
             }
 
             return Task.FromResult(stringBuilders.Select(s => s.ToString()));
-        }
-
-        private DateTime? ParseDateTimeParameters(string[] parameters)
-        {
-            switch (parameters.Length)
-            {
-                case 2:
-                    return DateTime.Now;
-                case 3:
-                    if (!DateTime.TryParse(parameters[2], out var dateTime))
-                    {
-                        return null;
-                    }
-
-                    if (dateTime > dateTimeHelper.CurrentTime.AddHours(1))
-                        dateTime = dateTime.AddDays(-1);
-                    return dateTime;
-                case 4:
-                    if (!DateTime.TryParse($"{parameters[2]} {parameters[3]}", out dateTime))
-                    {
-                        return null;
-                    }
-
-                    return dateTime;
-                default:
-                    return null;
-            }
         }
     }
 }
