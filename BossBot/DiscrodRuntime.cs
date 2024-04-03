@@ -35,7 +35,9 @@ namespace BossBot
                 new GetAllBossInformationCommand(_bossData),
                 new LogKillBossCommand(_bossData, _dateTimeHelper),
                 new ClearBossCommand(_bossData),
-                new RestartTimeCommand(_bossData, _dateTimeHelper)
+                new RestartTimeCommand(_bossData, _dateTimeHelper),
+                new AdenBossCommand(_bossData, _dateTimeHelper),
+                new OrenBossCommand(_bossData, _dateTimeHelper)
             });
         }
 

@@ -22,7 +22,7 @@ namespace BossBot.Commands
                 return Task.FromResult(list.Select(s => s));
             }
 
-            bossData.PredictedTimeAfterRestart(chatId, time.Value);
+            bossData.PredictedTimeAfterRestart(chatId, time);
             return GetBossInformation(chatId);
         }
 

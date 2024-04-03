@@ -1,7 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using BossBot.Interfaces;
 using System.Text;
-using BossBot.Interfaces;
-using Discord.WebSocket;
 
 namespace BossBot.Commands
 {
@@ -25,7 +23,18 @@ namespace BossBot.Commands
                     sb.AppendLine("Не правильный формат");
                 }
 
-                var dateTime = commands.Length == 3 ? dateTimeHelper.ParseCommand(commands[2]) : dateTimeHelper.ParseCommand(commands[2], commands[3]);
+                DateTime? dateTime = null;
+                if (commands.Length == 2)
+                {
+                    dateTime = dateTimeHelper.CurrentTime;
+                }
+                else
+                {
+                    dateTime = commands.Length == 3
+                        ? dateTimeHelper.ParseCommand(commands[2])
+                        : dateTimeHelper.ParseCommand(commands[2], commands[3]);
+                }
+
                 if (!dateTime.HasValue)
                 {
                     sb.AppendLine("Не правильный формат");

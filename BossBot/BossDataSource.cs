@@ -13,7 +13,7 @@ namespace BossBot
         {
             var folder = Environment.SpecialFolder.LocalApplicationData;
             var path = Environment.GetFolderPath(folder);
-            _dbPath = Path.Join(path, "L2MBossTest.db");
+            _dbPath = Path.Join(path, "L2MBoss.db");
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
@@ -26,7 +26,5 @@ namespace BossBot
             modelBuilder.Entity<BossInformationDbModel>().
                 HasMany<BossDbModel>().WithOne();
         }
-
-        public bool DatabaseIsCreated => Path.Exists( _dbPath );
     }
 }

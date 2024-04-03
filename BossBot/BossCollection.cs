@@ -26,7 +26,7 @@ namespace BossBot
             new BossDbModel(name: "Talakin", chance: 100, location: "Dion", nickName: "талакин", respawnTime: 10),
             new BossDbModel(name: "Timitris", chance: 100, location: "Dion", nickName: "тимитрис", respawnTime: 8),
             new BossDbModel(name: "Valefar", chance: 100, location: "Dion", nickName: "буря", respawnTime: 6),
-            //Giran 
+            // Giran 
             new BossDbModel(location: "Giran", respawnTime: 9, name: "Behemoth", chance: 100, nickName: "чудовище"),
             new BossDbModel(location: "Giran", respawnTime: 12, name: "Black Lily", chance: 100, nickName: "лилия", restartRespawnTime:8),
             new BossDbModel(location: "Giran", respawnTime: 6, name: "Breka", chance: 50, nickName: "брека"),

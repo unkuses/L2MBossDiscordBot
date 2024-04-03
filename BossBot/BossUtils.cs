@@ -1,0 +1,28 @@
+﻿using System.Text;
+
+namespace BossBot;
+
+public static class BossUtils
+{
+    public static Task<IEnumerable<string>> PopulateBossInformationString(IList<BossModel> models, DateTimeHelper dateTimeHelper)
+    {
+        List<StringBuilder> builders = new();
+        var stringBuilder = new StringBuilder();
+        builders.Add(stringBuilder);
+        int maxLength = models.Max(x => x.NickName.Length);
+        foreach (var model in models)
+        {
+            var nextRespawnTime = model.KillTime.AddHours(model.RespawnTime);
+            var timeToRespawn = nextRespawnTime - dateTimeHelper.CurrentTime;
+            var str = $@"**{StringHelper.PopulateWithWhiteSpaces(model.Id.ToString(), 2)}**|{nextRespawnTime:HH:mm}|**{StringHelper.PopulateWithWhiteSpaces(model.NickName.ToUpper(), maxLength)}** через {timeToRespawn.ToString(@"hh\:mm")} | {model.Chance}";
+            if (stringBuilder.Length + str.Length > 2000)
+            {
+                stringBuilder = new StringBuilder();
+            }
+
+            stringBuilder.AppendLine(str);
+        }
+
+        return Task.FromResult(builders.Select(b => b.ToString()));
+    }
+}

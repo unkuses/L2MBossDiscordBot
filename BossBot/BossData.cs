@@ -6,24 +6,35 @@ namespace BossBot
     public class BossData
     {
         private readonly BossDataSource _bossData = new();
-        private List<BossDbModel>? _bossCache = null;
+        private List<BossDbModel>? _bossCache;
         private readonly List<int> _mentionedBosses = new();
         private readonly DateTimeHelper _dateTimeHelper;
 
         public BossData(Options options)
         {
             _dateTimeHelper = new DateTimeHelper(options.TimeZone);
-            var needPopulateTable = _bossData.DatabaseIsCreated;
             _bossData.Database.EnsureCreated();
-            if (!needPopulateTable)
-            {
-                PopulateTable();
-            }
+            PopulateTable();
         }
 
         private void PopulateTable()
         {
-            _bossData.BossDbModels.AddRange(BossCollection.GetBossesCollection());
+            var allBosses = BossCollection.GetBossesCollection();
+            foreach (var boss in allBosses)
+            {
+                var dbModel = _bossData.BossDbModels.FirstOrDefault(b => Equals(b.Name, boss.Name));
+                if (dbModel == null)
+                {
+                    _bossData.BossDbModels.Add(boss);
+                }
+                else if (!dbModel.AreEqual(boss))
+                {
+                    dbModel.RestartRespawnTime = boss.RestartRespawnTime;
+                    dbModel.RespawnTime = boss.RespawnTime;
+                    dbModel.NickName = boss.NickName;
+                }
+            }
+
             _bossData.SaveChanges();
         }
 
@@ -93,7 +104,6 @@ namespace BossBot
                 .Where(info => info.ChatId == chatId)
                 .OrderBy(i => i.KillTime.AddHours(i.Boss.RespawnTime))
                 .Take(count)
-
                 .ToList();
             return bosses.Select(b => new BossModel(b)).ToList();
         }
@@ -130,6 +140,12 @@ namespace BossBot
             return list;
         }
 
+        public IList<BossModel> GetAllAdenByLocation(ulong chatId, string location) =>
+            _bossData.BossInformationDbModels.Include(model => model.Boss)
+                .Where(info => info.ChatId == chatId && info.Boss.Location == location).Select(i => new BossModel(i))
+                .ToList();
+
+
         public void ClearAllBossInformation(ulong chatId)
         {
             _bossData.BossInformationDbModels.RemoveRange(
@@ -137,21 +153,26 @@ namespace BossBot
             _bossData.SaveChangesAsync();
         }
 
-        public Task PredictedTimeAfterRestart(ulong chatId, DateTime restartTime)
+        public Task PredictedTimeAfterRestart(ulong chatId, DateTime? restartTime)
         {
             var bossInfo = _bossData.BossInformationDbModels.Where(info => info.ChatId == chatId);
             var notLoggedBosses = BossModelsCache.Where(b => !bossInfo.Any(info => info.BossId == b.ID));
-            List<BossInformationDbModel> bossInformation = new List<BossInformationDbModel>();
-            var bossInfos = notLoggedBosses.Select(boss => new BossInformationDbModel()
+
+            foreach (var boss in notLoggedBosses)
             {
-                Boss = boss,
-                BossId = boss.ID,
-                ChatId = chatId,
-                KillTime = boss.RestartRespawnTime == 0
-                    ? restartTime
-                    : restartTime.AddHours(boss.RestartRespawnTime)
-            }).ToList();
-            _bossData.BossInformationDbModels.AddRange(bossInfos);
+                var predictedKillTime = boss.RestartRespawnTime == 0
+                    ? restartTime.Value
+                    : restartTime.Value.AddHours(boss.RestartRespawnTime - boss.RespawnTime);
+                var notLoggedBossInfo = new BossInformationDbModel()
+                {
+                    Boss = boss,
+                    BossId = boss.ID,
+                    ChatId = chatId,
+                    KillTime = predictedKillTime
+                };
+                _bossData.BossInformationDbModels.Add(notLoggedBossInfo);
+            }
+
             return _bossData.SaveChangesAsync();
         }
     }
