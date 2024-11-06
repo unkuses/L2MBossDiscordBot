@@ -1,10 +1,10 @@
 ﻿using BossBot.DBModel;
 
-namespace BossBot
+namespace BossBot;
+
+public static class BossCollection
 {
-    public static class BossCollection
-    {
-        public static List<BossDbModel> GetBossesCollection()
+    public static List<BossDbModel> GetBossesCollection()
         =>
         [
             new BossDbModel(name: "Basila", chance: 50, location: "Gludio", nickName: "базил", respawnTime: 4),
@@ -61,7 +61,7 @@ namespace BossBot
             //Heine
             new BossDbModel(location: "Heine", name: "Phoenix", chance: 66, respawnTime: 24, nickName: "птиц", restartRespawnTime:14),
             new BossDbModel(location: "Heine", name: "Naiad", chance: 33, respawnTime: 15, nickName: "ная", restartRespawnTime:14),
-            new BossDbModel(location: "Heine", name: "Modeus", chance: 33, respawnTime: 24, nickName: "мудя", restartRespawnTime:14)
+            new BossDbModel(location: "Heine", name: "Modeus", chance: 33, respawnTime: 24, nickName: "мудя", restartRespawnTime:14),
+            new BossDbModel(location: "Heine", name: "Valak", chance: 33, respawnTime: 20, nickName:"Гавнобоссина", restartRespawnTime: 8)
         ];
-    }
 }
