@@ -7,7 +7,7 @@ namespace BossBot.Commands
     public class GetAllNotLoggedBossesCommand(BossData bossData) : ICommand
     {
         public string[] Keys { get; } = ["??"];
-        public Task<IEnumerable<string>> ExecuteAsync(ulong chatId, string[] commands)
+        public Task<IEnumerable<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands)
         {
             var list = bossData.GetAllNotLoggedBossInformation(chatId);
             var stringBuilders = new List<StringBuilder>();

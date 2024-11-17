@@ -11,9 +11,10 @@ namespace BossBot.DBModel
         }
 
         [SetsRequiredMembers]
-        public BossDbModel(string name, int chance, string location, string nickName, int respawnTime, int restartRespawnTime = 0)
+        public BossDbModel(string name, string russionName, int chance, string location, string nickName, int respawnTime, int restartRespawnTime = 0)
         {
             Name = name;
+            RussionName = russionName;
             Chance = chance;
             Location = location;
             NickName = nickName;
@@ -25,6 +26,8 @@ namespace BossBot.DBModel
         public int ID { get; set; }
 
         public required string Name { get; set; }
+        
+        public required string RussionName { get; set; }
         public required string NickName { get; set; }
         public required int Chance { get; set; }
         public required int RespawnTime { get; set; }

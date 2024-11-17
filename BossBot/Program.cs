@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Globalization;
+using Newtonsoft.Json;
 
 namespace BossBot;
 
@@ -11,7 +12,7 @@ internal class Program
         Options options;
         if (!string.IsNullOrWhiteSpace(botTok) && string.IsNullOrWhiteSpace(chatName))
         {
-            options = new Options(chatName, botTok);
+            options = new Options(chatName, botTok, "", "");
         }
         else
         {

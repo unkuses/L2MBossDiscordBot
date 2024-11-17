@@ -1,9 +1,11 @@
-﻿namespace BossBot
+﻿using System.Globalization;
+
+namespace BossBot
 {
     public class DateTimeHelper(string timeZone)
     {
-        private TimeZoneInfo TimeZoneInfoMsc { get; } = TimeZoneInfo.FindSystemTimeZoneById(timeZone);
-        public DateTime CurrentTime => TimeZoneInfo.ConvertTime(DateTime.UtcNow, TimeZoneInfoMsc);
+        private TimeZoneInfo TimeZoneInfo { get; } = TimeZoneInfo.FindSystemTimeZoneById(timeZone);
+        public DateTime CurrentTime => TimeZoneInfo.ConvertTime(DateTime.UtcNow, TimeZoneInfo);
 
         public DateTime? ParseCommand(params string[] command)
         {
@@ -29,6 +31,41 @@
                 default:
                     return null;
             }
+        }
+
+        public DateTime NormalizeDateTime(DateTime input, string timeZone)
+        {
+            var fromTimeZone = TimeZoneInfo.FindSystemTimeZoneById(timeZone);
+            var utcDateTime = TimeZoneInfo.ConvertTimeToUtc(input, fromTimeZone);
+
+            return TimeZoneInfo.ConvertTimeFromUtc(utcDateTime, TimeZoneInfo);
+        }
+
+        public DateTime? TryParseData(string input, string timeZoneInfo)
+        {
+            string format = "dd.MM.yyyy HH:mm";
+            string formatUS = "yyyy/MM/dd HH:mm";
+            IFormatProvider provider = new CultureInfo("en-US");
+            if (DateTime.TryParseExact(input, format, provider, DateTimeStyles.None, out var data))
+            {
+                if (!string.IsNullOrEmpty(timeZoneInfo))
+                {
+                    data = NormalizeDateTime(data, timeZoneInfo);
+                }
+
+                return data;
+            }
+            if (DateTime.TryParseExact(input, formatUS, provider, DateTimeStyles.None, out var dataUS))
+            {
+                if (!string.IsNullOrEmpty(timeZoneInfo))
+                {
+                    dataUS = NormalizeDateTime(dataUS, timeZoneInfo);
+                }
+
+                return dataUS;
+            }
+
+            return null;
         }
     }
 }

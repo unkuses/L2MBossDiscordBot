@@ -16,12 +16,14 @@ namespace BossBot
         private readonly DateTimeHelper _dateTimeHelper;
         private readonly List<ICommand> _commands = [];
         private readonly Logger _logger = new();
+        private readonly ImageWork _imageWork;
 
         public DiscordRuntime(Options? options)
         {
             _options = options;
             _dateTimeHelper = new DateTimeHelper(_options.TimeZone);
             _bossData = new BossData(_options);
+            _imageWork = new ImageWork(_bossData, _dateTimeHelper, _options);
             _client = new DiscordSocketClient();
 
             _client.MessageReceived += Discord_MessageReceived;
@@ -37,13 +39,14 @@ namespace BossBot
                 new ClearBossCommand(_bossData),
                 new RestartTimeCommand(_bossData, _dateTimeHelper),
                 new AdenBossCommand(_bossData, _dateTimeHelper),
-                new OrenBossCommand(_bossData, _dateTimeHelper)
+                new OrenBossCommand(_bossData, _dateTimeHelper),
+                new SetUserTimeZoneCommand(_bossData)
             });
         }
 
         private Task Client_LoggedIn() => _logger.WriteLog("LoggedIn");
 
-        private Task Client_Log(LogMessage arg) => _logger.WriteLog(arg.Message);
+        private Task Client_Log(LogMessage arg) => _logger.WriteLog(arg.ToString());
 
         private void Test()
         {
@@ -70,7 +73,7 @@ namespace BossBot
                         {
                             if (_lastReadMessage.ContainsKey(arg.Channel.Id) &&
                                 message.CreatedAt <= _lastReadMessage[arg.Channel.Id]) continue;
-                            ProcessMessage(message.Content, arg.Channel);
+                            ProcessMessage(message, arg.Channel);
                         }
 
                         _lastReadMessage[arg.Channel.Id] = message.CreatedAt;
@@ -148,12 +151,24 @@ namespace BossBot
             }
         }
 
-        private async Task ProcessMessage(string? message, ISocketMessageChannel channel)
+        private async Task ProcessMessage(IMessage message, ISocketMessageChannel channel)
         {
-            if (channel.Name != _options.ChatName || message == null)
+            if (message.Attachments.Any())
+            {
+                var image = message.Attachments.First();
+                if(image.ContentType.StartsWith("image/"))
+                {
+                    var result = await ProcessImage(image.Url, channel.Id, message.Author.Id);
+                    ProcessAnswers(channel, [result]);
+                    return;
+                }
+            }
+            
+            if (channel.Name != _options.ChatName || message.Content == null)
                 return;
 
-            var lines = Regex.Split(message, "\r\n|\r|\n");
+            var content = message.Content;
+            var lines = Regex.Split(content, "\r\n|\r|\n");
             var answers = new List<string>();
             foreach (var line in lines)
             {
@@ -163,10 +178,10 @@ namespace BossBot
                 var messageParts = line.Remove(0, 1).Split(' ');
                 if (messageParts.Any())
                 {
-                    var command = _commands.FirstOrDefault(c => c.Keys.Contains(messageParts[0]));
+                    var command = _commands.FirstOrDefault(c => c.Keys.Contains(messageParts[0].ToLower()));
                     if(command == null)
                         continue;
-                    var result = await command.ExecuteAsync(channel.Id, messageParts);
+                    var result = await command.ExecuteAsync(channel.Id, message.Author.Id, messageParts);
                     answers.AddRange(result);
                 }
             }
@@ -175,7 +190,6 @@ namespace BossBot
             {
                 ProcessAnswers(channel, answers);
             }
-            return;
         }
 
         private Task ProcessAnswers(ISocketMessageChannel channel, List<string> answers)
@@ -193,5 +207,8 @@ namespace BossBot
             }
             return channel.SendMessageAsync(builder.ToString());
         }
+
+        private Task<string> ProcessImage(string url, ulong chatId, ulong usedId) =>
+            _imageWork.ProcessImage(url, chatId, usedId);
     }
 }

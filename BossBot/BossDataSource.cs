@@ -8,6 +8,8 @@ namespace BossBot
         private readonly string _dbPath;
         public DbSet<BossDbModel> BossDbModels { get; set; }
         public DbSet<BossInformationDbModel> BossInformationDbModels { get; set; }
+        
+        public DbSet<UserInformationDBModel> UserInformationDbModels { get; set; }
 
         public BossDataSource()
         {

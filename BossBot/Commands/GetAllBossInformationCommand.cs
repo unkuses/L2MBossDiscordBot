@@ -7,7 +7,7 @@ namespace BossBot.Commands
     {
         public string[] Keys { get; } = ["?"];
 
-        public Task<IEnumerable<string>> ExecuteAsync(ulong chatId, string[] commands)
+        public Task<IEnumerable<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands)
         {
             var list = bossData.GetBossesInformation();
             List<StringBuilder> builders = new List<StringBuilder>();

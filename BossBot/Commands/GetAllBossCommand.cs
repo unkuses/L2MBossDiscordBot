@@ -11,7 +11,7 @@ namespace BossBot.Commands
             "l", "л"
         ]; 
         
-        public Task<IEnumerable<string>> ExecuteAsync(ulong chatId, string[] commands)
+        public Task<IEnumerable<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands)
         {
             if (commands.Length == 1 || !int.TryParse(commands[1], out var count))
             {

@@ -1,4 +1,5 @@
-﻿using BossBot.DBModel;
+﻿using System.Globalization;
+using BossBot.DBModel;
 using Microsoft.EntityFrameworkCore;
 
 namespace BossBot
@@ -55,6 +56,68 @@ namespace BossBot
 
         public IList<BossModel> GetBossesInformation() =>
             BossModelsCache.Select(b => new BossModel(b)).OrderBy(b => b.KillTime).ToList();
+        
+        public string SetUserTimeZone(ulong userId, string timeZone)
+        {
+            var existUser = _bossData.UserInformationDbModels.FirstOrDefault(u => u.UserId == userId);
+            if (existUser != null)
+            {
+                existUser.UserTimeZone = timeZone;
+            }
+            else
+            {
+                _bossData.UserInformationDbModels.Add(new UserInformationDBModel()
+                    { UserId = userId, UserTimeZone = timeZone });
+            }
+
+            _bossData.SaveChanges();
+            return $"Time zone set as {timeZone}";
+        }
+
+        public List<BossModel> ImageAnalyzeParser(List<string> lines, ulong userId, ulong chatId)
+        {
+            List<BossModel> bossInfo = new List<BossModel>();
+            UserInformationDBModel timeZoneInfo = null;
+            if (_bossData.UserInformationDbModels.Any(u => u.UserId == userId))
+            {
+                timeZoneInfo = _bossData.UserInformationDbModels.First(u => u.UserId == userId);
+            }
+            List<DateTime> dateTimes = new List<DateTime>();
+            for (int i = 0; i < lines.Count; i++)
+            {
+                var boss = _bossCache.FirstOrDefault(b => lines[i].Contains(b.Name) || lines[i].Contains(b.RussionName));
+                if (boss != null)
+                {
+                    i = i + 1;
+                    for (;i<lines.Count;i++)
+                    {
+                        var data = _dateTimeHelper.TryParseData(lines[i], timeZoneInfo?.UserTimeZone);
+                        if (data.HasValue)
+                        {
+                            dateTimes.Add(data.Value);
+                        }
+                        if (_bossCache.Any(b => lines[i].Contains(b.Name) || lines[i].Contains(b.RussionName)) || i == lines.Count - 1)
+                        {
+                            var bossModel = LogKillBossInformation(chatId, boss.ID, dateTimes.Min());
+                            dateTimes.Clear();
+                            bossInfo.Add(bossModel);
+                            --i;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    var data = _dateTimeHelper.TryParseData(lines[i], timeZoneInfo?.UserTimeZone);
+                    if (data.HasValue)
+                    {
+                        dateTimes.Add(data.Value);
+                    } 
+                }
+            }
+
+            return bossInfo;
+        }
 
         private bool IsBossPostpone(BossInformationDbModel info)
         {
@@ -68,7 +131,7 @@ namespace BossBot
                 .Where(b => _bossData.BossInformationDbModels.Any(info => info.ChatId == chatId && info.BossId != b.ID))
                 .Select(b => new BossModel(b)).ToList();
 
-        public BossModel LogKillBossInformation(ulong chatId, int bossId, DateTime time)
+        public BossModel? LogKillBossInformation(ulong chatId, int bossId, DateTime time)
         {
             var boss = GetBossModelById(bossId);
             if (boss == null) return null;

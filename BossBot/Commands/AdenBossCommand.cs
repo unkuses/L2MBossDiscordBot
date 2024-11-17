@@ -7,7 +7,7 @@ public class AdenBossCommand(BossData bossData, DateTimeHelper dateTimeHelper) :
 {
     public string[] Keys { get; } = ["aden", "аден"];
 
-    public Task<IEnumerable<string>> ExecuteAsync(ulong chatId, string[] commands)
+    public Task<IEnumerable<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands)
     {
         var bossesInAden = bossData.GetAllAdenByLocation(chatId, "Aden");
         return BossUtils.PopulateBossInformationString(bossesInAden, dateTimeHelper);
