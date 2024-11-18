@@ -46,7 +46,7 @@ public static class BossCollection
             new BossDbModel(location: "Oren", russionName: "Корун",name: "Coroon", chance: 100, respawnTime: 12, nickName: "корун",restartRespawnTime:8),
             new BossDbModel(location: "Oren", russionName: "Самуэль",name: "Samuel", chance: 100, respawnTime: 12, nickName: "самуэль", restartRespawnTime:8),
             // Aden
-            new BossDbModel(location: "Aden", russionName: "Зеркало Забвения",name: "Oblivion Mirror", chance: 100, respawnTime: 11,
+            new BossDbModel(location: "Aden", russionName: "Зеркало Забвения",name: "Mirror of Oblivion ", chance: 100, respawnTime: 11,
                 nickName: "зеркало", restartRespawnTime:8),
             new BossDbModel(location: "Aden", russionName: "Хисилром",name: "Hisilrome", chance: 50, respawnTime: 6, nickName: "хисилром", restartRespawnTime:8),
             new BossDbModel(location: "Aden", russionName: "Ландор",name: "Landor", chance: 100, respawnTime: 9, nickName: "ландор", restartRespawnTime:8),
@@ -63,6 +63,6 @@ public static class BossCollection
             new BossDbModel(location: "Heine", russionName: "Наяда",name: "Naiad", chance: 33, respawnTime: 15, nickName: "ная", restartRespawnTime:14),
             new BossDbModel(location: "Heine", russionName: "Модеус",name: "Modeus", chance: 33, respawnTime: 24, nickName: "мудя", restartRespawnTime:14),
             new BossDbModel(location: "Heine", russionName: "Баллак",name: "Valak", chance: 33, respawnTime: 20, nickName:"Гавнобоссина", restartRespawnTime: 8),
-            new BossDbModel(location:"Heine", russionName:"Куриса", name:"Cyrex", nickName:"Cайракс", chance:33, respawnTime:25)
+            // new BossDbModel(location:"Heine", russionName:"Куриса", name:"Cyrex", nickName:"Cайракс", chance:33, respawnTime:25)
         ];
 }

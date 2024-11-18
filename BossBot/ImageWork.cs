@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using SixLabors.ImageSharp;
 using Azure;
 using Azure.AI.Vision.ImageAnalysis;
 
@@ -9,9 +8,7 @@ public class ImageWork(BossData bossData, DateTimeHelper dateTimeHelper, Options
 {
     public async Task<string> ProcessImage(string url, ulong chatId, ulong usedId)
     {
-        var imageBytes = await LoadImage(url);
-        Image image = Image.Load(imageBytes);
-        var bossInformationList = ReadTextAzure(image);
+        var bossInformationList = await ReadTextAzure(url);
         var bossList = bossData.ImageAnalyzeParser(bossInformationList, usedId, chatId);
         var stringBuilder = new StringBuilder();
         foreach (var bossModel in bossList)
@@ -23,22 +20,12 @@ public class ImageWork(BossData bossData, DateTimeHelper dateTimeHelper, Options
         }
         return stringBuilder.ToString();
     }
-
-    private async Task<byte[]> LoadImage(string url)
-    {
-        using var httpClient = new HttpClient();
-        return await httpClient.GetByteArrayAsync(url);
-    }
     
-    private List<string> ReadTextAzure(Image image)
+    private async Task<List<string>> ReadTextAzure(string url)
     {
         var text = new List<string>();
         var client = new ImageAnalysisClient(new Uri(options.ImageAnalysisUrl), new AzureKeyCredential(options.ImageAnalysisKey));
-        using var memoryStream = new MemoryStream();
-        image.Save(memoryStream, image.Metadata.DecodedImageFormat);
-        ImageAnalysisResult result = client.Analyze(
-            BinaryData.FromBytes(memoryStream.ToArray()),
-            VisualFeatures.Read,
+        ImageAnalysisResult result = await client.AnalyzeAsync(new Uri(url), VisualFeatures.Read,
             new ImageAnalysisOptions { GenderNeutralCaption = true });
         // Send image to Azure Computer Vision OCR endpoint
         foreach (var block in result.Read.Blocks)
