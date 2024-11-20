@@ -39,7 +39,5 @@ namespace BossBot.Commands
             var bosses = bossData.GetFirstLoggedBossInfo(chatId, count);
             return BossUtils.PopulateBossInformationString(bosses, dateTimeHelper);
         }
-
-
     }
 }

@@ -4,7 +4,8 @@ namespace BossBot;
 
 public static class BossUtils
 {
-    public static Task<IEnumerable<string>> PopulateBossInformationString(IList<BossModel> models, DateTimeHelper dateTimeHelper)
+    public static Task<IEnumerable<string>> PopulateBossInformationString(IList<BossModel> models,
+        DateTimeHelper dateTimeHelper)
     {
         List<StringBuilder> builders = new();
         var stringBuilder = new StringBuilder();
@@ -14,7 +15,8 @@ public static class BossUtils
         {
             var nextRespawnTime = model.KillTime.AddHours(model.RespawnTime);
             var timeToRespawn = nextRespawnTime - dateTimeHelper.CurrentTime;
-            var str = $@"**{StringHelper.PopulateWithWhiteSpaces(model.Id.ToString(), 2)}**|{nextRespawnTime:HH:mm}|**{StringHelper.PopulateWithWhiteSpaces(model.NickName.ToUpper(), maxLength)}** через {timeToRespawn.ToString(@"hh\:mm")} | {model.Chance}";
+            var str =
+                $@"**{StringHelper.PopulateWithWhiteSpaces(model.Id.ToString(), 2)}**|{nextRespawnTime:HH:mm}|**{StringHelper.PopulateWithWhiteSpaces(model.NickName.ToUpper(), maxLength)}** через {timeToRespawn.ToString(@"hh\:mm")} | {model.Chance}{GetChanceStatus(model.Chance)}{AppendEggPlant(model.PurpleDrop)}";
             if (stringBuilder.Length + str.Length > 2000)
             {
                 stringBuilder = new StringBuilder();
@@ -25,4 +27,14 @@ public static class BossUtils
 
         return Task.FromResult(builders.Select(b => b.ToString()));
     }
+
+    public static string GetChanceStatus(int chance) =>
+        chance switch
+        {
+            <= 33 => ":orange_circle:",
+            50 => ":yellow_circle:",
+            _ => ":green_circle:"
+        };
+
+    public static string AppendEggPlant(bool append) => append ? ":eggplant:" : "";
 }

@@ -8,6 +8,6 @@ public static class BossDbModelExtension
     {
         return original.Name == model.Name && original.NickName == model.NickName && original.Chance == model.Chance &&
                original.RespawnTime == model.RespawnTime && original.Location == model.Location &&
-               original.RestartRespawnTime == model.RestartRespawnTime;
+               original.RestartRespawnTime == model.RestartRespawnTime && Equals(original.BossNames, model.BossNames);
     }
 }

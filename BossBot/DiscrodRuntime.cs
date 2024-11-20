@@ -139,7 +139,7 @@ namespace BossBot
                             var nextRespawnTime = item.KillTime.AddHours(item.RespawnTime);
                             var timeToRespawn = nextRespawnTime - _dateTimeHelper.CurrentTime;
                             builder.AppendLine(
-                                $"**{StringHelper.PopulateWithWhiteSpaces(item.Id.ToString(), 2)}**|{nextRespawnTime:HH:mm}|**{item.NickName.ToUpper()}**| через {timeToRespawn.ToString(@"hh\:mm")} | {item.Chance}");
+                                $"**{StringHelper.PopulateWithWhiteSpaces(item.Id.ToString(), 2)}**|{nextRespawnTime:HH:mm}|**{item.NickName.ToUpper()}**| через {timeToRespawn.ToString(@"hh\:mm")} | {item.Chance} {BossUtils.GetChanceStatus(item.Chance)}{BossUtils.AppendEggPlant(item.PurpleDrop)}");
                         }
 
                         var channel = _client.GetChannel(i) as ITextChannel;

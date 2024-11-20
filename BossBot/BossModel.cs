@@ -16,6 +16,8 @@ namespace BossBot
         public string NickName { get; } = model.NickName;
         public int Chance {  get; } = model.Chance;
         public int RespawnTime { get; } = model.RespawnTime;
+
+        public bool PurpleDrop { get; } = model.PurpleDrop;
         public DateTime KillTime { get; }
     }
 }

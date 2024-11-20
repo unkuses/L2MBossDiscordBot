@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BossBot.DBModel
 {
@@ -9,7 +10,6 @@ namespace BossBot.DBModel
         public int BossId {  get; set; }
         public DateTime KillTime { get; set; } 
         public ulong ChatId { get; set; }
-
         public required BossDbModel Boss { get; set; }
     }
 }

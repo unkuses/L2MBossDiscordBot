@@ -45,7 +45,7 @@ namespace BossBot
             {
                 if (_bossCache == null)
                 {
-                    _bossCache = _bossData.BossDbModels.OrderBy(b => b.ID).ToList();
+                    _bossCache = _bossData.BossDbModels.Include(b => b.BossNames).OrderBy(b => b.ID).ToList();
                 }
 
                 return _bossCache;
@@ -85,7 +85,7 @@ namespace BossBot
             List<DateTime> dateTimes = new List<DateTime>();
             for (int i = 0; i < lines.Count; i++)
             {
-                var boss = _bossCache.FirstOrDefault(b => lines[i].Contains(b.Name) || lines[i].Contains(b.RussionName));
+                var boss = BossModelsCache.FirstOrDefault(b => b.BossNames.Any(name => lines[i].Contains(name.Name, StringComparison.CurrentCultureIgnoreCase)));
                 if (boss != null)
                 {
                     i = i + 1;
@@ -96,7 +96,7 @@ namespace BossBot
                         {
                             dateTimes.Add(data.Value);
                         }
-                        if (_bossCache.Any(b => lines[i].Contains(b.Name) || lines[i].Contains(b.RussionName)) || i == lines.Count - 1)
+                        if (BossModelsCache.Any(b => b.BossNames.Any(name => lines[i].Contains(name.Name, StringComparison.CurrentCultureIgnoreCase))) || i == lines.Count - 1)
                         {
                             var bossModel = LogKillBossInformation(chatId, boss.ID, dateTimes.Min());
                             dateTimes.Clear();

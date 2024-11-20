@@ -10,6 +10,8 @@ namespace BossBot
         public DbSet<BossInformationDbModel> BossInformationDbModels { get; set; }
         
         public DbSet<UserInformationDBModel> UserInformationDbModels { get; set; }
+        
+        public DbSet<BossNamesDBModel> BossNamesDbModels { get; set; }
 
         public BossDataSource()
         {
@@ -25,8 +27,17 @@ namespace BossBot
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<BossInformationDbModel>().
-                HasMany<BossDbModel>().WithOne();
+            modelBuilder.Entity<BossInformationDbModel>()
+                .HasOne(a => a.Boss)               
+                .WithMany(p => p.BossInformationDbModels)          
+                .HasForeignKey(a => a.BossId)      
+                .OnDelete(DeleteBehavior.Cascade);   
+            
+            modelBuilder.Entity<BossNamesDBModel>()
+                .HasOne(b => b.Boss)              
+                .WithMany(p => p.BossNames)
+                .HasForeignKey(b => b.BossId)
+                .OnDelete(DeleteBehavior.Cascade); 
         }
     }
 }
