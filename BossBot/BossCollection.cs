@@ -25,7 +25,7 @@ public static class BossCollection
                 BossNames = new List<BossNamesDBModel>()
                     { new(name: "Королева Муравьев"), new(name: "Queen") }
             },
-            new BossDbModel(name: "Saban", chance: 50, location: "Gludio", nickName: "сабянин", respawnTime: 12)
+            new BossDbModel(name: "Saban", chance: 100, location: "Gludio", nickName: "сабянин", respawnTime: 12)
             {
                 BossNames = new List<BossNamesDBModel>() { new(name: "Сабан"), new(name: "Saban") }
             },
@@ -186,8 +186,8 @@ public static class BossCollection
             new BossDbModel(location: "Heine", name: "Valak", chance: 33, respawnTime: 20,
                     nickName: "Гавнобоссина", restartRespawnTime: 8, purpleDrop:true)
                 { BossNames = new List<BossNamesDBModel>() { new("Баллак"), new("Valak") } },
-            new BossDbModel(location: "Heine", name: "Cyrex", nickName: "Cайракс", chance: 33,
+            new BossDbModel(location: "Heine", name: "Cyrex", nickName: "Курис", chance: 33,
                     respawnTime: 24, restartRespawnTime:8, purpleDrop:true)
-                { BossNames = new List<BossNamesDBModel>() { new("Куриса"), new("Cyrex") } }
+                { BossNames = new List<BossNamesDBModel>() { new("Сайракс"), new("Cyrex") } }
         ];
 }

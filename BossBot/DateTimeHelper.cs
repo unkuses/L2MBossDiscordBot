@@ -43,8 +43,9 @@ namespace BossBot
 
         public DateTime? TryParseData(string input, string timeZoneInfo)
         {
-            string format = "dd.MM.yyyy HH:mm";
-            string formatUS = "yyyy/MM/dd HH:mm";
+            input = input.Replace(" ", "");
+            string format = "dd.MM.yyyyHH:mm";
+            string formatUS = "yyyy/MM/ddHH:mm";
             IFormatProvider provider = new CultureInfo("en-US");
             if (DateTime.TryParseExact(input, format, provider, DateTimeStyles.None, out var data))
             {

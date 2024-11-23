@@ -164,8 +164,8 @@ namespace BossBot
                 }
             }
             
-            if (channel.Name != _options.ChatName || message.Content == null)
-                return;
+            // if (channel.Name != _options.ChatName || message.Content == null)
+            //     return;
 
             var content = message.Content;
             var lines = Regex.Split(content, "\r\n|\r|\n");
