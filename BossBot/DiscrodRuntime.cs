@@ -153,6 +153,9 @@ namespace BossBot
 
         private async Task ProcessMessage(IMessage message, ISocketMessageChannel channel)
         {
+            if (channel.Name != _options.ChatName || message.Content == null)
+                return;
+            
             if (message.Attachments.Any())
             {
                 var image = message.Attachments.First();
@@ -164,9 +167,6 @@ namespace BossBot
                 }
             }
             
-            // if (channel.Name != _options.ChatName || message.Content == null)
-            //     return;
-
             var content = message.Content;
             var lines = Regex.Split(content, "\r\n|\r|\n");
             var answers = new List<string>();
