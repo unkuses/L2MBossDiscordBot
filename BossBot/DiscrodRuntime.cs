@@ -188,13 +188,13 @@ namespace BossBot
 
             if (answers.Count > 0)
             {
-                ProcessAnswers(channel, answers);
+                await ProcessAnswers(channel, answers);
             }
         }
 
         private Task ProcessAnswers(ISocketMessageChannel channel, List<string> answers)
         {
-            StringBuilder builder = new StringBuilder();
+            var builder = new StringBuilder();
             foreach (var answer in answers)
             {
                 if (builder.Length + answer.Length > 2000)

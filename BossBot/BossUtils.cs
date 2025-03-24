@@ -20,6 +20,7 @@ public static class BossUtils
             if (stringBuilder.Length + str.Length > 2000)
             {
                 stringBuilder = new StringBuilder();
+                builders.Add(stringBuilder);
             }
 
             stringBuilder.AppendLine(str);
