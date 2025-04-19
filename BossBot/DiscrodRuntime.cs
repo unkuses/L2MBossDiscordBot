@@ -146,35 +146,35 @@ namespace BossBot
                     }
                 }
 
-                if (bossesToMention.Count > 0)
-                {
-                    Dictionary<ulong, IList<BossModel>> dictionary = new();
-                    foreach (var boss in bossesToMention)
-                    {
-                        if (!dictionary.ContainsKey(boss.ChatId.Value))
-                        {
-                            dictionary[boss.ChatId.Value] = new List<BossModel>();
-                        }
+                //if (bossesToMention.Count > 0)
+                //{
+                //    Dictionary<ulong, IList<BossModel>> dictionary = new();
+                //    foreach (var boss in bossesToMention)
+                //    {
+                //        if (!dictionary.ContainsKey(boss.ChatId.Value))
+                //        {
+                //            dictionary[boss.ChatId.Value] = new List<BossModel>();
+                //        }
 
-                        dictionary[boss.ChatId.Value].Add(boss);
-                    }
+                //        dictionary[boss.ChatId.Value].Add(boss);
+                //    }
 
-                    foreach (var i in dictionary.Keys)
-                    {
-                        var builder = new StringBuilder();
-                        builder.AppendLine("@here Боссы отмеченные ботом");
-                        foreach (var item in dictionary[i])
-                        {
-                            var nextRespawnTime = item.KillTime.AddHours(item.RespawnTime);
-                            var timeToRespawn = nextRespawnTime - _dateTimeHelper.CurrentTime;
-                            builder.AppendLine(
-                                $"**{StringHelper.PopulateWithWhiteSpaces(item.Id.ToString(), 2)}**|{nextRespawnTime:HH:mm}|**{item.NickName.ToUpper()}**| через {timeToRespawn.ToString(@"hh\:mm")} | {item.Chance} {BossUtils.GetChanceStatus(item.Chance)}{BossUtils.AppendEggPlant(item.PurpleDrop)}");
-                        }
+                //    foreach (var i in dictionary.Keys)
+                //    {
+                //        var builder = new StringBuilder();
+                //        builder.AppendLine("@here Боссы отмеченные ботом");
+                //        foreach (var item in dictionary[i])
+                //        {
+                //            var nextRespawnTime = item.KillTime.AddHours(item.RespawnTime);
+                //            var timeToRespawn = nextRespawnTime - _dateTimeHelper.CurrentTime;
+                //            builder.AppendLine(
+                //                $"**{StringHelper.PopulateWithWhiteSpaces(item.Id.ToString(), 2)}**|{nextRespawnTime:HH:mm}|**{item.NickName.ToUpper()}**| через {timeToRespawn.ToString(@"hh\:mm")} | {item.Chance} {BossUtils.GetChanceStatus(item.Chance)}{BossUtils.AppendEggPlant(item.PurpleDrop)}");
+                //        }
 
-                        var channel = _client.GetChannel(i) as ITextChannel;
-                        channel?.SendMessageAsync(builder.ToString());
-                    }
-                }
+                //        var channel = _client.GetChannel(i) as ITextChannel;
+                //        channel?.SendMessageAsync(builder.ToString());
+                //    }
+                //}
 
                 Thread.Sleep(60 * 1000);
             }
