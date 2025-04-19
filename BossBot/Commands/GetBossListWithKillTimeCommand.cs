@@ -1,15 +1,15 @@
 ﻿using BossBot.Interfaces;
-using Discord.WebSocket;
 using System.Text;
+using CommonLib.Models;
 
 namespace BossBot.Commands
 {
-    public class GetBossListWithKillTimeCommand(BossData bossData) : ICommand
+    public class GetBossListWithKillTimeCommand(CosmoDb bossData) : ICommand
     {
         public string[] Keys { get; } = ["kl"];
 
-        public Task<IEnumerable<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands) =>
-            GetAllBossStatus(bossData.GetAllLoggedBossInfo(chatId));
+        public async Task<IEnumerable<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands) =>
+            await GetAllBossStatus(await bossData.GetAllLoggedBossInfoAsync(chatId));
 
         private Task<IEnumerable<string>> GetAllBossStatus(IList<BossModel> models)
         {

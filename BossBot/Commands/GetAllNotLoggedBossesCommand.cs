@@ -1,15 +1,14 @@
 ﻿using BossBot.Interfaces;
-using Discord.WebSocket;
 using System.Text;
 
 namespace BossBot.Commands
 {
-    public class GetAllNotLoggedBossesCommand(BossData bossData) : ICommand
+    public class GetAllNotLoggedBossesCommand(CosmoDb bossData) : ICommand
     {
         public string[] Keys { get; } = ["??"];
-        public Task<IEnumerable<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands)
+        public async Task<IEnumerable<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands)
         {
-            var list = bossData.GetAllNotLoggedBossInformation(chatId);
+            var list = await bossData.GetAllNotLoggedBossInformationAsync(chatId);
             var stringBuilders = new List<StringBuilder>();
             var str = new StringBuilder();
             stringBuilders.Add(str);
@@ -18,7 +17,7 @@ namespace BossBot.Commands
                 str.Append($"**{item.NickName.ToUpper()}**:**{item.Id}**, ");
             }
 
-            return Task.FromResult(stringBuilders.Select(s => s.ToString()));
+            return stringBuilders.Select(s => s.ToString());
         }
     }
 }

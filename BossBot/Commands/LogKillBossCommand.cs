@@ -1,13 +1,14 @@
 ﻿using BossBot.Interfaces;
 using System.Text;
+using CommonLib.Helpers;
 
 namespace BossBot.Commands
 {
-    public class LogKillBossCommand(BossData bossData, DateTimeHelper dateTimeHelper) : ICommand
+    public class LogKillBossCommand(CosmoDb bossData, DateTimeHelper dateTimeHelper) : ICommand
     {
         public string[] Keys { get; } = ["k", "к"];
 
-        public Task<IEnumerable<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands)
+        public async Task<IEnumerable<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands)
         {
             List<StringBuilder> stringBuilders = [];
             var sb = new StringBuilder();
@@ -18,10 +19,7 @@ namespace BossBot.Commands
             }
             else
             {
-                if (!int.TryParse(commands[1], out var id))
-                {
-                    sb.AppendLine("Не правильный формат");
-                }
+                var id = commands[1];
 
                 DateTime? dateTime = null;
                 if (commands.Length == 2)
@@ -42,7 +40,7 @@ namespace BossBot.Commands
 
                 if (dateTime > dateTimeHelper.CurrentTime.AddHours(1))
                     dateTime = dateTime.Value.AddDays(-1);
-                var boss = bossData.LogKillBossInformation(chatId, id, dateTime.Value);
+                var boss = await bossData.LogKillBossInformationAsync(chatId, id, dateTime.Value);
                 if (boss == null)
                 {
                     sb.AppendLine($"Босс с номером {id} не был найден");
@@ -57,7 +55,7 @@ namespace BossBot.Commands
                 }
             }
 
-            return Task.FromResult(stringBuilders.Select(s => s.ToString()));
+            return stringBuilders.Select(s => s.ToString());
         }
     }
 }

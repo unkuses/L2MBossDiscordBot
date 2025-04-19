@@ -1,15 +1,15 @@
-﻿using System.Text;
-using BossBot.Interfaces;
+﻿using BossBot.Interfaces;
+using CommonLib.Helpers;
 
 namespace BossBot.Commands;
 
-public class AdenBossCommand(BossData bossData, DateTimeHelper dateTimeHelper) : ICommand
+public class AdenBossCommand(CosmoDb bossData, DateTimeHelper dateTimeHelper) : ICommand
 {
     public string[] Keys { get; } = ["aden", "аден"];
 
-    public Task<IEnumerable<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands)
+    public async Task<IEnumerable<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands)
     {
-        var bossesInAden = bossData.GetAllAdenByLocation(chatId, "Aden");
-        return BossUtils.PopulateBossInformationString(bossesInAden, dateTimeHelper);
+        var bossesInAden = await bossData.GetAllBossesByLocationAsync(chatId, "Aden");
+        return await BossUtils.PopulateBossInformationString(bossesInAden, dateTimeHelper);
     }
 }

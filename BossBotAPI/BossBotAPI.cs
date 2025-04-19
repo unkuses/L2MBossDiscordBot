@@ -1,0 +1,78 @@
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Functions.Worker;
+using Microsoft.Extensions.Logging;
+using System.Text.Json;
+using CommonLib.Requests;
+
+namespace BossBotAPI
+{
+    public class BossBotApi
+    {
+        private readonly ILogger<BossBotApi> _logger;
+        private readonly ImageWork _imageWork;
+
+        public BossBotApi(ILogger<BossBotApi> logger, ImageWork imageWork)
+        {
+            _logger = logger;
+            _imageWork = imageWork;
+        }
+
+        [Function("ParseImage")]
+        public async Task<IActionResult> ParseImage([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req)
+        {
+            _logger.LogInformation("C# HTTP trigger function processed a request.");
+
+            try
+            {
+                // Parse the request body
+                var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+                var requestData = JsonSerializer.Deserialize<RequestData>(requestBody);
+
+                if (requestData == null || string.IsNullOrEmpty(requestData.TimeZone) || requestData.Image == null)
+                {
+                    return new BadRequestObjectResult("Invalid request. Please provide both TimeZone and Image.");
+                }
+
+                var result = await _imageWork.ProcessImage(requestData.Image, requestData.ChatId, requestData.TimeZone);
+                return new OkObjectResult(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error processing request: {ex.Message}");
+                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        [Function("ParseImageByUrl")]
+        public async Task<IActionResult> ParseImageURL([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req)
+        {
+            _logger.LogInformation("C# HTTP trigger function processed a request.");
+
+            try
+            {
+                // Parse the request body
+                var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+                var requestData = JsonSerializer.Deserialize<RequestParseImageUrl>(requestBody);
+
+                if (requestData == null || string.IsNullOrEmpty(requestData.TimeZone) || string.IsNullOrEmpty(requestData.Url))
+                {
+                    return new BadRequestObjectResult("Invalid request. Please provide both TimeZone and Image.");
+                }
+
+                var result = await _imageWork.ProcessImageByUrl(requestData.Url, requestData.ChatId, requestData.TimeZone);
+                // Log the received data
+                _logger.LogInformation($"Received TimeZone: {requestData.TimeZone}");
+                _logger.LogInformation($"Received Image url: {requestData.Url.Length}");
+
+
+                return new OkObjectResult(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error processing request: {ex.Message}");
+                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+            }
+        }
+    }
+}

@@ -1,6 +1,6 @@
-﻿using BossBot.DBModel;
+﻿using CommonLib.DBModels;
 
-namespace BossBot
+namespace CommonLib.Models
 {
     public class BossModel(BossDbModel model)
     {
@@ -11,7 +11,7 @@ namespace BossBot
         }
 
         public ulong? ChatId {get;}
-        public int Id { get; } = model.ID;
+        public string Id { get; } = model.Id;
         public string Name { get; } = model.Name;
         public string NickName { get; } = model.NickName;
         public int Chance {  get; } = model.Chance;

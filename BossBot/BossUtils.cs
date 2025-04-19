@@ -1,4 +1,6 @@
 ﻿using System.Text;
+using CommonLib.Helpers;
+using CommonLib.Models;
 
 namespace BossBot;
 
@@ -10,20 +12,27 @@ public static class BossUtils
         List<StringBuilder> builders = new();
         var stringBuilder = new StringBuilder();
         builders.Add(stringBuilder);
-        int maxLength = models.Max(x => x.NickName.Length);
-        foreach (var model in models)
+        if (models.Count == 0)
         {
-            var nextRespawnTime = model.KillTime.AddHours(model.RespawnTime);
-            var timeToRespawn = nextRespawnTime - dateTimeHelper.CurrentTime;
-            var str =
-                $@"**{StringHelper.PopulateWithWhiteSpaces(model.Id.ToString(), 2)}**|{nextRespawnTime:HH:mm}|**{StringHelper.PopulateWithWhiteSpaces(model.NickName.ToUpper(), maxLength)}** через {timeToRespawn.ToString(@"hh\:mm")} | {model.Chance}{GetChanceStatus(model.Chance)}{AppendEggPlant(model.PurpleDrop)}";
-            if (stringBuilder.Length + str.Length > 2000)
+            stringBuilder.AppendLine("Нет боссов в списке");
+        }
+        else
+        {
+            int maxLength = models.Max(x => x.NickName.Length);
+            foreach (var model in models)
             {
-                stringBuilder = new StringBuilder();
-                builders.Add(stringBuilder);
-            }
+                var nextRespawnTime = model.KillTime.AddHours(model.RespawnTime);
+                var timeToRespawn = nextRespawnTime - dateTimeHelper.CurrentTime;
+                var str =
+                    $@"**{StringHelper.PopulateWithWhiteSpaces(model.Id.ToString(), 2)}**|{nextRespawnTime:HH:mm}|**{StringHelper.PopulateWithWhiteSpaces(model.NickName.ToUpper(), maxLength)}** через {timeToRespawn.ToString(@"hh\:mm")} | {model.Chance}{GetChanceStatus(model.Chance)}{AppendEggPlant(model.PurpleDrop)}";
+                if (stringBuilder.Length + str.Length > 2000)
+                {
+                    stringBuilder = new StringBuilder();
+                    builders.Add(stringBuilder);
+                }
 
-            stringBuilder.AppendLine(str);
+                stringBuilder.AppendLine(str);
+            }
         }
 
         return Task.FromResult(builders.Select(b => b.ToString()));

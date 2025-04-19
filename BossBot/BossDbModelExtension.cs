@@ -1,4 +1,5 @@
 ﻿using BossBot.DBModel;
+using CommonLib.DBModels;
 
 namespace BossBot;
 

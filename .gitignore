@@ -5,3 +5,11 @@
 /.vs
 /BossBot/bin
 /BossBot/obj
+/CommonLib/bin
+/CommonLib/obj
+/BossLogger/bin/Debug/net8.0
+/BossLogger/obj/Release/net8.0
+/BossLogger/obj
+/BossBotAPI/Properties/PublishProfiles
+/BossBotAPI/Properties/ServiceDependencies/L2MBossInfoAPI - Zip Deploy
+/BossBotAPI/Properties

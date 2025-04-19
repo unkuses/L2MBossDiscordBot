@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace BossBot.DBModel;
+namespace CommonLib.DBModels;
 
 public class BossNamesDBModel
 {

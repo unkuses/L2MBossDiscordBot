@@ -3,13 +3,13 @@ using System.Text;
 
 namespace BossBot.Commands
 {
-    public class GetAllBossInformationCommand(BossData bossData) : ICommand
+    public class GetAllBossInformationCommand(CosmoDb bossData) : ICommand
     {
         public string[] Keys { get; } = ["?"];
 
-        public Task<IEnumerable<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands)
+        public async Task<IEnumerable<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands)
         {
-            var list = bossData.GetBossesInformation();
+            var list = await bossData.GetBossesInformationAsync();
             List<StringBuilder> builders = new List<StringBuilder>();
             StringBuilder builder = new StringBuilder();
             builders.Add(builder);
@@ -18,7 +18,7 @@ namespace BossBot.Commands
                 builder.Append($"**{item.NickName.ToUpper()}**:**{item.Id}**, ");
             }
 
-            return Task.FromResult(builders.Select(b => b.ToString()));
+            return builders.Select(b => b.ToString());
         }
     }
 }
