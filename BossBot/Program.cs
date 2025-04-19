@@ -27,6 +27,15 @@ internal class Program
 
         var discordRuntime = new DiscordRuntime(options);
         discordRuntime.LogIn();
-        Console.ReadKey();
+        RunServiceLoop(CancellationToken.None);
+    }
+
+    private static void RunServiceLoop(CancellationToken token)
+    {
+        while (!token.IsCancellationRequested)
+        {
+            // Do background work here
+            Thread.Sleep(1000*360); // Simulate work
+        }
     }
 }
