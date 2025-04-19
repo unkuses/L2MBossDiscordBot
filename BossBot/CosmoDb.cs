@@ -182,6 +182,7 @@ namespace BossBot
             foreach (var bossInfo in postponedBosses)
             {
                 bossInfo.KillTime = bossInfo.KillTime.AddHours(bossInfo.Boss.RespawnTime);
+                bossInfo.NextRespawnTime = bossInfo.KillTime.AddHours(bossInfo.Boss.RespawnTime);
                 _mentionedBosses.Remove(bossInfo.id);
 
                 // Update the item in Cosmos DB
@@ -288,6 +289,7 @@ namespace BossBot
             else
             {
                 bossInfo.KillTime = time;
+                bossInfo.NextRespawnTime = time.AddHours(boss.RespawnTime);
                 await container.ReplaceItemAsync(bossInfo, bossInfo.id, new PartitionKey(bossInfo.BossInformationId));
             }
 
