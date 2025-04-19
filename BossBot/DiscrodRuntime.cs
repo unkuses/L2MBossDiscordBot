@@ -245,13 +245,12 @@ namespace BossBot
                 {
                     Url = url,
                     ChatId = chatId,
-                    TimeZone = String.Empty
+                    TimeZone = timeZone
                 };
                 var jsonPayload = JsonSerializer.Serialize(requestData);
 
                 using var httpClient = new HttpClient();
-                var endpoint = "http://localhost:7112/api/ParseImageByUrl";
-                var response = await httpClient.PostAsync(endpoint, new StringContent(jsonPayload, Encoding.UTF8, "application/json"));
+                var response = await httpClient.PostAsync(_options.ImageAnalysisUrl, new StringContent(jsonPayload, Encoding.UTF8, "application/json"));
                 response.EnsureSuccessStatusCode();
                 var responseContent = await response.Content.ReadAsStringAsync();
                 return responseContent;
