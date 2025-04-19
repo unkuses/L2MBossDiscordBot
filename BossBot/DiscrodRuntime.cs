@@ -56,7 +56,6 @@ namespace BossBot
         {
             await _client.LoginAsync(TokenType.Bot, _options.BotToken);
             await _client.StartAsync();
-            MaintenanceTask();
         }
 
         private async Task Discord_MessageReceived(SocketMessage arg)
@@ -72,7 +71,7 @@ namespace BossBot
                         {
                             if (_lastReadMessage.ContainsKey(arg.Channel.Id) &&
                                 message.CreatedAt <= _lastReadMessage[arg.Channel.Id]) continue;
-                            ProcessMessage(message, arg.Channel, _bossData.GetUserTimeZone(message.Author.Id));
+                            _ = ProcessMessage(message, arg.Channel, _bossData.GetUserTimeZone(message.Author.Id));
                         }
 
                         _lastReadMessage[arg.Channel.Id] = message.CreatedAt;
@@ -81,13 +80,13 @@ namespace BossBot
             }
         }
 
-        private async Task MaintenanceTask()
+        public async Task MaintenanceTask()
         {
             while (true)
             {
                 var postponeBosses = await _cosmoDb.GetAndUpdateAllPostponeBossesAsync();
                 var appendBosses = await _cosmoDb.GetAllAppendingBossesAsync();
-                var bossesToMention = await _cosmoDb.GetAllNotAnnouncedBossesAsync();
+                // var bossesToMention = await _cosmoDb.GetAllNotAnnouncedBossesAsync();
                 if (postponeBosses.Count > 0)
                 {
                     Dictionary<ulong, IList<BossModel>> dic = new();
@@ -246,12 +245,13 @@ namespace BossBot
                 {
                     Url = url,
                     ChatId = chatId,
-                    TimeZone = timeZone
+                    TimeZone = String.Empty
                 };
                 var jsonPayload = JsonSerializer.Serialize(requestData);
 
                 using var httpClient = new HttpClient();
-                var response = await httpClient.PostAsync(_options.ImageAnalysisUrl, new StringContent(jsonPayload, Encoding.UTF8, "application/json"));
+                var endpoint = "http://localhost:7112/api/ParseImageByUrl";
+                var response = await httpClient.PostAsync(endpoint, new StringContent(jsonPayload, Encoding.UTF8, "application/json"));
                 response.EnsureSuccessStatusCode();
                 var responseContent = await response.Content.ReadAsStringAsync();
                 return responseContent;

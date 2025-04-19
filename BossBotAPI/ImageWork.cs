@@ -38,7 +38,7 @@ namespace BossBotAPI
                 : await ReadTextAzure(image!);
 
             // Parse the boss information
-            var bossList = await _bossData.ImageAnalyzeParser(bossInformationList, chatId, timeZone, image is null);
+            var bossList = await _bossData.ImageAnalyzeParser(bossInformationList, chatId, timeZone, image == null);
 
             // Build the response string
             var stringBuilder = new StringBuilder();

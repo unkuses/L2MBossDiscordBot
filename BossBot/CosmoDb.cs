@@ -70,7 +70,7 @@ namespace BossBot
         public async Task<IList<BossModel>> GetAllLoggedBossInfoAsync(ulong chatId)
         {
             var container = _cosmosClient.GetContainer(DatabaseId, "BossInformation");
-            var query = new QueryDefinition("SELECT * FROM c WHERE c.ChatId = @chatId")
+            var query = new QueryDefinition("SELECT * FROM c WHERE c.ChatId = @chatId ORDER BY c.NextRespawnTime ASC")
                 .WithParameter("@chatId", chatId);
 
             var iterator = container.GetItemQueryIterator<BossInformationDbModel>(query);
@@ -83,6 +83,28 @@ namespace BossBot
                 {
                     bossModels.Add(new BossModel(bossInfo));
                 }
+            }
+
+            return bossModels
+                .OrderBy(b => b.KillTime.AddHours(b.RespawnTime))
+                .ToList();
+        }
+
+        public async Task<IList<BossModel>> GetFirstLoggedBossInfoAsync(ulong chatId, int count)
+        {
+            var container = _cosmosClient.GetContainer(DatabaseId, "BossInformation");
+            var query = new QueryDefinition(
+                    "SELECT * FROM c WHERE c.ChatId = @chatId ORDER BY c.NextRespawnTime ASC OFFSET 0 LIMIT @count")
+                .WithParameter("@chatId", chatId)
+                .WithParameter("@count", count);
+
+            var iterator = container.GetItemQueryIterator<BossInformationDbModel>(query);
+            var bossModels = new List<BossModel>();
+
+            while (iterator.HasMoreResults)
+            {
+                var response = await iterator.ReadNextAsync();
+                bossModels.AddRange(response.Select(bossInfo => new BossModel(bossInfo)));
             }
 
             return bossModels
@@ -233,85 +255,6 @@ namespace BossBot
                 .ToList();
         }
 
-        public async Task<IList<BossModel>> GetFirstLoggedBossInfoAsync(ulong chatId, int count)
-        {
-            var container = _cosmosClient.GetContainer(DatabaseId, "BossInformation");
-            var query = new QueryDefinition(
-                "SELECT * FROM c WHERE c.ChatId = @chatId ORDER BY c.NextRespawnTime ASC OFFSET 0 LIMIT @count")
-                .WithParameter("@chatId", chatId)
-                .WithParameter("@count", count);
-
-            var iterator = container.GetItemQueryIterator<BossInformationDbModel>(query);
-            var bossModels = new List<BossModel>();
-
-            while (iterator.HasMoreResults)
-            {
-                var response = await iterator.ReadNextAsync();
-                foreach (var bossInfo in response)
-                {
-                    bossModels.Add(new BossModel(bossInfo));
-                }
-            }
-
-            return bossModels;
-        }
-
-        public async Task<List<BossModel>> ImageAnalyzeParser(List<string> lines, ulong userId, ulong chatId, string timeZoneInfo)
-        {
-            var bossInfo = new List<BossModel>();
-            var dateTimes = new List<DateTime>();
-
-            for (int i = 0; i < lines.Count; i++)
-            {
-                var BossModelsCache = BossCollection.GetBossesCollection();
-                // Find the boss in the cache whose name matches the current line
-                var boss = BossModelsCache
-                    .FirstOrDefault(b => b.BossNames
-                        .Any(name => lines[i].Contains(name.Name, StringComparison.CurrentCultureIgnoreCase)));
-
-                if (boss != null)
-                {
-                    i++; // Move to the next line to start parsing dates
-                    for (; i < lines.Count; i++)
-                    {
-                        // Try to parse a date from the current line
-                        var parsedDate = _dateTimeHelper.TryParseData(lines[i], timeZoneInfo);
-                        if (parsedDate.HasValue)
-                        {
-                            dateTimes.Add(parsedDate.Value);
-                        }
-
-                        // Check if the next line contains another boss name or if it's the last line
-                        var isNextBoss = BossModelsCache
-                            .Any(b => b.BossNames
-                                .Any(name => lines[i].Contains(name.Name, StringComparison.CurrentCultureIgnoreCase)));
-
-                        if (isNextBoss || i == lines.Count - 1)
-                        {
-                            // Log the kill information and add it to the result
-                            var bossModel = await LogKillBossInformationAsync(chatId, boss.Id, dateTimes.Min());
-                            dateTimes.Clear();
-                            bossInfo.Add(bossModel);
-
-                            i--; // Step back to reprocess the current line in the outer loop
-                            break;
-                        }
-                    }
-                }
-                else
-                {
-                    // Try to parse a date if no boss is found
-                    var parsedDate = _dateTimeHelper.TryParseData(lines[i], timeZoneInfo);
-                    if (parsedDate.HasValue)
-                    {
-                        dateTimes.Add(parsedDate.Value);
-                    }
-                }
-            }
-
-            return bossInfo;
-        }
-
         public async Task<BossModel> LogKillBossInformationAsync(ulong chatId, string bossId, DateTime time)
         {
             var container = _cosmosClient.GetContainer(DatabaseId, "BossInformation");
@@ -337,7 +280,8 @@ namespace BossBot
                     Boss = boss,
                     BossInformationId = bossId,
                     ChatId = chatId,
-                    KillTime = time
+                    KillTime = time,
+                    NextRespawnTime = time.AddHours(boss.RespawnTime),
                 };
                 await container.CreateItemAsync(bossInfo, new PartitionKey(bossInfo.BossInformationId));
             }
@@ -410,7 +354,6 @@ namespace BossBot
             }
         }
 
-        // Private Methods (Alphabetically Sorted)
         private async Task<BossDbModel> GetBossModelByIdAsync(string id)
         {
             var container = _cosmosClient.GetContainer(DatabaseId, ContainerId);
