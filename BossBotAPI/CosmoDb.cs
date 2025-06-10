@@ -103,7 +103,7 @@ namespace BossBotAPI
                     BossInformationId = bossId,
                     ChatId = chatId,
                     KillTime = time,
-                    NextRespawnTime = time.AddMinutes(boss.RespawnTime),
+                    NextRespawnTime = time.AddHours(boss.RespawnTime),
                     WasMentioned = wasMentioned
                 };
                 await container.CreateItemAsync(bossInfo, new PartitionKey(bossInfo.BossInformationId));
@@ -111,7 +111,7 @@ namespace BossBotAPI
             else
             {
                 bossInfo.KillTime = time;
-                bossInfo.NextRespawnTime = time.AddMinutes(boss.RespawnTime);
+                bossInfo.NextRespawnTime = time.AddHours(boss.RespawnTime);
                 await container.ReplaceItemAsync(bossInfo, bossInfo.id, new PartitionKey(bossInfo.BossInformationId));
             }
 

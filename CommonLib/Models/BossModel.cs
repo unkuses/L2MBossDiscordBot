@@ -15,8 +15,7 @@ namespace CommonLib.Models
         public string Name { get; } = model.Name;
         public string NickName { get; } = model.NickName;
         public int Chance {  get; } = model.Chance;
-        public int RespawnTime { get; } = model.RespawnTime;
-
+        public double RespawnTime { get; } = model.RespawnTime;
         public bool PurpleDrop { get; } = model.PurpleDrop;
         public DateTime KillTime { get; }
     }

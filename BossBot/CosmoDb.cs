@@ -349,7 +349,8 @@ namespace BossBot
                     Boss = boss,
                     BossInformationId = boss.Id,
                     ChatId = chatId,
-                    KillTime = predictedKillTime
+                    KillTime = predictedKillTime,
+                    NextRespawnTime = predictedKillTime.AddHours(boss.RespawnTime),
                 };
 
                 await bossInfoContainer.CreateItemAsync(notLoggedBossInfo, new PartitionKey(notLoggedBossInfo.BossInformationId));

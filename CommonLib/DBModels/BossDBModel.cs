@@ -11,7 +11,7 @@ public class BossDbModel
     }
 
     [SetsRequiredMembers]
-    public BossDbModel(int id, string name, int chance, string location, string nickName, int respawnTime, bool purpleDrop = false, int restartRespawnTime = 0)
+    public BossDbModel(int id, string name, int chance, string location, string nickName, double respawnTime, bool purpleDrop = false, int restartRespawnTime = 0)
     {
         Id = id.ToString();
         BossId = $"boss{id}";
@@ -32,7 +32,7 @@ public class BossDbModel
     public required string Name { get; set; }
     public required string NickName { get; set; }
     public required int Chance { get; set; }
-    public required int RespawnTime { get; set; }
+    public required double RespawnTime { get; set; }
     public required string Location { get; set; }
     public required bool PurpleDrop { get; set; }
         
