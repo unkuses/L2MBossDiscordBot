@@ -268,9 +268,13 @@ public static class BossCollection
             {
                 BossNames = new List<BossNamesDBModel>() { new("Сайракс"), new("Cyrex") }
             },
-            new BossDbModel(id: 51, location: "Goddard", name: "Baron", nickName:"Бекон", restartRespawnTime:14, respawnTime:24, chance:33, purpleDrop:true)
+            new BossDbModel(id: 51, location: "Goddard", name: "Baron", nickName:"Бароша", restartRespawnTime:14, respawnTime:24, chance:33, purpleDrop:true)
             {
                 BossNames = new List<BossNamesDBModel>() { new("Барон"), new("Baron") }
+            },
+            new BossDbModel(id: 52, location:"Goddard", name:"Hecaton", nickName:"Бекон", restartRespawnTime:14, respawnTime:24, chance:33, purpleDrop:true)
+            {
+                BossNames = new List<BossNamesDBModel>() { new("Гекатон"), new("Hecaton") }
             }
         };
 }
