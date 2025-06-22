@@ -1,4 +1,5 @@
 ﻿using BossBot.DBModel;
+using CommonLib.Helpers;
 
 namespace BossBot
 {
@@ -7,11 +8,13 @@ namespace BossBot
         private readonly BossDataSource _bossData = new();
         private readonly EventInfoDataSource _eventInfoData = new();
         private readonly List<int> _eventWasMentionToday = [];
+        private readonly DateTimeHelper _dateTimeHelper;
 
-        public BossData(Options options)
+        public BossData(Options options, DateTimeHelper dateTimeHelper)
         {
             _bossData.Database.EnsureCreated();
             _eventInfoData.Database.EnsureCreated();
+            _dateTimeHelper = dateTimeHelper;
         }
         
         public string SetUserTimeZone(ulong userId, string timeZone)
@@ -80,13 +83,13 @@ namespace BossBot
 
         private bool IsCurrentDay(RepeatDays days)
         {
-            var today = DateTime.Now.DayOfWeek;
+            var today = _dateTimeHelper.CurrentTime.DayOfWeek;
             return days.HasFlag((RepeatDays)(1 << (int)today));
         }
 
         private bool In5Minutes(DateTime time, int eventId)
         {
-            var now = DateTime.Now;
+            var now = _dateTimeHelper.CurrentTime;
             var nowTime = new TimeSpan(now.Hour, now.Minute, 0);
             var eventTime = new TimeSpan(time.Hour, time.Minute, 0);
 
