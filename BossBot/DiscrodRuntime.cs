@@ -28,7 +28,7 @@ namespace BossBot
             _options = options;
             _dateTimeHelper = new DateTimeHelper(_options.TimeZone);
             _cosmoDb = new CosmoDb(_dateTimeHelper, _options.CosmoDbUrl, _options.CosmoDbKey);
-            _bossData = new BossData(_options);
+            _bossData = new BossData(_options, _dateTimeHelper);
             _client = new DiscordSocketClient();
 
             _client.MessageReceived += Discord_MessageReceived;
