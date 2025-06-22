@@ -55,9 +55,9 @@ namespace BossBot
             ]);
         }
 
-        private async Task Client_LoggedIn() => Console.WriteLine("LoggedIn"); // _logger.WriteLog("LoggedIn");
+        private async Task Client_LoggedIn() => await _logger.WriteLog("LoggedIn");
 
-        private async Task Client_Log(LogMessage arg) => Console.WriteLine(arg.ToString());//_logger.WriteLog(arg.ToString());
+        private async Task Client_Log(LogMessage arg) => await _logger.WriteLog(arg.ToString());
 
         public async Task LogIn()
         {
@@ -91,10 +91,9 @@ namespace BossBot
         {
             while (true)
             {
-                var postponeBosses = new List<BossModel>();//await _cosmoDb.GetAndUpdateAllPostponeBossesAsync());
-                var appendBosses = new List<BossModel>(); //await _cosmoDb.GetAllAppendingBossesAsync();
+                var postponeBosses = await _cosmoDb.GetAndUpdateAllPostponeBossesAsync();
+                var appendBosses = await _cosmoDb.GetAllAppendingBossesAsync();
                 var upcomingEvents = _bossData.GetAllEvents();
-                // var bossesToMention = await _cosmoDb.GetAllNotAnnouncedBossesAsync();
                 if (postponeBosses.Count > 0)
                 {
                     Dictionary<ulong, IList<BossModel>> dic = new();
