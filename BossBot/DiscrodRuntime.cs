@@ -1,13 +1,14 @@
-﻿using Discord;
-using Discord.WebSocket;
-using System.Text;
-using System.Text.Json;
-using BossBot.Commands;
+﻿using BossBot.Commands;
+using BossBot.DBModel;
 using BossBot.Interfaces;
-using System.Text.RegularExpressions;
 using CommonLib.Helpers;
 using CommonLib.Models;
 using CommonLib.Requests;
+using Discord;
+using Discord.WebSocket;
+using System.Text;
+using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace BossBot
 {
@@ -30,6 +31,12 @@ namespace BossBot
             _cosmoDb = new CosmoDb(_dateTimeHelper, _options.CosmoDbUrl, _options.CosmoDbKey);
             _bossData = new BossData(_options, _dateTimeHelper);
             _client = new DiscordSocketClient();
+
+            var s = (int)_dateTimeHelper.CurrentTime.DayOfWeek;
+
+            var days = RepeatDays.Su;
+            var today = _dateTimeHelper.CurrentTime.DayOfWeek;
+            var tr =  days.HasFlag((RepeatDays)(1 << (int)today));
 
             _client.MessageReceived += Discord_MessageReceived;
             _client.Log += Client_Log;
@@ -170,7 +177,7 @@ namespace BossBot
 
         private int TimeDifference(DateTime time)
         {
-            var now = DateTime.Now;
+            var now = _dateTimeHelper.CurrentTime;
             var nowTime = new TimeSpan(now.Hour, now.Minute, 0);
             var eventTime = new TimeSpan(time.Hour, time.Minute, 0);
 
