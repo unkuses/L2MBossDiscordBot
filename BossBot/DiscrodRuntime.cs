@@ -20,6 +20,7 @@ namespace BossBot
         private readonly Dictionary<ulong, DateTimeOffset> _lastReadMessage = new();
         private readonly DateTimeHelper _dateTimeHelper;
         private readonly List<ICommand> _commands = [];
+        private readonly List<ICommand> _eventCommands = [];
         private readonly Logger _logger = new();
 
         public DiscordRuntime(Options? options)
@@ -37,20 +38,26 @@ namespace BossBot
             [
                 new GetAllBossCommand(_cosmoDb, _dateTimeHelper),
                 new GetBossListWithKillTimeCommand(_cosmoDb),
-                new GetAllNotLoggedBossesCommand( _cosmoDb),
+                new GetAllNotLoggedBossesCommand(_cosmoDb),
                 new GetAllBossInformationCommand(_cosmoDb),
                 new LogKillBossCommand(_cosmoDb, _dateTimeHelper),
                 new ClearBossCommand(_cosmoDb),
                 new RestartTimeCommand(_cosmoDb, _dateTimeHelper),
                 new AdenBossCommand(_cosmoDb, _dateTimeHelper),
                 new OrenBossCommand(_cosmoDb, _dateTimeHelper),
-                new SetUserTimeZoneCommand(_bossData)
+                new SetUserTimeZoneCommand(_bossData),
+            ]);
+            _eventCommands.AddRange(
+            [
+                new AddEventCommand(_bossData),
+                new RemoveEventCommand(_bossData),
+                new GetAllEventsCommand(_bossData),
             ]);
         }
 
-        private Task Client_LoggedIn() => _logger.WriteLog("LoggedIn");
+        private async Task Client_LoggedIn() => Console.WriteLine("LoggedIn"); // _logger.WriteLog("LoggedIn");
 
-        private Task Client_Log(LogMessage arg) => _logger.WriteLog(arg.ToString());
+        private async Task Client_Log(LogMessage arg) => Console.WriteLine(arg.ToString());//_logger.WriteLog(arg.ToString());
 
         public async Task LogIn()
         {
@@ -84,8 +91,9 @@ namespace BossBot
         {
             while (true)
             {
-                var postponeBosses = await _cosmoDb.GetAndUpdateAllPostponeBossesAsync();
-                var appendBosses = await _cosmoDb.GetAllAppendingBossesAsync();
+                var postponeBosses = new List<BossModel>();//await _cosmoDb.GetAndUpdateAllPostponeBossesAsync());
+                var appendBosses = new List<BossModel>(); //await _cosmoDb.GetAllAppendingBossesAsync();
+                var upcomingEvents = _bossData.GetAllEvents();
                 // var bossesToMention = await _cosmoDb.GetAllNotAnnouncedBossesAsync();
                 if (postponeBosses.Count > 0)
                 {
@@ -146,69 +154,73 @@ namespace BossBot
                     }
                 }
 
-                //if (bossesToMention.Count > 0)
-                //{
-                //    Dictionary<ulong, IList<BossModel>> dictionary = new();
-                //    foreach (var boss in bossesToMention)
-                //    {
-                //        if (!dictionary.ContainsKey(boss.ChatId.Value))
-                //        {
-                //            dictionary[boss.ChatId.Value] = new List<BossModel>();
-                //        }
+                if (upcomingEvents.Any())
+                {
+                    foreach (var upcomingEvent in upcomingEvents)
+                    {
+                        var channel = _client.GetChannel(upcomingEvent.ChatId) as ITextChannel;
 
-                //        dictionary[boss.ChatId.Value].Add(boss);
-                //    }
-
-                //    foreach (var i in dictionary.Keys)
-                //    {
-                //        var builder = new StringBuilder();
-                //        builder.AppendLine("@here Боссы отмеченные ботом");
-                //        foreach (var item in dictionary[i])
-                //        {
-                //            var nextRespawnTime = item.KillTime.AddHours(item.RespawnTime);
-                //            var timeToRespawn = nextRespawnTime - _dateTimeHelper.CurrentTime;
-                //            builder.AppendLine(
-                //                $"**{StringHelper.PopulateWithWhiteSpaces(item.Id.ToString(), 2)}**|{nextRespawnTime:HH:mm}|**{item.NickName.ToUpper()}**| через {timeToRespawn.ToString(@"hh\:mm")} | {item.Chance} {BossUtils.GetChanceStatus(item.Chance)}{BossUtils.AppendEggPlant(item.PurpleDrop)}");
-                //        }
-
-                //        var channel = _client.GetChannel(i) as ITextChannel;
-                //        channel?.SendMessageAsync(builder.ToString());
-                //    }
-                //}
+                        channel?.SendMessageAsync(
+                            $"@here **{upcomingEvent.EventName}** в {upcomingEvent.Time:HH:mm} через {TimeDifference(upcomingEvent.Time)} минут.");
+                    }
+                }
 
                 Thread.Sleep(60 * 1000);
             }
         }
 
+        private int TimeDifference(DateTime time)
+        {
+            var now = DateTime.Now;
+            var nowTime = new TimeSpan(now.Hour, now.Minute, 0);
+            var eventTime = new TimeSpan(time.Hour, time.Minute, 0);
+
+            // Calculate the difference in minutes
+            return Convert.ToInt32((eventTime - nowTime).TotalMinutes);
+        }
+
         private async Task ProcessMessage(IMessage message, ISocketMessageChannel channel, string timeZone)
         {
-            if (channel.Name != _options.ChatName || message.Content == null)
+            if (message.Content == null)
                 return;
-            
+
+            if(channel.Name == _options.ChatName)
+            {
+                await ProcessBossMessages(message, channel, timeZone);
+            }
+            else if (channel.Name == _options.ChatEvent)
+            {
+                await ProcessEventMessages(message, channel);
+            }
+        }
+
+        private async Task ProcessBossMessages(IMessage message, ISocketMessageChannel channel, string timeZone)
+        {
+
             if (message.Attachments.Any())
             {
                 var image = message.Attachments.First();
-                if(image.ContentType.StartsWith("image/"))
+                if (image.ContentType.StartsWith("image/"))
                 {
                     var result = await ProcessImage(image.Url, channel.Id, timeZone);
                     ProcessAnswers(channel, [result]);
                     return;
                 }
             }
-            
+
             var content = message.Content;
             var lines = Regex.Split(content, "\r\n|\r|\n");
             var answers = new List<string>();
             foreach (var line in lines)
             {
-                if(!line.StartsWith("!"))
+                if (!line.StartsWith("!"))
                     continue;
-                
+
                 var messageParts = line.Remove(0, 1).Split(' ');
                 if (messageParts.Any())
                 {
                     var command = _commands.FirstOrDefault(c => c.Keys.Contains(messageParts[0].ToLower()));
-                    if(command == null)
+                    if (command == null)
                         continue;
                     var result = await command.ExecuteAsync(channel.Id, message.Author.Id, messageParts);
                     answers.AddRange(result);
@@ -218,6 +230,23 @@ namespace BossBot
             if (answers.Count > 0)
             {
                 await ProcessAnswers(channel, answers);
+            }
+        }
+
+        private async Task ProcessEventMessages(IMessage message, ISocketMessageChannel channel)
+        {
+            var content = message.Content;
+            if (!content.StartsWith("!"))
+                return;
+
+            var messageParts = content.Remove(0, 1).Split(' ');
+            if (messageParts.Any())
+            {
+                var command = _eventCommands.FirstOrDefault(c => c.Keys.Contains(messageParts[0].ToLower()));
+                if (command == null)
+                    return;
+                var result = await command.ExecuteAsync(channel.Id, message.Author.Id, messageParts);
+                await ProcessAnswers(channel, [.. result]);
             }
         }
 

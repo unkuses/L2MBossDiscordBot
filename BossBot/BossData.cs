@@ -5,10 +5,13 @@ namespace BossBot
     public class BossData
     {
         private readonly BossDataSource _bossData = new();
+        private readonly EventInfoDataSource _eventInfoData = new();
+        private readonly List<int> _eventWasMentionToday = [];
 
         public BossData(Options options)
         {
             _bossData.Database.EnsureCreated();
+            _eventInfoData.Database.EnsureCreated();
         }
         
         public string SetUserTimeZone(ulong userId, string timeZone)
@@ -36,6 +39,78 @@ namespace BossBot
             }
 
             return string.Empty;
+        }
+
+        public List<EventInformationDBModel> GetAllEvents()
+        {
+            return _eventInfoData.EventInformationDbModels.ToList().Where(e => IsCurrentDay(e.Days) && In5Minutes(e.Time, e.Id))
+                .ToList();
+        }
+
+        public List<EventInformationDBModel> GetAllEvents(ulong chatId)
+        {
+            return _eventInfoData.EventInformationDbModels.ToList()
+                .Where(e => e.ChatId == chatId)
+                .ToList();
+        }
+
+        public bool AddEvent(EventInformationDBModel eventInfo)
+        {
+            if (_eventInfoData.EventInformationDbModels.Any(e => e.EventName == eventInfo.EventName))
+            {
+                return false; // Event already exists
+            }
+
+            _eventInfoData.EventInformationDbModels.Add(eventInfo);
+            _eventInfoData.SaveChanges();
+            return true;
+        }
+
+        public bool RemoveEventById(int eventId)
+        {
+            var eventInfo = _eventInfoData.EventInformationDbModels.FirstOrDefault(e => e.Id == eventId);
+            if (eventInfo != null)
+            {
+                _eventInfoData.EventInformationDbModels.Remove(eventInfo);
+                _eventInfoData.SaveChanges();
+                return true;
+            }
+            return false; // Event not found
+        }
+
+        private bool IsCurrentDay(RepeatDays days)
+        {
+            var today = DateTime.Now.DayOfWeek;
+            return days.HasFlag((RepeatDays)(1 << (int)today));
+        }
+
+        private bool In5Minutes(DateTime time, int eventId)
+        {
+            var now = DateTime.Now;
+            var nowTime = new TimeSpan(now.Hour, now.Minute, 0);
+            var eventTime = new TimeSpan(time.Hour, time.Minute, 0);
+
+            // Calculate the difference in minutes
+            var diff = (eventTime - nowTime).TotalMinutes;
+
+            // Check if event is within the next 5 minutes (1 to 5 minutes ahead)
+            var isIn5Minutes = diff is > 0 and <= 5;
+
+            // Only allow mention if not already mentioned today
+            if (isIn5Minutes)
+            {
+                if (_eventWasMentionToday.Contains(eventId))
+                    return false;
+
+                _eventWasMentionToday.Add(eventId);
+                return true;
+            }
+            else
+            {
+                // Remove from mentioned list if time has passed or is not in window
+                _eventWasMentionToday.Remove(eventId);
+                return false;
+            }
         }
     }
 }

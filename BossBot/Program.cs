@@ -11,7 +11,7 @@ internal class Program
         Options options;
         if (!string.IsNullOrWhiteSpace(botTok) && string.IsNullOrWhiteSpace(chatName))
         {
-            options = new Options(chatName, botTok, "", "", "");
+            options = new Options(chatName, botTok, "", "", "", "");
         }
         else
         {
@@ -28,5 +28,9 @@ internal class Program
         var discordRuntime = new DiscordRuntime(options);
         await discordRuntime.LogIn();
         await discordRuntime.MaintenanceTask();
+        while (true)
+        {
+            Thread.Sleep(1000*60);
+        }
     }
 }

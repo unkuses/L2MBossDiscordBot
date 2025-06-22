@@ -1,8 +1,10 @@
 ﻿namespace BossBot
 {
-    public class Options(string chatName, string botToken, string imageAnalysisURL, string cosmoDbUrl, string cosmoDbKey, string timeZone = "Russian Standard Time")
+    public class Options(string chatName, string botToken, string imageAnalysisURL, string cosmoDbUrl, string cosmoDbKey, string chatEvent, string timeZone = "Russian Standard Time")
     {
         public string ChatName { get; set; } = chatName;
+
+        public string ChatEvent { get; set; } = string.IsNullOrEmpty(chatEvent) ? "события-будильники" : chatEvent;
 
         public string BotToken { get; set; } = botToken;
 
