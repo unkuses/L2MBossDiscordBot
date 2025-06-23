@@ -16,7 +16,7 @@ namespace BossBot
             _eventInfoData.Database.EnsureCreated();
             _dateTimeHelper = dateTimeHelper;
         }
-        
+
         public string SetUserTimeZone(ulong userId, string timeZone)
         {
             var existUser = _bossData.UserInformationDbModels.FirstOrDefault(u => u.UserId == userId);
@@ -27,7 +27,7 @@ namespace BossBot
             else
             {
                 _bossData.UserInformationDbModels.Add(new UserInformationDBModel()
-                    { UserId = userId, UserTimeZone = timeZone });
+                { UserId = userId, UserTimeZone = timeZone });
             }
 
             _bossData.SaveChanges();
@@ -47,6 +47,13 @@ namespace BossBot
         public List<EventInformationDBModel> GetAllEvents()
         {
             return _eventInfoData.EventInformationDbModels.ToList().Where(e => IsCurrentDay(e.Days) && In5Minutes(e.Time, e.Id))
+                .ToList();
+        }
+
+        public List<EventInformationDBModel> GetAllTodayEvents()
+        {
+            return _eventInfoData.EventInformationDbModels.ToList()
+                .Where(e => IsCurrentDay(e.Days))
                 .ToList();
         }
 

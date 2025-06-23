@@ -94,6 +94,57 @@ namespace BossBot
             }
         }
 
+        public async Task StartDailyJob()
+        {
+            await Task.Delay(1000 * 60);
+            while (true)
+            {
+                try
+                {
+                    await GetAllDailyEvents();
+                }
+                catch (Exception ex)
+                {
+                    await _logger.WriteLog($"Daily job error: {ex.Message}");
+                }
+                var now = _dateTimeHelper.CurrentTime;
+                var nextRun = now.Date.AddHours(9);
+                if (now > nextRun)
+                    nextRun = nextRun.AddDays(1);
+
+                var delay = nextRun - now;
+                await Task.Delay(delay);
+            }
+        }
+
+        private async Task GetAllDailyEvents()
+        {
+            var events = _bossData.GetAllTodayEvents();
+            Dictionary<ulong, IList<EventInformationDBModel>> dictionary = new();
+            foreach (var e in events)
+            {
+                if (!dictionary.ContainsKey(e.ChatId))
+                {
+                    dictionary[e.ChatId] = new List<EventInformationDBModel>();
+                }
+
+                dictionary[e.ChatId].Add(e);
+            }
+
+            foreach (var chatId in dictionary.Keys)
+            {
+                var builder = new StringBuilder();
+                builder.AppendLine("@here Ближайшие события:");
+                foreach (var item in dictionary[chatId])
+                {
+                    var timeToEvent = item.Time - _dateTimeHelper.CurrentTime;
+                    builder.AppendLine($"**{item.EventName}** в {item.Time:HH:mm} через {timeToEvent.ToString(@"hh\:mm")}");
+                }
+                var channel = _client.GetChannel(chatId) as ITextChannel;
+                await channel?.SendMessageAsync(builder.ToString());
+            }
+        }
+
         public async Task MaintenanceTask()
         {
             while (true)

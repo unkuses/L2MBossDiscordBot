@@ -27,6 +27,7 @@ internal class Program
 
         var discordRuntime = new DiscordRuntime(options);
         await discordRuntime.LogIn();
+        _ = discordRuntime.StartDailyJob();
         await discordRuntime.MaintenanceTask();
         while (true)
         {
