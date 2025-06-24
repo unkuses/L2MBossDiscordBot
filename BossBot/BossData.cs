@@ -1,5 +1,6 @@
 ﻿using BossBot.DBModel;
 using CommonLib.Helpers;
+using Microsoft.EntityFrameworkCore;
 
 namespace BossBot
 {
@@ -14,6 +15,7 @@ namespace BossBot
         {
             _bossData.Database.EnsureCreated();
             _eventInfoData.Database.EnsureCreated();
+            MigrationEvent.Migration_1(_eventInfoData);
             _dateTimeHelper = dateTimeHelper;
         }
 
@@ -46,8 +48,15 @@ namespace BossBot
 
         public List<EventInformationDBModel> GetAllEvents()
         {
-            return _eventInfoData.EventInformationDbModels.ToList().Where(e => IsCurrentDay(e.Days) && In5Minutes(e.Time, e.Id))
+            var todayEvents = _eventInfoData.EventInformationDbModels.ToList().Where(e => IsCurrentDay(e.Days) && EventIsSoon(e.Time, e.Id, e.TimeBeforeNotification))
                 .ToList();
+            var oneTimeEvents = _eventInfoData.EventInformationDbModels.ToList()
+                .Where(e => e.IsOneTimeEvent && e.Time.Date == _dateTimeHelper.CurrentTime.Date && EventIsSoon(e.Time, e.Id, e.TimeBeforeNotification))
+                .ToList();
+            _eventInfoData.EventInformationDbModels.RemoveRange(oneTimeEvents);
+            _eventInfoData.SaveChanges();
+            todayEvents.AddRange(oneTimeEvents);
+            return todayEvents;
         }
 
         public List<EventInformationDBModel> GetAllTodayEvents()
@@ -94,7 +103,7 @@ namespace BossBot
             return days.HasFlag((RepeatDays)(1 << (int)today));
         }
 
-        private bool In5Minutes(DateTime time, int eventId)
+        private bool EventIsSoon(DateTime time, int eventId, double timeDiff)
         {
             var now = _dateTimeHelper.CurrentTime;
             var nowTime = new TimeSpan(now.Hour, now.Minute, 0);
@@ -104,7 +113,7 @@ namespace BossBot
             var diff = (eventTime - nowTime).TotalMinutes;
 
             // Check if event is within the next 5 minutes (1 to 5 minutes ahead)
-            var isIn5Minutes = diff is > 0 and <= 5;
+            var isIn5Minutes = diff > 0 && diff <= timeDiff;
 
             // Only allow mention if not already mentioned today
             if (isIn5Minutes)

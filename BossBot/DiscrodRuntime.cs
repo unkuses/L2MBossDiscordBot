@@ -56,7 +56,7 @@ namespace BossBot
             ]);
             _eventCommands.AddRange(
             [
-                new AddEventCommand(_bossData),
+                new AddEventCommand(_bossData, _dateTimeHelper),
                 new RemoveEventCommand(_bossData),
                 new GetAllEventsCommand(_bossData),
             ]);
@@ -149,8 +149,8 @@ namespace BossBot
         {
             while (true)
             {
-                var postponeBosses = await _cosmoDb.GetAndUpdateAllPostponeBossesAsync();
-                var appendBosses = await _cosmoDb.GetAllAppendingBossesAsync();
+                var postponeBosses = new List<BossModel>();// await _cosmoDb.GetAndUpdateAllPostponeBossesAsync();
+                var appendBosses = new List<BossModel>(); //await _cosmoDb.GetAllAppendingBossesAsync();
                 var upcomingEvents = _bossData.GetAllEvents();
                 if (postponeBosses.Count > 0)
                 {

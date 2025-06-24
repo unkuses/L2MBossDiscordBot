@@ -1,10 +1,12 @@
 ﻿using BossBot.DBModel;
 using BossBot.Interfaces;
+using CommonLib.Helpers;
 
 namespace BossBot.Commands;
 
-public class AddEventCommand(BossData bossData) : ICommand
+public class AddEventCommand(BossData bossData, DateTimeHelper dateTimeHelper) : ICommand
 {
+    const string TimeFormat = "MM/dd:HH:mm";
     public string[] Keys { get; } = ["add", "добавить", "a", "д"];
     public async Task<IEnumerable<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands)
     {
@@ -17,27 +19,47 @@ public class AddEventCommand(BossData bossData) : ICommand
     {
         var i = 1;
         var days = ParseRepeatDays(commands, ref i);
-        if (days == RepeatDays.None)
-            return false;
-        if (!DateTime.TryParse(commands[i], out var startTime))
+        if (!ParseTime(commands[i], out var startTime))
         {
             return false; // Invalid date format
         }
+
+        if(days == RepeatDays.None && startTime < dateTimeHelper.CurrentTime)
+        {
+            return false; // Event cannot be in the past if no repeat days are specified
+        }
+        i++;
+
+        if (Int32.TryParse(commands[i], out var timeBeforeNotification))
+        {
+            i++;
+        }
+        else
+        {
+            timeBeforeNotification = 5; // Default notification time
+        }
+        if (timeBeforeNotification < 0)
+        {
+            return false; // Notification time cannot be negative
+        }
+
         var eventName = string.Join(" ", commands.Skip(i + 1));
         if (string.IsNullOrWhiteSpace(eventName))
         {
             return false; // Event name cannot be empty
         }
+
         var eventInfo = new EventInformationDBModel
         {
             EventName = eventName,
             Time = startTime,
             Days = days,
-            ChatId = chatId
+            ChatId = chatId,
+            IsOneTimeEvent = days == RepeatDays.None,
+            TimeBeforeNotification = timeBeforeNotification
         };
         return bossData.AddEvent(eventInfo);
     }
-
 
 
     private RepeatDays ParseRepeatDays(string[] commands, ref int index)
@@ -57,4 +79,8 @@ public class AddEventCommand(BossData bossData) : ICommand
         }
         return days;
     }
+
+    private bool ParseTime(string str, out DateTime dateTime) =>
+        DateTime.TryParseExact(str, TimeFormat, null, System.Globalization.DateTimeStyles.None, out dateTime) || DateTime.TryParse(str, out dateTime);
+    
 }

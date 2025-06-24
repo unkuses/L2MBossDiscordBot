@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BossBot.DBModel;
@@ -15,6 +16,10 @@ public class EventInformationDBModel
     public RepeatDays Days { get; set; }
 
     public ulong ChatId { get; set; }
+
+    [DefaultValue(false)] public bool IsOneTimeEvent { get; set; } = false;
+
+    [DefaultValue(5)] public double TimeBeforeNotification { get; set; } = 5;
 }
 
 [Flags]
