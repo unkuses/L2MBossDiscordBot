@@ -34,7 +34,7 @@ public static class BossCollection
             new BossDbModel(id: 5, name: "Saban", chance: 100, location: "Gludio", nickName: "сабянин", respawnTime: 12,
                 restartRespawnTime: 6)
             {
-                BossNames = new List<BossNamesDBModel>() { new(name: "Сабан"), new(name: "Saban") }
+                BossNames = new List<BossNamesDBModel>() { new(name: "Сабан"), new(name: "Savan") }
             },
 
             new BossDbModel(id: 25, location: "Gludio", name: "Tromba", chance: 50, respawnTime: 4.5,
@@ -89,7 +89,7 @@ public static class BossCollection
             new BossDbModel(id: 12, name: "Pan Draaed", chance: 100, location: "Dion",
                 nickName: "драйд", respawnTime: 8)
             {
-                BossNames = new List<BossNamesDBModel>() { new("Pan Draaed"), new("Пан Драйд") }
+                BossNames = new List<BossNamesDBModel>() { new("Pan Dra'eed"), new("Пан Драйд") }
             },
 
             new BossDbModel(id: 13, name: "Sarka", chance: 100, location: "Dion", nickName: "шарка",
