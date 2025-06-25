@@ -309,14 +309,14 @@ namespace BossBot
                 .WithParameter("@chatId", chatId);
 
             var loggedBossIdsIterator = bossInfoContainer.GetItemQueryIterator<dynamic>(loggedBossIdsQuery);
-            var loggedBossIds = new HashSet<string>();
+            var loggedBossIds = new List<string>();
 
             while (loggedBossIdsIterator.HasMoreResults)
             {
                 var response = await loggedBossIdsIterator.ReadNextAsync();
                 foreach (var item in response)
                 {
-                    loggedBossIds.Add(item.BossInformationId);
+                    loggedBossIds.Add(item.BossInformationId.ToString());
                 }
             }
 
