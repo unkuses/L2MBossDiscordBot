@@ -99,6 +99,13 @@ namespace BossBot
             await Task.Delay(1000 * 60);
             while (true)
             {
+                var now = _dateTimeHelper.CurrentTime;
+                var nextRun = now.Date.AddHours(9);
+                if (now > nextRun)
+                    nextRun = nextRun.AddDays(1);
+
+                var delay = nextRun - now;
+                await Task.Delay(delay);
                 try
                 {
                     await GetAllDailyEvents();
@@ -107,13 +114,6 @@ namespace BossBot
                 {
                     await _logger.WriteLog($"Daily job error: {ex.Message}");
                 }
-                var now = _dateTimeHelper.CurrentTime;
-                var nextRun = now.Date.AddHours(9);
-                if (now > nextRun)
-                    nextRun = nextRun.AddDays(1);
-
-                var delay = nextRun - now;
-                await Task.Delay(delay);
             }
         }
 
@@ -149,8 +149,8 @@ namespace BossBot
         {
             while (true)
             {
-                var postponeBosses = new List<BossModel>();// await _cosmoDb.GetAndUpdateAllPostponeBossesAsync();
-                var appendBosses = new List<BossModel>(); //await _cosmoDb.GetAllAppendingBossesAsync();
+                var postponeBosses = await _cosmoDb.GetAndUpdateAllPostponeBossesAsync();
+                var appendBosses = await _cosmoDb.GetAllAppendingBossesAsync();
                 var upcomingEvents = _bossData.GetAllEvents();
                 if (postponeBosses.Count > 0)
                 {
