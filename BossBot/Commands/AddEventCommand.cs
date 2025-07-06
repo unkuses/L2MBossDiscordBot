@@ -43,7 +43,7 @@ public class AddEventCommand(BossData bossData, DateTimeHelper dateTimeHelper) :
             return false; // Notification time cannot be negative
         }
 
-        var eventName = string.Join(" ", commands.Skip(i + 1));
+        var eventName = string.Join(" ", commands.Skip(i));
         if (string.IsNullOrWhiteSpace(eventName))
         {
             return false; // Event name cannot be empty
