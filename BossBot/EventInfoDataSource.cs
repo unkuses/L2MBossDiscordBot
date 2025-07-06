@@ -12,7 +12,7 @@ public class EventInfoDataSource : DbContext
     {
         var folder = Environment.SpecialFolder.LocalApplicationData;
         var path = Environment.GetFolderPath(folder);
-        _dbPath = Path.Join(path, "EventInformation.db");
+        _dbPath = Path.Join(path, "Events.db");
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)

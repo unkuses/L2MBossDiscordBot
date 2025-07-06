@@ -48,10 +48,10 @@ namespace BossBot
 
         public List<EventInformationDBModel> GetAllEvents()
         {
-            var todayEvents = _eventInfoData.EventInformationDbModels.ToList().Where(e => IsCurrentDay(e.Days) && EventIsSoon(e.Time, e.Id, e.TimeBeforeNotification))
+            var todayEvents = _eventInfoData.EventInformationDbModels.ToList().Where(e => IsCurrentDay(e.Days) && EventIsSoon(e.Time, e.EventNumber, e.TimeBeforeNotification))
                 .ToList();
             var oneTimeEvents = _eventInfoData.EventInformationDbModels.ToList()
-                .Where(e => e.IsOneTimeEvent && e.Time.Date == _dateTimeHelper.CurrentTime.Date && EventIsSoon(e.Time, e.Id, e.TimeBeforeNotification))
+                .Where(e => e.IsOneTimeEvent && e.Time.Date == _dateTimeHelper.CurrentTime.Date && EventIsSoon(e.Time, e.EventNumber, e.TimeBeforeNotification))
                 .ToList();
             _eventInfoData.EventInformationDbModels.RemoveRange(oneTimeEvents);
             _eventInfoData.SaveChanges();
@@ -85,16 +85,31 @@ namespace BossBot
             return true;
         }
 
+        public int LastEventNumber() =>
+            _eventInfoData.EventInformationDbModels.OrderBy(e => e.EventNumber).LastOrDefault()?.EventNumber ?? 0;
+
         public bool RemoveEventById(int eventId)
         {
-            var eventInfo = _eventInfoData.EventInformationDbModels.FirstOrDefault(e => e.Id == eventId);
+            var eventInfo = _eventInfoData.EventInformationDbModels.FirstOrDefault(e => e.EventNumber == eventId);
             if (eventInfo != null)
             {
                 _eventInfoData.EventInformationDbModels.Remove(eventInfo);
                 _eventInfoData.SaveChanges();
+                ReassignAllEventIds();
                 return true;
             }
             return false; // Event not found
+        }
+
+        public void ReassignAllEventIds()
+        {
+            var events = _eventInfoData.EventInformationDbModels.OrderBy(e => e.EventNumber).ToList();
+            var newId = 1;
+            foreach (var ev in events)
+            {
+                ev.EventNumber = newId++;
+            }
+            _eventInfoData.SaveChanges();
         }
 
         private bool IsCurrentDay(RepeatDays days)

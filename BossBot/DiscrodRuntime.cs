@@ -9,6 +9,7 @@ using Discord.WebSocket;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Threading.Channels;
 
 namespace BossBot
 {
@@ -23,6 +24,7 @@ namespace BossBot
         private readonly List<ICommand> _commands = [];
         private readonly List<ICommand> _eventCommands = [];
         private readonly Logger _logger = new();
+        private readonly OpenAIService _openAiService;
 
         public DiscordRuntime(Options? options)
         {
@@ -30,13 +32,8 @@ namespace BossBot
             _dateTimeHelper = new DateTimeHelper(_options.TimeZone);
             _cosmoDb = new CosmoDb(_dateTimeHelper, _options.CosmoDbUrl, _options.CosmoDbKey);
             _bossData = new BossData(_options, _dateTimeHelper);
+            _openAiService = new OpenAIService(_options, _dateTimeHelper);
             _client = new DiscordSocketClient();
-
-            var s = (int)_dateTimeHelper.CurrentTime.DayOfWeek;
-
-            var days = RepeatDays.Su;
-            var today = _dateTimeHelper.CurrentTime.DayOfWeek;
-            var tr =  days.HasFlag((RepeatDays)(1 << (int)today));
 
             _client.MessageReceived += Discord_MessageReceived;
             _client.Log += Client_Log;
@@ -294,9 +291,27 @@ namespace BossBot
         {
             var content = message.Content;
             if (!content.StartsWith("!"))
+            {
+                await OpenAiEventMessage(message, channel, content);
                 return;
+            }
 
             var messageParts = content.Remove(0, 1).Split(' ');
+            if (messageParts.Any())
+            {
+                var command = _eventCommands.FirstOrDefault(c => c.Keys.Contains(messageParts[0].ToLower()));
+                if (command == null)
+                    return;
+                var result = await command.ExecuteAsync(channel.Id, message.Author.Id, messageParts);
+                await ProcessAnswers(channel, [.. result]);
+            }
+        }
+
+        private async Task OpenAiEventMessage(IMessage message, ISocketMessageChannel channel, string text)
+        {
+            var commandText = await _openAiService.GetEventResponseAsync(text);
+
+            var messageParts = commandText.Split(' ');
             if (messageParts.Any())
             {
                 var command = _eventCommands.FirstOrDefault(c => c.Keys.Contains(messageParts[0].ToLower()));

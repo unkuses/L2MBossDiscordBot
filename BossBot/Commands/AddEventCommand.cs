@@ -56,7 +56,8 @@ public class AddEventCommand(BossData bossData, DateTimeHelper dateTimeHelper) :
             Days = days,
             ChatId = chatId,
             IsOneTimeEvent = days == RepeatDays.None,
-            TimeBeforeNotification = timeBeforeNotification
+            TimeBeforeNotification = timeBeforeNotification,
+            EventNumber = bossData.LastEventNumber() + 1
         };
         return bossData.AddEvent(eventInfo);
     }
