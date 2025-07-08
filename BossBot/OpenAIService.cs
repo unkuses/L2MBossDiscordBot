@@ -73,7 +73,7 @@ public class OpenAIService
             ChatMessage.CreateSystemMessage("for all Time provide information format: HH:mm"),
             ChatMessage.CreateSystemMessage("Try to add always provide NextRespawnTime information hrs and minutes"), 
             ChatMessage.CreateSystemMessage($"Boss list information: {bossListJson}"),
-            ChatMessage.CreateSystemMessage($"Current Data: {_dateTimeHelper.CurrentTime.ToLongDateString()}"),
+            ChatMessage.CreateSystemMessage($"Current Data: {_dateTimeHelper.CurrentTime:F}"),
             ChatMessage.CreateAssistantMessage(prompt)
         ];
 
