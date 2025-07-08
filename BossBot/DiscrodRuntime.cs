@@ -6,6 +6,7 @@ using CommonLib.Models;
 using CommonLib.Requests;
 using Discord;
 using Discord.WebSocket;
+using Microsoft.Azure.Cosmos.Serialization.HybridRow;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -32,7 +33,7 @@ namespace BossBot
             _dateTimeHelper = new DateTimeHelper(_options.TimeZone);
             _cosmoDb = new CosmoDb(_dateTimeHelper, _options.CosmoDbUrl, _options.CosmoDbKey);
             _bossData = new BossData(_options, _dateTimeHelper);
-            _openAiService = new OpenAIService(_options, _dateTimeHelper);
+            _openAiService = new OpenAIService(_options, _cosmoDb, _dateTimeHelper);
             _client = new DiscordSocketClient();
 
             _client.MessageReceived += Discord_MessageReceived;
@@ -268,7 +269,10 @@ namespace BossBot
             foreach (var line in lines)
             {
                 if (!line.StartsWith("!"))
+                {
+                    await OpenAiBossMessage(message, channel, line);
                     continue;
+                }
 
                 var messageParts = line.Remove(0, 1).Split(' ');
                 if (messageParts.Any())
@@ -305,6 +309,12 @@ namespace BossBot
                 var result = await command.ExecuteAsync(channel.Id, message.Author.Id, messageParts);
                 await ProcessAnswers(channel, [.. result]);
             }
+        }
+
+        private async Task OpenAiBossMessage(IMessage message, ISocketMessageChannel channel, string text)
+        {
+            var result = await _openAiService.GetBossResponseAsync(message.Channel.Id, text);
+            await ProcessAnswers(channel, [result]);
         }
 
         private async Task OpenAiEventMessage(IMessage message, ISocketMessageChannel channel, string text)
