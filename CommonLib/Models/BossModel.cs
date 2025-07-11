@@ -18,6 +18,6 @@ public class BossModel(BossDbModel model)
     public double RespawnTime { get; } = model.RespawnTime;
     public bool PurpleDrop { get; } = model.PurpleDrop;
     public DateTime KillTime { get; }
-
+    public string Location { get; } = model.Location;
     public DateTime NextRespawnTime => KillTime.AddHours(RespawnTime);
 }

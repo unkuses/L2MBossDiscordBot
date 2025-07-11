@@ -11,10 +11,11 @@ public class SetUserTimeZoneCommand(BossData bossData) : ICommand
         var stringBuilders = new List<StringBuilder>();
         var statusBuilder = new StringBuilder();
         stringBuilders.Add(statusBuilder);
-        var timeZoneName = commands.Where(s => s != "tz").ToList();
-        var timeZone = TimeZoneInfo.FindSystemTimeZoneById(string.Join(" ", timeZoneName));
+        var tzList = commands.Where(s => s != "tz").ToList();
+        var timeZoneId = string.Join(" ", tzList);
+        var timeZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
         statusBuilder.AppendLine(timeZone != null
-            ? bossData.SetUserTimeZone(userId, timeZone.StandardName)
+            ? bossData.SetUserTimeZone(userId, timeZoneId)
             : "Incorrect format");
 
         return Task.FromResult(stringBuilders.Select(s => s.ToString()));
