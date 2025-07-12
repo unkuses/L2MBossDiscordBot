@@ -1,10 +1,12 @@
 ﻿using BossBot.DBModel;
 using BossBot.Interfaces;
+using BossBot.Model;
 using CommonLib.Helpers;
+using Newtonsoft.Json;
 
 namespace BossBot.Commands;
 
-public class AddEventCommand(BossData bossData, DateTimeHelper dateTimeHelper) : ICommand
+public class AddEventCommand(BossData bossData, DateTimeHelper dateTimeHelper) : IEventCommand
 {
     const string TimeFormat = "MM/dd:HH:mm";
     public string[] Keys { get; } = ["add", "добавить", "a", "д"];
@@ -13,6 +15,23 @@ public class AddEventCommand(BossData bossData, DateTimeHelper dateTimeHelper) :
         if (AddNewEvent(commands, chatId))
             return ["New event added successfully."];
         return ["Failed to add new event. Please check the command format."];
+    }
+
+    public async Task<IEnumerable<string>> ExecuteAsync(ulong chatId, ulong userId, string jsonCommand)
+    {
+        var model = JsonConvert.DeserializeObject<EventModel<AddEventModel>>(jsonCommand);
+        var eventInfo = new EventInformationDBModel
+        {
+            EventName = model.EventCommand.Description,
+            Time = model.EventCommand.Time,
+            Days = model.EventCommand.RepeatAt,
+            ChatId = chatId,
+            IsOneTimeEvent = model.EventCommand.RepeatAt == RepeatDays.None,
+            TimeBeforeNotification = model.EventCommand.TimeBeforeNotification,
+            EventNumber = bossData.LastEventNumber() + 1
+        };
+        bossData.AddEvent(eventInfo);
+        return ["New event added successfully."];
     }
 
     private bool AddNewEvent(string[] commands, ulong chatId)

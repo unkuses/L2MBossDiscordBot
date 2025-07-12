@@ -6,9 +6,12 @@ using CommonLib.Models;
 using CommonLib.Requests;
 using Discord;
 using Discord.WebSocket;
+using Newtonsoft.Json;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using BossBot.Model;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace BossBot
 {
@@ -21,7 +24,7 @@ namespace BossBot
         private readonly Dictionary<ulong, DateTimeOffset> _lastReadMessage = new();
         private readonly DateTimeHelper _dateTimeHelper;
         private readonly List<ICommand> _commands = [];
-        private readonly List<ICommand> _eventCommands = [];
+        private readonly List<IEventCommand> _eventCommands = [];
         private readonly Logger _logger = new();
         private readonly OpenAIService _openAiService;
 
@@ -318,15 +321,10 @@ namespace BossBot
         {
             var commandText = await _openAiService.GetEventResponseAsync(text);
 
-            var messageParts = commandText.Split(' ');
-            if (messageParts.Any())
-            {
-                var command = _eventCommands.FirstOrDefault(c => c.Keys.Contains(messageParts[0].ToLower()));
-                if (command == null)
-                    return;
-                var result = await command.ExecuteAsync(channel.Id, message.Author.Id, messageParts);
-                await ProcessAnswers(channel, [.. result]);
-            }
+            var eventModel = JsonConvert.DeserializeObject<EventCommandModel>(commandText);
+            var eventCommand = _eventCommands.FirstOrDefault(c => c.Keys.Contains(eventModel.Event.ToString().ToLower()));
+            var result = await eventCommand.ExecuteAsync(channel.Id, message.Author.Id, commandText);
+            await ProcessAnswers(channel, [.. result]);
         }
 
         private Task ProcessAnswers(ISocketMessageChannel channel, List<string> answers)

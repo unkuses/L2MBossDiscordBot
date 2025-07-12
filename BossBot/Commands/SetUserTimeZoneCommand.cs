@@ -5,7 +5,7 @@ namespace BossBot.Commands;
 
 public class SetUserTimeZoneCommand(BossData bossData) : ICommand
 {
-    public string[] Keys { get; } = new[] { "tz" };
+    public string[] Keys { get; } = ["tz"];
     public Task<IEnumerable<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands)
     {
         var stringBuilders = new List<StringBuilder>();

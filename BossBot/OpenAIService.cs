@@ -1,10 +1,8 @@
 ﻿using System.Text.Json;
 using Azure;
 using Azure.AI.OpenAI;
-using Azure.AI.OpenAI.Chat;
 using OpenAI.Chat;
 using CommonLib.Helpers;
-using Discord.Rest;
 
 namespace BossBot;
 
@@ -27,16 +25,9 @@ public class OpenAIService
         // Create a list of chat messages
         List<ChatMessage> messagesQueue =
         [
-            ChatMessage.CreateSystemMessage(@"Response only in given format:
-                                                         Days should be in format: Mon, Tue, Wed, Thu, Fri, Sat, Sun
-                                                         If user want to add event for days: add Days Hours:Minutes Event Message
-                                                         If user want to add event on specific date: add Month/Day:Hours:Minutes Event Message
-                                                         If want to remove event: remove Event Number
-                                                         If want to see all exist events: all"),
-
-            ChatMessage.CreateSystemMessage($"Current Data: {_dateTimeHelper.CurrentTime.ToLongDateString()}"),
             ChatMessage.CreateAssistantMessage(prompt)
         ];
+        messagesQueue.AddRange(CreateSystemMessageForEvent());
 
         try
         {
@@ -53,6 +44,34 @@ public class OpenAIService
 
         return string.Empty;
     }
+
+    private List<ChatMessage> CreateSystemMessageForEvent() =>
+        [
+            ChatMessage.CreateSystemMessage(@"Response only in Json"),
+            ChatMessage.CreateSystemMessage(@"Event json {
+                                                                  ""Event"": ""Add"",
+                                                                  ""EventCommand"": ""/add_event""
+                                                                }"),
+            ChatMessage.CreateSystemMessage("Event can be: Add, Remove, All"),
+            ChatMessage.CreateSystemMessage(@"EventCommand - One of the fallowing object in JSON format"),
+            ChatMessage.CreateSystemMessage(@"RepeatAt is Day when to repeat : None = 0,
+                                                                    Sun = 1 << 0, // Sunday
+                                                                    Mon = 1 << 1, // Monday
+                                                                    Tue = 1 << 2, // Tuesday
+                                                                    Wed = 1 << 3, // Wednesday
+                                                                    Thu = 1 << 4, // Thursday
+                                                                    Fri = 1 << 5, // Friday
+                                                                    Sat = 1 << 6  // Saturday"),
+            ChatMessage.CreateSystemMessage(@"TimeBeforeNotification: time before notification should show, default 10."),
+            ChatMessage.CreateSystemMessage(@"If user want to add new event use format: {
+                                                                                                  ""RepeatAt"": ""Mon,Wed,Fri"",
+                                                                                                  ""Time"": ""2025-07-12T14:30:00"",
+                                                                                                  ""Description"": ""Recurring event on Monday, Wednesday, and Friday"",
+                                                                                                  ""TimeBeforeNotification"": 15
+                                                                                                }"),
+            ChatMessage.CreateSystemMessage(@"If user want to remove event: { ""EventNumber"": 123"), 
+            ChatMessage.CreateSystemMessage($"Current Data: {_dateTimeHelper.CurrentTime.ToLongDateString()}"),
+        ];
 
     public async Task<string> GetBossResponseAsync(ulong chatId, string prompt)
     {
