@@ -6,11 +6,9 @@ using CommonLib.Models;
 using CommonLib.Requests;
 using Discord;
 using Discord.WebSocket;
-using Microsoft.Azure.Cosmos.Serialization.HybridRow;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using System.Threading.Channels;
 
 namespace BossBot
 {
@@ -258,9 +256,15 @@ namespace BossBot
                 if (image.ContentType.StartsWith("image/"))
                 {
                     var result = await ProcessImage(image.Url, channel.Id, timeZone);
-                    ProcessAnswers(channel, [result]);
+                    _ = ProcessAnswers(channel, [result]);
                     return;
                 }
+            }
+
+            if (message.MentionedUserIds.Contains(_client.CurrentUser.Id))
+            {
+                _ = OpenAiBossMessage(message, channel, message.Content);
+                return;
             }
 
             var content = message.Content;
@@ -268,12 +272,6 @@ namespace BossBot
             var answers = new List<string>();
             foreach (var line in lines)
             {
-                if (!line.StartsWith("!"))
-                {
-                    await OpenAiBossMessage(message, channel, line);
-                    continue;
-                }
-
                 var messageParts = line.Remove(0, 1).Split(' ');
                 if (messageParts.Any())
                 {
@@ -293,14 +291,13 @@ namespace BossBot
 
         private async Task ProcessEventMessages(IMessage message, ISocketMessageChannel channel)
         {
-            var content = message.Content;
-            if (!content.StartsWith("!"))
+            if (message.MentionedUserIds.Contains(_client.CurrentUser.Id))
             {
-                await OpenAiEventMessage(message, channel, content);
+                await OpenAiEventMessage(message, channel, message.Content);
                 return;
             }
 
-            var messageParts = content.Remove(0, 1).Split(' ');
+            var messageParts = message.Content.Remove(0, 1).Split(' ');
             if (messageParts.Any())
             {
                 var command = _eventCommands.FirstOrDefault(c => c.Keys.Contains(messageParts[0].ToLower()));
@@ -361,7 +358,7 @@ namespace BossBot
                 var jsonPayload = JsonSerializer.Serialize(requestData);
 
                 using var httpClient = new HttpClient();
-                var response = await httpClient.PostAsync(_options.ImageAnalysisUrl, new StringContent(jsonPayload, Encoding.UTF8, "application/json"));
+                var response = await httpClient.PostAsync("http://localhost:7112/api/ParseImageByUrl", new StringContent(jsonPayload, Encoding.UTF8, "application/json"));
                 response.EnsureSuccessStatusCode();
                 var responseContent = await response.Content.ReadAsStringAsync();
                 return responseContent;
