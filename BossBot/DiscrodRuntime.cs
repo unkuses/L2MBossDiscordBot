@@ -240,14 +240,12 @@ namespace BossBot
             if (message.Content == null)
                 return;
 
-            if(channel.Name == _options.ChatName)
-            {
-                await ProcessBossMessages(message, channel, timeZone);
-            }
-            else if (channel.Name == _options.ChatEvent)
+            if (channel.Name == _options.ChatEvent)
             {
                 await ProcessEventMessages(message, channel);
             }
+            
+            await ProcessBossMessages(message, channel, timeZone);
         }
 
         private async Task ProcessBossMessages(IMessage message, ISocketMessageChannel channel, string timeZone)
