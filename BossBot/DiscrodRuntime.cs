@@ -8,7 +8,6 @@ using Discord;
 using Discord.WebSocket;
 using Newtonsoft.Json;
 using System.Text;
-using System.Text.Json;
 using System.Text.RegularExpressions;
 using BossBot.Model;
 using JsonSerializer = System.Text.Json.JsonSerializer;
@@ -27,6 +26,7 @@ namespace BossBot
         private readonly List<IEventCommand> _eventCommands = [];
         private readonly Logger _logger = new();
         private readonly OpenAIService _openAiService;
+        private readonly RegisterChatCommand _registerChatCommand;
 
         public DiscordRuntime(Options? options)
         {
@@ -52,6 +52,7 @@ namespace BossBot
                 new AdenBossCommand(_cosmoDb, _dateTimeHelper),
                 new OrenBossCommand(_cosmoDb, _dateTimeHelper),
                 new SetUserTimeZoneCommand(_bossData),
+                new UnregisterChatCommand(_bossData, _cosmoDb)
             ]);
             _eventCommands.AddRange(
             [
@@ -59,6 +60,8 @@ namespace BossBot
                 new RemoveEventCommand(_bossData),
                 new GetAllEventsCommand(_bossData),
             ]);
+
+            _registerChatCommand = new RegisterChatCommand(_bossData);
         }
 
         private async Task Client_LoggedIn() => await _logger.WriteLog("LoggedIn");
@@ -244,8 +247,15 @@ namespace BossBot
             {
                 await ProcessEventMessages(message, channel);
             }
-            
-            await ProcessBossMessages(message, channel, timeZone);
+            else if (_bossData.ChatIsRegistered(channel.Id))
+            {
+                await ProcessBossMessages(message, channel, timeZone);
+            }
+            else if (_registerChatCommand.Keys.Contains(message.Content.ToLower()))
+            {
+                var result = await _registerChatCommand.ExecuteAsync(channel.Id, message.Author.Id, [string.Empty]);
+                _ = ProcessAnswers(channel, result.ToList());
+            }
         }
 
         private async Task ProcessBossMessages(IMessage message, ISocketMessageChannel channel, string timeZone)

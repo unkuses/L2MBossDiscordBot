@@ -1,7 +1,7 @@
 ﻿using BossBot.DBModel;
 using Microsoft.EntityFrameworkCore;
 
-namespace BossBot;
+namespace BossBot.DataSource;
 
 public class EventInfoDataSource : DbContext
 {

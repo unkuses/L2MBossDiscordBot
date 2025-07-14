@@ -1,6 +1,6 @@
-﻿using BossBot.DBModel;
+﻿using BossBot.DataSource;
+using BossBot.DBModel;
 using CommonLib.Helpers;
-using Microsoft.EntityFrameworkCore;
 
 namespace BossBot
 {
@@ -8,6 +8,7 @@ namespace BossBot
     {
         private readonly BossDataSource _bossData = new();
         private readonly EventInfoDataSource _eventInfoData = new();
+        private readonly BossInfoChatsDataSource _bossInfoChatsData = new();
         private readonly List<int> _eventWasMentionToday = [];
         private readonly DateTimeHelper _dateTimeHelper;
 
@@ -15,6 +16,7 @@ namespace BossBot
         {
             _bossData.Database.EnsureCreated();
             _eventInfoData.Database.EnsureCreated();
+            _bossInfoChatsData.Database.EnsureCreated();
             MigrationEvent.Migration_1(_eventInfoData);
             _dateTimeHelper = dateTimeHelper;
         }
@@ -144,6 +146,30 @@ namespace BossBot
                 // Remove from mentioned list if time has passed or is not in window
                 _eventWasMentionToday.Remove(eventId);
                 return false;
+            }
+        }
+
+        public List<ulong> GetAllChatIds() =>
+            _bossInfoChatsData.BossBotChatsDbModels.Select(chat => chat.ChatId).ToList();
+
+        public bool ChatIsRegistered(ulong chatId) => _bossInfoChatsData.BossBotChatsDbModels.Any(chat => chat.ChatId == chatId);
+
+        public void RegisterChat(ulong chatId)
+        {
+            if (!ChatIsRegistered(chatId))
+            {
+                _bossInfoChatsData.BossBotChatsDbModels.Add(new BossBotChatsDBModel { ChatId = chatId });
+                _bossInfoChatsData.SaveChanges();
+            }
+        }
+
+        public void UnregisterChat(ulong chatId)
+        {
+            var chat = _bossInfoChatsData.BossBotChatsDbModels.FirstOrDefault(c => c.ChatId == chatId);
+            if (chat != null)
+            {
+                _bossInfoChatsData.BossBotChatsDbModels.Remove(chat);
+                _bossInfoChatsData.SaveChanges();
             }
         }
     }

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using BossBot.DataSource;
+using Microsoft.EntityFrameworkCore;
 
 namespace BossBot;
 
