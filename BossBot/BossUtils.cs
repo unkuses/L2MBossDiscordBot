@@ -19,12 +19,13 @@ public static class BossUtils
         else
         {
             var maxLength = models.Max(x => x.NickName.Length);
-            for(var i = 0;i < models.Count; ++i)
+            for(var i = 0;i < models.Count;)
             {
                 var followingBosses = FollowingBosses(models, i);
                 if (followingBosses < 5)
                 {
                     PopulateString(builders, ref stringBuilder, CreateBossInfoString(dateTimeHelper, models[i], maxLength));
+                    i++;
                 }
                 else
                 {   
