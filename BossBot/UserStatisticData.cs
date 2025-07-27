@@ -47,7 +47,7 @@ public class UserStatisticData
         return false;
     }
     public List<UserStatisticDBModel> GetUserStatistics(ulong chatId) =>
-        _userStatisticDataSource.UserInfo.Where(u => u.ChatId == chatId).ToList();
+        _userStatisticDataSource.UserInfo.Where(u => u.ChatId == chatId).OrderBy(u => u.Count).ToList();
 
     private void RebuildUserIds()
     {
