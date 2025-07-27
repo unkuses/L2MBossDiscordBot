@@ -4,7 +4,7 @@ using BossBot.Model;
 using CommonLib.Helpers;
 using Newtonsoft.Json;
 
-namespace BossBot.Commands;
+namespace BossBot.Commands.Event;
 
 public class AddEventCommand(BossData bossData, DateTimeHelper dateTimeHelper) : IEventCommand
 {
@@ -49,7 +49,7 @@ public class AddEventCommand(BossData bossData, DateTimeHelper dateTimeHelper) :
         }
         i++;
 
-        if (Int32.TryParse(commands[i], out var timeBeforeNotification))
+        if (int.TryParse(commands[i], out var timeBeforeNotification))
         {
             i++;
         }

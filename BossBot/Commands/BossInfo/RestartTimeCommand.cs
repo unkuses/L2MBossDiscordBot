@@ -3,38 +3,38 @@ using System.Text;
 using CommonLib.Helpers;
 using CommonLib.Models;
 
-namespace BossBot.Commands
+namespace BossBot.Commands.BossInfo
 {
     public class RestartTimeCommand(CosmoDb bossData, DateTimeHelper dateTimeHelper) : ICommand
     {
         public string[] Keys { get; } = ["r", "р"];
 
-        public async Task<IEnumerable<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands)
+        public async Task<List<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands)
         {
             var list = new List<string>();
             if (commands.Length is 1 or > 3)
             {
                 list.Add("Не правильный формат");
-                return list.Select(s => s);
+                return list;
             }
             var time = commands.Length == 2 ? dateTimeHelper.ParseCommand(commands[1]) : dateTimeHelper.ParseCommand(commands[1], commands[2]);
             if (!time.HasValue)
             {
                 list.Add("Не правильный формат");
-                return list.Select(s => s);
+                return list;
             }
 
             await bossData.PredictedTimeAfterRestartAsync(chatId, time);
             return await GetBossInformation(chatId);
         }
 
-        private async Task<IEnumerable<string>> GetBossInformation(ulong chatId)
+        private async Task<List<string>> GetBossInformation(ulong chatId)
         {
             var bosses = await bossData.GetAllLoggedBossInfoAsync(chatId);
             return await PopulateBossInformationString(bosses);
         }
 
-        private Task<IEnumerable<string>> PopulateBossInformationString(IList<BossModel> models)
+        private Task<List<string>> PopulateBossInformationString(IList<BossModel> models)
         {
             List<StringBuilder> builders = new();
             var stringBuilder = new StringBuilder();
@@ -55,7 +55,7 @@ namespace BossBot.Commands
                 stringBuilder.AppendLine(str);
             }
 
-            return Task.FromResult(builders.Select(b => b.ToString()));
+            return Task.FromResult(builders.Select(b => b.ToString()).ToList());
         }
     }
 }

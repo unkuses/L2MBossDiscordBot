@@ -1,6 +1,8 @@
 ﻿using BossBot.Commands;
 using BossBot.DBModel;
 using BossBot.Interfaces;
+using BossBot.Model;
+using BossBot.Service;
 using CommonLib.Helpers;
 using CommonLib.Models;
 using CommonLib.Requests;
@@ -9,7 +11,8 @@ using Discord.WebSocket;
 using Newtonsoft.Json;
 using System.Text;
 using System.Text.RegularExpressions;
-using BossBot.Model;
+using BossBot.Commands.BossInfo;
+using BossBot.Commands.Event;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace BossBot
@@ -27,10 +30,12 @@ namespace BossBot
         private readonly Logger _logger = new();
         private readonly OpenAIService _openAiService;
         private readonly RegisterChatCommand _registerChatCommand;
+        private readonly ActivityService _activityService;
 
         public DiscordRuntime(Options? options)
         {
             _options = options;
+            _activityService = new ActivityService(_options);
             _dateTimeHelper = new DateTimeHelper(_options.TimeZone);
             _cosmoDb = new CosmoDb(_dateTimeHelper, _options.CosmoDbUrl, _options.CosmoDbKey);
             _bossData = new BossData(_options, _dateTimeHelper);
@@ -243,6 +248,10 @@ namespace BossBot
             if (message.Content == null)
                 return;
 
+            if(channel.Name == "активность")             
+            {
+                await ProcessActivityMessage(message, channel);
+            } else
             if (channel.Name == _options.ChatEvent)
             {
                 await ProcessEventMessages(message, channel);
@@ -300,6 +309,26 @@ namespace BossBot
             }
         }
 
+        private async Task ProcessActivityMessage(IMessage message, ISocketMessageChannel channel)
+        {
+            if (message.Attachments.Any())
+            {
+                var image = message.Attachments.First();
+                if (image.ContentType.StartsWith("image/"))
+                {
+                    var result = _activityService.AddUser(channel.Id, image.Url);
+                    _ = ProcessAnswers(channel, [result]);
+                    return;
+                }
+            }
+            else
+            {
+                var result = _activityService.CommandResponse(message.Content, channel.Id, message.Author.Id);
+                _ = ProcessAnswers(channel, result);
+                return;
+            }
+        }
+
         private async Task ProcessEventMessages(IMessage message, ISocketMessageChannel channel)
         {
             if (message.MentionedUserIds.Contains(_client.CurrentUser.Id))
@@ -335,20 +364,20 @@ namespace BossBot
             await ProcessAnswers(channel, [.. result]);
         }
 
-        private Task ProcessAnswers(ISocketMessageChannel channel, List<string> answers)
+        private async Task ProcessAnswers(ISocketMessageChannel channel, List<string> answers)
         {
             var builder = new StringBuilder();
             foreach (var answer in answers)
             {
                 if (builder.Length + answer.Length > 2000)
                 {
-                    channel.SendMessageAsync(builder.ToString());
+                    await channel.SendMessageAsync(builder.ToString());
                     builder.Clear();
                 }
 
                 builder.AppendLine(answer);
             }
-            return channel.SendMessageAsync(builder.ToString());
+            await channel.SendMessageAsync(builder.ToString());
         }
 
         private async Task<string> ProcessImage(string url, ulong chatId, string timeZone)

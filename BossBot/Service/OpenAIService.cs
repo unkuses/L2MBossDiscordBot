@@ -4,7 +4,7 @@ using Azure.AI.OpenAI;
 using OpenAI.Chat;
 using CommonLib.Helpers;
 
-namespace BossBot;
+namespace BossBot.Service;
 
 public class OpenAIService
 {

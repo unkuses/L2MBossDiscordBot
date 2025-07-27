@@ -2,7 +2,7 @@
 using BossBot.Model;
 using Newtonsoft.Json;
 
-namespace BossBot.Commands;
+namespace BossBot.Commands.Event;
 
 public class RemoveEventCommand(BossData bossData) : IEventCommand
 {

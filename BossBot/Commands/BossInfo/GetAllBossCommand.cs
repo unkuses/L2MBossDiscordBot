@@ -1,7 +1,7 @@
 ﻿using BossBot.Interfaces;
 using CommonLib.Helpers;
 
-namespace BossBot.Commands;
+namespace BossBot.Commands.BossInfo;
 
 public class GetAllBossCommand(CosmoDb bossData, DateTimeHelper dateTimeHelper) : ICommand
 {
@@ -10,7 +10,7 @@ public class GetAllBossCommand(CosmoDb bossData, DateTimeHelper dateTimeHelper) 
         "l", "л"
     ]; 
     
-    public Task<IEnumerable<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands)
+    public Task<List<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands)
     {
         if (commands.Length == 1 || !int.TryParse(commands[1], out var count))
         {
@@ -22,13 +22,13 @@ public class GetAllBossCommand(CosmoDb bossData, DateTimeHelper dateTimeHelper) 
         }
     }
 
-    private async Task<IEnumerable<string>> GetBossInformation(ulong chatId)
+    private async Task<List<string>> GetBossInformation(ulong chatId)
     {
         var bosses = await bossData.GetAllLoggedBossInfoAsync(chatId);
         return await BossUtils.PopulateBossInformationString(bosses, dateTimeHelper);
     }
 
-    private async Task<IEnumerable<string>> GetFirstLoggedBossInfo(ulong chatId, int count)
+    private async Task<List<string>> GetFirstLoggedBossInfo(ulong chatId, int count)
     {
         if (count <= 0)
         {

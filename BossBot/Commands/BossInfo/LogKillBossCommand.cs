@@ -2,13 +2,13 @@
 using System.Text;
 using CommonLib.Helpers;
 
-namespace BossBot.Commands
+namespace BossBot.Commands.BossInfo
 {
     public class LogKillBossCommand(CosmoDb bossData, DateTimeHelper dateTimeHelper) : ICommand
     {
         public string[] Keys { get; } = ["k", "к"];
 
-        public async Task<IEnumerable<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands)
+        public async Task<List<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands)
         {
             List<StringBuilder> stringBuilders = [];
             var sb = new StringBuilder();
@@ -55,7 +55,7 @@ namespace BossBot.Commands
                 }
             }
 
-            return stringBuilders.Select(s => s.ToString());
+            return stringBuilders.Select(s => s.ToString()).ToList();
         }
     }
 }

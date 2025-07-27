@@ -2,19 +2,19 @@
 using System.Text;
 using CommonLib.Models;
 
-namespace BossBot.Commands
+namespace BossBot.Commands.BossInfo
 {
     public class GetBossListWithKillTimeCommand(CosmoDb bossData) : ICommand
     {
         public string[] Keys { get; } = ["kl"];
 
-        public async Task<IEnumerable<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands) =>
+        public async Task<List<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands) =>
             await GetAllBossStatus(await bossData.GetAllLoggedBossInfoAsync(chatId));
 
-        private Task<IEnumerable<string>> GetAllBossStatus(IList<BossModel> models)
+        private Task<List<string>> GetAllBossStatus(IList<BossModel> models)
         {
             var stringBuilders = new List<StringBuilder>();
-            StringBuilder statusBuilder = new StringBuilder();
+            var statusBuilder = new StringBuilder();
             stringBuilders.Add(statusBuilder);
             foreach (var model in models)
             {
@@ -27,7 +27,7 @@ namespace BossBot.Commands
                 statusBuilder.AppendLine(str);
             }
 
-            return Task.FromResult(stringBuilders.Select(s => s.ToString()));
+            return Task.FromResult(stringBuilders.Select(s => s.ToString()).ToList());
         }
     }
 }

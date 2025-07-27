@@ -1,6 +1,6 @@
 ﻿using BossBot.Interfaces;
 
-namespace BossBot.Commands;
+namespace BossBot.Commands.Event;
 
 public class GetAllEventsCommand(BossData bossData) : IEventCommand
 {

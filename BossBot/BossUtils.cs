@@ -6,7 +6,7 @@ namespace BossBot;
 
 public static class BossUtils
 {
-    public static Task<IEnumerable<string>> PopulateBossInformationString(IList<BossModel> models,
+    public static Task<List<string>> PopulateBossInformationString(IList<BossModel> models,
         DateTimeHelper dateTimeHelper)
     {
         List<StringBuilder> builders = [];
@@ -51,7 +51,7 @@ public static class BossUtils
             }
         }
 
-        return Task.FromResult(builders.Select(b => b.ToString()));
+        return Task.FromResult(builders.Select(b => b.ToString()).ToList());
     }
 
     private static int FollowingBosses(IList<BossModel> models, int currentModel)

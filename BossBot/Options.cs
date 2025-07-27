@@ -1,6 +1,6 @@
 ﻿namespace BossBot
 {
-    public class Options(string chatName, string botToken, string imageAnalysisURL, string cosmoDbUrl, string cosmoDbKey, string chatEvent, string openAIEndpoint, string openAIKey, string timeZone = "Russian Standard Time")
+    public class Options(string chatName, string botToken, string imageAnalysisURL, string imageStatisticAnalysisUrl, string cosmoDbUrl, string cosmoDbKey, string chatEvent, string openAIEndpoint, string openAIKey, string timeZone = "Russian Standard Time")
     {
         public string ChatName { get; set; } = chatName;
 
@@ -11,6 +11,8 @@
         public string TimeZone { get; set; } = timeZone;
 
         public string ImageAnalysisUrl { get; set; } = imageAnalysisURL;
+
+        public string ImageStatisticAnalysisUrl { get; set; } = imageStatisticAnalysisUrl;
 
         public string CosmoDbUrl { get; set; } = cosmoDbUrl;
 

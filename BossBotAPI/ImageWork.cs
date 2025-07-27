@@ -30,6 +30,27 @@ namespace BossBotAPI
             return await ProcessImageInternal(null, image, chatId, timeZone);
         }
 
+        public async Task<List<string>> GetBossStatistic(string url)
+        {
+            var result = await ReadTextAzure(url);
+            var users = new List<string>();
+            var isUser = false;
+            foreach (var r in result)
+            {
+                if (int.TryParse(r.Replace(",", ""), out _) || r.Equals("loot", StringComparison.CurrentCultureIgnoreCase) ||
+                    r.Equals("получить", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    isUser = true;
+                }
+                else if (isUser && r.Length >= 3)
+                {
+                    users.Add(r);
+                    isUser = false;
+                }
+            }
+            return users;
+        }
+
         private async Task<string> ProcessImageInternal(string? url, byte[]? image, ulong chatId, string timeZone)
         {
             // Read text from Azure using the appropriate input (URL or byte array)
@@ -53,15 +74,13 @@ namespace BossBotAPI
             return stringBuilder.ToString();
         }
 
-        private async Task<List<string>> ReadTextAzure(string url)
-        {
-            return await ReadTextAzureInternal(new Uri(url), null);
-        }
+        private Task<List<string>> ReadTextAzure(string url) =>
+            ReadTextAzureInternal(new Uri(url), null);
+        
 
-        private async Task<List<string>> ReadTextAzure(byte[] image)
-        {
-            return await ReadTextAzureInternal(null, BinaryData.FromBytes(image));
-        }
+        private Task<List<string>> ReadTextAzure(byte[] image) =>
+            ReadTextAzureInternal(null, BinaryData.FromBytes(image));
+        
 
         private async Task<List<string>> ReadTextAzureInternal(Uri? url, BinaryData? imageData)
         {
