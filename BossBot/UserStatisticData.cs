@@ -64,6 +64,20 @@ public class UserStatisticData
         return _userStatisticDataSource.SaveChanges() > 0;
     }
 
+    public bool MergeUsers(ulong chatId, int firstUserId, int secondUserId)
+    {
+        var firstUser = _userStatisticDataSource.UserInfo.FirstOrDefault(u => u.UserId == firstUserId && u.ChatId == chatId);
+        var secondUser = _userStatisticDataSource.UserInfo.FirstOrDefault(u => u.UserId == secondUserId && u.ChatId == chatId);
+        if (firstUser == null || secondUser == null)
+            return false;
+        firstUser.Count += secondUser.Count;
+        _userStatisticDataSource.UserInfo.Remove(secondUser);
+        _userStatisticDataSource.UserInfo.Update(firstUser);
+        _userStatisticDataSource.SaveChanges();
+        RebuildUserIds();
+        return true;
+    }
+
     private void RebuildUserIds()
     {
         var newId = 1;
