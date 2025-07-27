@@ -12,7 +12,7 @@ public class UserStatisticData
     }
     public void AddUserStatistic(ulong chatId, string userName)
     {
-        var user = _userStatisticDataSource.UserInfo.FirstOrDefault(u => u.UserName.Equals(userName, StringComparison.CurrentCultureIgnoreCase) && u.ChatId == chatId);
+        var user = _userStatisticDataSource.UserInfo.FirstOrDefault(u => u.UserName.ToLower() == userName.ToLower() && u.ChatId == chatId);
         if (user != null)
         {
             user.Count++;
