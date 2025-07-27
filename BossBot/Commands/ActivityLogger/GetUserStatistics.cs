@@ -18,7 +18,7 @@ public class GetUserStatistics(UserStatisticData userStatisticData) : ICommand
         usersInfo.ForEach(u =>
         {
             
-            var str = $"{StringHelper.PopulateWithWhiteSpaces(u.UserId.ToString(), 2)} | {StringHelper.PopulateWithWhiteSpaces(u.UserName, maxUserNameLength)} | {u.Count}";
+            var str = $"{StringHelper.PopulateWithWhiteSpaces(u.UserId.ToString(), 2)} | {u.UserName} | {u.Count}";
             if ((result.Length + str.Length) > 2000)
             {
                 result = new StringBuilder();

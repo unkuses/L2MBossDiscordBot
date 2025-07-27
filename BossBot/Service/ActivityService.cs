@@ -16,6 +16,7 @@ public class ActivityService
         _commands.Add(new GetUserStatistics(_userStatisticData));
         _commands.Add(new RemoveUserCommand(_userStatisticData));
         _commands.Add(new RegisterUser(_userStatisticData));
+        _commands.Add(new MergeUsersCommand(_userStatisticData));
     }
 
     public List<string> CommandResponse(string command, ulong chatId, ulong userId)
