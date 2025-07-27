@@ -12,19 +12,20 @@ public class UserStatisticData
     }
     public void AddUserStatistic(ulong chatId, string userName)
     {
-        var user = _userStatisticDataSource.UserInfo.FirstOrDefault(u => u.UserName.ToLower() == userName.ToLower() && u.ChatId == chatId);
-        if (user != null)
+        var users = _userStatisticDataSource.UserInfo.Where(u => u.ChatId == chatId);
+        foreach (var user in users)
         {
-            user.Count++;
-            _userStatisticDataSource.UserInfo.Update(user);
-            _userStatisticDataSource.SaveChanges();
+            if (user.UserName.Equals(userName, StringComparison.CurrentCultureIgnoreCase))
+            {
+                user.Count++;
+                _userStatisticDataSource.UserInfo.Update(user);
+                _userStatisticDataSource.SaveChanges();
+                return;
+            }
         }
-        else
-        {
-            var count = _userStatisticDataSource.UserInfo.Count() + 1;
-            _userStatisticDataSource.UserInfo.Add(new UserStatisticDBModel() { ChatId = chatId, Count = 1, UserName = userName, UserId = count});
-            _userStatisticDataSource.SaveChanges();
-        }
+        var count = _userStatisticDataSource.UserInfo.Count() + 1;
+        _userStatisticDataSource.UserInfo.Add(new UserStatisticDBModel() { ChatId = chatId, Count = 1, UserName = userName, UserId = count });
+        _userStatisticDataSource.SaveChanges();
     }
 
     public bool ClearAllInformation(ulong chatId)
