@@ -9,7 +9,7 @@ public class RegisterUser(UserStatisticData userStatisticData) : ICommand
     {
         var userName = commands[1];
         var count = 1;
-        if (commands.Length >= 2)
+        if (commands.Length >= 3)
         {
             int.TryParse(commands[2], out count);
         }

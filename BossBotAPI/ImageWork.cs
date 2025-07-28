@@ -30,26 +30,7 @@ namespace BossBotAPI
             return await ProcessImageInternal(null, image, chatId, timeZone);
         }
 
-        public async Task<List<string>> GetBossStatistic(string url)
-        {
-            var result = await ReadTextAzure(url);
-            var users = new List<string>();
-            var isUser = false;
-            foreach (var r in result)
-            {
-                if (int.TryParse(r.Replace(",", ""), out _) || r.Equals("loot", StringComparison.CurrentCultureIgnoreCase) ||
-                    r.Equals("получить", StringComparison.CurrentCultureIgnoreCase))
-                {
-                    isUser = true;
-                }
-                else if (isUser && r.Length >= 3)
-                {
-                    users.Add(r);
-                    isUser = false;
-                }
-            }
-            return users;
-        }
+        public Task<List<string>> GetBossStatistic(string url) => ReadTextAzure(url);
 
         private async Task<string> ProcessImageInternal(string? url, byte[]? image, ulong chatId, string timeZone)
         {

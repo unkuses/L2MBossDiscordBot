@@ -14,16 +14,10 @@ public class UserStatisticData
     public void AddUserStatistic(ulong chatId, string userName)
     {
         var user = FindUserByName(chatId, userName);
-        if (user != null)
-        {
-            user.Count++;
-            _userStatisticDataSource.UserInfo.Update(user);
-            _userStatisticDataSource.SaveChanges();
-            return;
-        }
-
-        var count = _userStatisticDataSource.UserInfo.Count() + 1;
-        _userStatisticDataSource.UserInfo.Add(new UserStatisticDBModel() { ChatId = chatId, Count = 1, UserName = userName, UserId = count });
+        if (user == null) return;
+        
+        user.Count++;
+        _userStatisticDataSource.UserInfo.Update(user);
         _userStatisticDataSource.SaveChanges();
     }
 
