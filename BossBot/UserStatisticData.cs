@@ -11,14 +11,15 @@ public class UserStatisticData
         _userStatisticDataSource.Database.EnsureCreated();
     }
 
-    public void AddUserStatistic(ulong chatId, string userName)
+    public UserStatisticDBModel AddUserStatistic(ulong chatId, string userName)
     {
         var user = FindUserByName(chatId, userName);
-        if (user == null) return;
+        if (user == null) return null;
         
         user.Count++;
         _userStatisticDataSource.UserInfo.Update(user);
         _userStatisticDataSource.SaveChanges();
+        return user;
     }
 
     public bool ClearAllInformation(ulong chatId)

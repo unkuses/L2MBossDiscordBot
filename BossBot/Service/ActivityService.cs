@@ -29,9 +29,6 @@ public class ActivityService
         return cmd != null ? cmd.ExecuteAsync(chatId, userId, commandParts).Result.ToList() : ["Комманда не найдена"];
     }
 
-    public string AddUser(ulong chatId, string url)
-    {
-        _addUserCommand.ExecuteAsync(chatId, url).Wait();
-        return "Статистика Обновлена";
-    }
+    public Task<List<string>> AddUser(ulong chatId, string url) 
+        => _addUserCommand.ExecuteAsync(chatId, url);
 }

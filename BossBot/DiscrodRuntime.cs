@@ -316,8 +316,8 @@ namespace BossBot
                 var image = message.Attachments.First();
                 if (image.ContentType.StartsWith("image/"))
                 {
-                    var result = _activityService.AddUser(channel.Id, image.Url);
-                    _ = ProcessAnswers(channel, [result]);
+                    var result = await _activityService.AddUser(channel.Id, image.Url);
+                    _ = ProcessAnswers(channel, result);
                     return;
                 }
             }
