@@ -171,6 +171,7 @@ public class CosmoDb
             bossInfoList.AddRange(response);
         }
 
+        CleanMentionedBossesList();
         // Process each boss information
         foreach (var info in bossInfoList)
         {
@@ -399,18 +400,16 @@ public class CosmoDb
         return result;
     }
 
+    private void CleanMentionedBossesList()
+    {
+        var list = _mentionedBosses.Where(kvp => kvp.Value < _dateTimeHelper.CurrentTime).ToList();
+        list.ForEach(id => _mentionedBosses.Remove(id.Key));
+    }
+
     private bool BossWasMentioned(BossInformationDbModel boss)
     {
-        
         if(_mentionedBosses.ContainsKey(boss.id))
         {
-            if (_mentionedBosses[boss.id] < _dateTimeHelper.CurrentTime)
-                return true;
-            if (_mentionedBosses[boss.id] >= _dateTimeHelper.CurrentTime)
-            {
-                _mentionedBosses.Remove(boss.id);
-                return true;
-            }
             return true;
         }
         _mentionedBosses.Add(boss.id, boss.NextRespawnTime);
