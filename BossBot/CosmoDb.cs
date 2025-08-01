@@ -174,7 +174,7 @@ public class CosmoDb
         // Process each boss information
         foreach (var info in bossInfoList)
         {
-            if (info.NextRespawnTime < _dateTimeHelper.CurrentTime.AddMinutes(5) &&
+            if (info.NextRespawnTime < _dateTimeHelper.CurrentTime.AddMinutes(5) && info.NextRespawnTime < _dateTimeHelper.CurrentTime &&
                 !BossWasMentioned(info))
             {
                 list.Add(new BossModel(info));
