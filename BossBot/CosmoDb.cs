@@ -404,7 +404,7 @@ public class CosmoDb
         
         if(_mentionedBosses.ContainsKey(boss.id))
         {
-            if (_mentionedBosses[boss.id] < _dateTimeHelper.CurrentTime)
+            if (_mentionedBosses[boss.id] > _dateTimeHelper.CurrentTime)
             {
                 _mentionedBosses[boss.id] = boss.NextRespawnTime;
                 return false;
