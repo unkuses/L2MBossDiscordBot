@@ -120,7 +120,7 @@ public class RuntimeService(CosmoDb cosmoDb, BossData bossData, DiscordClientSer
             foreach (var i in dictionary.Keys)
             {
                 var builder = new StringBuilder();
-                builder.AppendLine("@here Боссы были обновлены");
+                builder.AppendLine("Боссы были обновлены");
                 foreach (var item in dictionary[i])
                 {
                     var nextRespawnTime = item.KillTime.AddHours(item.RespawnTime);
