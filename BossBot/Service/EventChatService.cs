@@ -52,6 +52,8 @@ public class EventChatService
             return;
         }
 
+        if (message.Content == null || !message.Content.StartsWith('!'))
+            return;
         var messageParts = message.Content.Remove(0, 1).Split(' ');
         if (messageParts.Any())
         {

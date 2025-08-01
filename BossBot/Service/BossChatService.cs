@@ -100,6 +100,8 @@ public class BossChatService
         var answers = new List<string>();
         foreach (var line in lines)
         {
+            if (!line.StartsWith('!'))
+                continue;
             var messageParts = line.Remove(0, 1).Split(' ');
             if (messageParts.Any())
             {

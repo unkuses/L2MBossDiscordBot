@@ -93,7 +93,7 @@ public class CosmoDb
             var response = await loggedBossIdsIterator.ReadNextAsync();
             foreach (var item in response)
             {
-                loggedBossIds.Add(item.BossInformationId);
+                loggedBossIds.Add(item.BossInformationId.ToString());
             }
         }
 
@@ -404,10 +404,12 @@ public class CosmoDb
         
         if(_mentionedBosses.ContainsKey(boss.id))
         {
-            if (_mentionedBosses[boss.id] > _dateTimeHelper.CurrentTime)
+            if (_mentionedBosses[boss.id] < _dateTimeHelper.CurrentTime)
+                return true;
+            if (_mentionedBosses[boss.id] >= _dateTimeHelper.CurrentTime)
             {
-                _mentionedBosses[boss.id] = boss.NextRespawnTime;
-                return false;
+                _mentionedBosses.Remove(boss.id);
+                return true;
             }
             return true;
         }
