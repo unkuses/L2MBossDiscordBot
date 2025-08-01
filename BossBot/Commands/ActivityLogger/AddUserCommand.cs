@@ -2,11 +2,12 @@
 using System.Text;
 using System.Text.Json;
 using BossBot.DBModel;
+using BossBot.Options;
 using BossBot.Utils;
 
 namespace BossBot.Commands.ActivityLogger;
 
-public class AddUserCommand(Options options, UserStatisticData userStatisticData)
+public class AddUserCommand(BotOptions options, UserStatisticData userStatisticData)
 {
     public async Task<List<string>> ExecuteAsync(ulong chatId, string url)
     {

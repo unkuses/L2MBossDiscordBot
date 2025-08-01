@@ -51,12 +51,15 @@ namespace BossBotAPI
                             .Any(b => b.BossNames
                                 .Any(name => lines[i].Contains(name.Name, StringComparison.CurrentCultureIgnoreCase)));
 
-                        if (isNextBoss || i == lines.Count - 1)
+                        if ((isNextBoss || i == lines.Count - 1) && dateTimes.Any())
                         {
                             // Log the kill information and add it to the result
                             var bossModel = await LogKillBossInformationAsync(chatId, boss.Id, dateTimes.Min(), wasMentioned);
                             dateTimes.Clear();
-                            bossInfo.Add(bossModel);
+                            if (bossModel != null)
+                            {
+                                bossInfo.Add(bossModel);
+                            }
 
                             i--; // Step back to reprocess the current line in the outer loop
                             break;
@@ -77,7 +80,7 @@ namespace BossBotAPI
             return bossInfo;
         }
 
-        public async Task<BossModel> LogKillBossInformationAsync(ulong chatId, string bossId, DateTime time, bool wasMentioned)
+        public async Task<BossModel?> LogKillBossInformationAsync(ulong chatId, string bossId, DateTime time, bool wasMentioned)
         {
             var container = _cosmosClient.GetContainer(DatabaseId, "BossInformation");
             var boss = await GetBossModelByIdAsync(bossId);
@@ -110,9 +113,13 @@ namespace BossBotAPI
             }
             else
             {
-                bossInfo.KillTime = time;
-                bossInfo.NextRespawnTime = time.AddHours(boss.RespawnTime);
-                await container.ReplaceItemAsync(bossInfo, bossInfo.id, new PartitionKey(bossInfo.BossInformationId));
+                if (bossInfo.KillTime != time)
+                {
+                    bossInfo.KillTime = time;
+                    bossInfo.NextRespawnTime = time.AddHours(boss.RespawnTime);
+                    await container.ReplaceItemAsync(bossInfo, bossInfo.id,
+                        new PartitionKey(bossInfo.BossInformationId));
+                }
             }
 
             return new BossModel(bossInfo);

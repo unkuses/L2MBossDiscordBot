@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using Azure;
 using Azure.AI.OpenAI;
+using BossBot.Options;
 using OpenAI.Chat;
 using CommonLib.Helpers;
 
@@ -11,7 +12,7 @@ public class OpenAIService
     private readonly ChatClient _chatClient;
     private readonly DateTimeHelper _dateTimeHelper;
     private readonly CosmoDb _cosmoDb;
-    public OpenAIService(Options options, CosmoDb cosmoDb, DateTimeHelper dateTimeHelper)
+    public OpenAIService(BotOptions options, CosmoDb cosmoDb, DateTimeHelper dateTimeHelper)
     {
         _dateTimeHelper = dateTimeHelper;
         _cosmoDb = cosmoDb;

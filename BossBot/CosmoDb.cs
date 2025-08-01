@@ -1,4 +1,5 @@
-﻿using CommonLib;
+﻿using BossBot.Options;
+using CommonLib;
 using CommonLib.DBModels;
 using CommonLib.Helpers;
 using CommonLib.Models;
@@ -13,12 +14,12 @@ public class CosmoDb
     private const string ContainerId = "BossTables";
     private readonly CosmosClient _cosmosClient;
     private readonly DateTimeHelper _dateTimeHelper;
-    private readonly List<string> _mentionedBosses = [];
+    private readonly Dictionary<string, DateTime> _mentionedBosses = [];
 
-    public CosmoDb(DateTimeHelper dateTimeHelper, string endpoint, string accountKey)
+    public CosmoDb(DateTimeHelper dateTimeHelper, CosmoDbOptions options)
     {
         _dateTimeHelper = dateTimeHelper;
-        var builder = new CosmosClientBuilder(endpoint, accountKey);
+        var builder = new CosmosClientBuilder(options.Endpoint, options.AccountKey);
         _cosmosClient = builder.Build();
 
         _ = PopulateTableAsync();
@@ -41,29 +42,6 @@ public class CosmoDb
                 await container.DeleteItemAsync<BossInformationDbModel>(item.id, new PartitionKey(item.BossInformationId));
             }
         }
-    }
-
-    public async Task<IList<BossModel>> GetAllBossesByLocationAsync(ulong chatId, string location)
-    {
-        var container = _cosmosClient.GetContainer(DatabaseId, "BossInformation");
-        var query = new QueryDefinition(
-                "SELECT * FROM c WHERE c.ChatId = @chatId AND c.Boss.Location = @location")
-            .WithParameter("@chatId", chatId)
-            .WithParameter("@location", location);
-
-        var iterator = container.GetItemQueryIterator<BossInformationDbModel>(query);
-        var bossModels = new List<BossModel>();
-
-        while (iterator.HasMoreResults)
-        {
-            var response = await iterator.ReadNextAsync();
-            foreach (var bossInfo in response)
-            {
-                bossModels.Add(new BossModel(bossInfo));
-            }
-        }
-
-        return bossModels;
     }
 
     public async Task<IList<BossModel>> GetAllLoggedBossInfoAsync(ulong chatId)
@@ -92,20 +70,6 @@ public class CosmoDb
     public async Task<IList<BossModel>> GetFirstLoggedBossInfoAsync(ulong chatId, int count)
     {
         var bossModels = await GetChainBosses(chatId, count);
-        //var container = _cosmosClient.GetContainer(DatabaseId, "BossInformation");
-        //var query = new QueryDefinition(
-        //        "SELECT * FROM c WHERE c.ChatId = @chatId ORDER BY c.NextRespawnTime ASC OFFSET 0 LIMIT @count")
-        //    .WithParameter("@chatId", chatId)
-        //    .WithParameter("@count", count);
-
-        //var iterator = container.GetItemQueryIterator<BossInformationDbModel>(query);
-        //var bossModels = new List<BossModel>();
-
-        //while (iterator.HasMoreResults)
-        //{
-        //    var response = await iterator.ReadNextAsync();
-        //    bossModels.AddRange(response.Select(bossInfo => new BossModel(bossInfo)));
-        //}
 
         return bossModels
             .OrderBy(b => b.KillTime.AddHours(b.RespawnTime))
@@ -183,7 +147,6 @@ public class CosmoDb
         {
             bossInfo.KillTime = bossInfo.KillTime.AddHours(bossInfo.Boss.RespawnTime);
             bossInfo.NextRespawnTime = bossInfo.KillTime.AddHours(bossInfo.Boss.RespawnTime);
-            _mentionedBosses.Remove(bossInfo.id);
 
             // Update the item in Cosmos DB
             await container.ReplaceItemAsync(bossInfo, bossInfo.id, new PartitionKey(bossInfo.BossInformationId));
@@ -211,10 +174,9 @@ public class CosmoDb
         // Process each boss information
         foreach (var info in bossInfoList)
         {
-            if (info.KillTime.AddHours(info.Boss.RespawnTime) < _dateTimeHelper.CurrentTime.AddMinutes(5) &&
-                !_mentionedBosses.Contains(info.id))
+            if (info.NextRespawnTime < _dateTimeHelper.CurrentTime.AddMinutes(5) &&
+                !BossWasMentioned(info))
             {
-                _mentionedBosses.Add(info.id);
                 list.Add(new BossModel(info));
             }
         }
@@ -435,5 +397,21 @@ public class CosmoDb
         }
 
         return result;
+    }
+
+    private bool BossWasMentioned(BossInformationDbModel boss)
+    {
+        
+        if(_mentionedBosses.ContainsKey(boss.id))
+        {
+            if (_mentionedBosses[boss.id] < _dateTimeHelper.CurrentTime)
+            {
+                _mentionedBosses[boss.id] = boss.NextRespawnTime;
+                return false;
+            }
+            return true;
+        }
+        _mentionedBosses.Add(boss.id, boss.NextRespawnTime);
+        return false;
     }
 }

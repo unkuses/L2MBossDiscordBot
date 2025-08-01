@@ -1,13 +1,16 @@
-﻿using System.Diagnostics;
+﻿using CommonLib.Requests;
+using System.Diagnostics;
 using System.Drawing;
-using System.Runtime.InteropServices;
-using System.Text.Json;
-using System.Text;
-using CommonLib.Requests;
 using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Text.Json;
 
 class Program
 {
+    [DllImport("user32.dll")]
+    private static extern uint GetDpiForWindow(IntPtr hWnd);
+
     [DllImport("user32.dll")]
     private static extern IntPtr GetForegroundWindow();
 
@@ -58,6 +61,19 @@ class Program
         }
     }
 
+    private static void SaveScreenshot(Bitmap? screenshot)
+    {
+        if (screenshot == null)
+        {
+            Console.WriteLine("No screenshot taken.");
+            return;
+        }
+        var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+        var fileName = $"C:\\test\\screenshot_{timestamp}.png";
+        screenshot.Save(fileName, ImageFormat.Png);
+        Console.WriteLine($"Screenshot saved as {fileName}");
+    }
+
     private static byte[] BitmapToByteArray(Bitmap bitmap)
     {
         using var memoryStream = new MemoryStream();
@@ -79,9 +95,15 @@ class Program
 
             if (GetWindowRect(hWnd, out RECT rect))
             {
-                // Calculate the width and height of the window
-                int width = rect.Right - rect.Left + 525;
-                int height = rect.Bottom - rect.Top + 400;
+                // Get DPI and scale factor
+                uint dpi = GetDpiForWindow(hWnd);
+                double scale = dpi / 96.0;
+
+                // Calculate scaled coordinates and size
+                int left = (int)(rect.Left * scale);
+                int top = (int)(rect.Top * scale);
+                int width = (int)((rect.Right - rect.Left) * scale);
+                int height = (int)((rect.Bottom - rect.Top) * scale);
 
                 if (width <= 0 || height <= 0)
                 {
@@ -89,13 +111,12 @@ class Program
                     return null;
                 }
 
-                // Create a bitmap with the correct dimensions
                 var bitmap = new Bitmap(width, height);
                 using var graphics = Graphics.FromImage(bitmap);
 
                 graphics.CopyFromScreen(
-                    rect.Left + 525,
-                    rect.Top + 200,
+                    left,
+                    top,
                     0,
                     0,
                     new Size(width, height),

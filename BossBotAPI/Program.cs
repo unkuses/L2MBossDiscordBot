@@ -1,5 +1,6 @@
 using BossBotAPI;
 using CommonLib.Helpers;
+using CommonLib.Options;
 using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -13,7 +14,8 @@ builder.ConfigureFunctionsWebApplication();
 //     .AddApplicationInsightsTelemetryWorkerService()
 //     .ConfigureFunctionsApplicationInsights();
 
-builder.Services.AddSingleton(_ => new DateTimeHelper(builder.Configuration["TimeZone"]));
+builder.Services.AddSingleton(new DateTimeHelperOptions() { TimeZone = builder.Configuration["TimeZone"] });
+builder.Services.AddSingleton<DateTimeHelper>();
 builder.Services.AddSingleton(provider =>
 {
     var imageAnalyzeUrl = builder.Configuration["ImageAnalyzeUrl"];

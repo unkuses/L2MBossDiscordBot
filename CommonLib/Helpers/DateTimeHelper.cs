@@ -1,10 +1,11 @@
 ﻿using System.Globalization;
+using CommonLib.Options;
 
 namespace CommonLib.Helpers;
 
-public class DateTimeHelper(string timeZone)
+public class DateTimeHelper(DateTimeHelperOptions options)
 {
-    private TimeZoneInfo TimeZoneInfo { get; } = TimeZoneInfo.FindSystemTimeZoneById(timeZone);
+    private TimeZoneInfo TimeZoneInfo { get; } = TimeZoneInfo.FindSystemTimeZoneById(options.TimeZone);
     public DateTime CurrentTime => TimeZoneInfo.ConvertTime(DateTime.UtcNow, TimeZoneInfo);
 
     public DateTime? ParseCommand(params string[] command)

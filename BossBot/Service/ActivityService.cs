@@ -1,5 +1,8 @@
 ﻿using BossBot.Commands.ActivityLogger;
 using BossBot.Interfaces;
+using BossBot.Options;
+using Discord;
+using Discord.WebSocket;
 
 namespace BossBot.Service;
 
@@ -7,16 +10,55 @@ public class ActivityService
 {
     private readonly List<ICommand> _commands = [];
     private readonly AddUserCommand _addUserCommand;
-    private readonly UserStatisticData _userStatisticData = new ();
+    private readonly UserStatisticData _userStatisticData;
+    private readonly DiscordClientService _discordClientService;
 
-    public ActivityService(Options options)
+    public ActivityService(BotOptions options, 
+        DiscordClientService discordClientService,
+        UserStatisticData userStatisticData,
+        AddUserCommand addUserCommand,
+        ClearAllStatistic clearAllStatistic,
+        GetUserStatistics getUserStatistics,
+        RemoveUserCommand removeUserCommand,
+        RegisterUser registerUser,
+        MergeUsersCommand mergeUsersCommand)
     {
-        _addUserCommand = new AddUserCommand(options, _userStatisticData);
-        _commands.Add(new ClearAllStatistic(_userStatisticData));
-        _commands.Add(new GetUserStatistics(_userStatisticData));
-        _commands.Add(new RemoveUserCommand(_userStatisticData));
-        _commands.Add(new RegisterUser(_userStatisticData));
-        _commands.Add(new MergeUsersCommand(_userStatisticData));
+        _discordClientService = discordClientService;
+        _discordClientService.MessageReceivedEvent += async (sender, args) =>
+        {
+            await ProcessMessage(args.Item1, args.Item2);
+        };
+
+        _addUserCommand = addUserCommand;
+        _userStatisticData = userStatisticData;
+        _commands.Add(clearAllStatistic);
+        _commands.Add(getUserStatistics);
+        _commands.Add(removeUserCommand);
+        _commands.Add(registerUser);
+        _commands.Add(mergeUsersCommand);
+    }
+
+    private async Task ProcessMessage(IMessage message, ISocketMessageChannel channel)
+    {
+        if (message.Content == null || channel.Name != "активность")
+            return;
+
+        if (message.Attachments.Any())
+        {
+            var image = message.Attachments.First();
+            if (image.ContentType.StartsWith("image/"))
+            {
+                var result = await AddUser(channel.Id, image.Url);
+                _ = _discordClientService.ProcessAnswers(channel, result);
+                return;
+            }
+        }
+        else
+        {
+            var result = CommandResponse(message.Content, channel.Id, message.Author.Id);
+            _ = _discordClientService.ProcessAnswers(channel, result);
+            return;
+        }
     }
 
     public List<string> CommandResponse(string command, ulong chatId, ulong userId)
