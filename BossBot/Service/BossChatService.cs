@@ -44,7 +44,7 @@ public class BossChatService
         _openAiService = openAiService;
         _discordClientService.MessageReceivedEvent += async (sender, args) =>
         {
-            var timeZone = _bossData.GetUserTimeZone(args.Item2.Id);
+            var timeZone = bossData.GetUserTimeZone(args.Item1.Author.Id);
             await ProcessMessage(args.Item1, args.Item2, timeZone);
         };
         _commands.Add(clearBossCommand);
