@@ -120,13 +120,13 @@ public class RuntimeService(CosmoDb cosmoDb, BossData bossData, DiscordClientSer
             foreach (var i in dictionary.Keys)
             {
                 var builder = new StringBuilder();
-                builder.AppendLine("Боссы были обновлены");
+                builder.AppendLine("Время респавна боссов были обновлены");
                 foreach (var item in dictionary[i])
                 {
                     var nextRespawnTime = item.KillTime.AddHours(item.RespawnTime);
                     var timeToRespawn = nextRespawnTime - dateTimeHelper.CurrentTime;
                     builder.AppendLine(
-                        $"**{StringHelper.PopulateWithWhiteSpaces(item.Id, 2)}**|{nextRespawnTime:HH:mm}|**{item.NickName.ToUpper()}**| через {timeToRespawn.ToString(@"hh\:mm")} | {item.Chance} {BossUtils.GetChanceStatus(item.Chance)}{BossUtils.AppendEggPlant(item.PurpleDrop)}");
+                        $"Босс убит **{item.Id}** **{item.NickName.ToUpper()}** респавн {nextRespawnTime:HH:mm} через {timeToRespawn.ToString(@"hh\:mm")}");
                 }
 
                 var channel = discordClientService.GetChannel(i);

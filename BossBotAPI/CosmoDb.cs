@@ -117,6 +117,7 @@ namespace BossBotAPI
                 {
                     bossInfo.KillTime = time;
                     bossInfo.NextRespawnTime = time.AddHours(boss.RespawnTime);
+                    bossInfo.WasMentioned = wasMentioned;
                     await container.ReplaceItemAsync(bossInfo, bossInfo.id,
                         new PartitionKey(bossInfo.BossInformationId));
                 }
