@@ -404,7 +404,7 @@ public class CosmoDb
 
     private void CleanMentionedBossesList()
     {
-        var list = _mentionedBosses.Where(kvp => kvp.Value > _dateTimeHelper.CurrentTime).ToList();
+        var list = _mentionedBosses.Where(kvp => kvp.Value < _dateTimeHelper.CurrentTime).ToList();
         list.ForEach(id => _mentionedBosses.Remove(id.Key));
     }
 
