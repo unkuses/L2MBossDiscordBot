@@ -1,12 +1,13 @@
 ﻿using System.Text;
+using BossBot.Interfaces;
 using CommonLib.Helpers;
 using CommonLib.Models;
 
 namespace BossBot;
 
-public static class BossUtils
+public class BossUtils(ILanguage localization)
 {
-    public static Task<List<string>> PopulateBossInformationString(IList<BossModel> models,
+    public Task<List<string>> PopulateBossInformationString(ulong chatId, IList<BossModel> models,
         DateTimeHelper dateTimeHelper)
     {
         List<StringBuilder> builders = [];
@@ -14,7 +15,7 @@ public static class BossUtils
         builders.Add(stringBuilder);
         if (models.Count == 0)
         {
-            stringBuilder.AppendLine("Нет боссов в списке");
+            stringBuilder.AppendLine(localization.BossListEmpty(chatId));
         }
         else
         {
@@ -42,12 +43,12 @@ public static class BossUtils
 
                     var maxCount = bossLocation.Values.Max();
                     var maxLocations = bossLocation.First(l => l.Value == maxCount).Key;
-                    PopulateString(builders, ref stringBuilder, $"\r\n--------Начало ** {maxLocations} ** чейна--------");
+                    PopulateString(builders, ref stringBuilder, localization.ChainBeginAnnouncement(chatId, maxLocations));
                     foreach (var bossInfo in bossInfos)
                     {
                         PopulateString(builders, ref stringBuilder, bossInfo);
                     }
-                    PopulateString(builders, ref stringBuilder, "--------Конец чейна-------- \r\n");
+                    PopulateString(builders, ref stringBuilder, localization.ChainEndAnnouncement(chatId));
                 }
             }
         }

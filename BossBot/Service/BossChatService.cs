@@ -20,11 +20,13 @@ public class BossChatService
     private readonly DiscordClientService _discordClientService;
     private readonly OpenAIService _openAiService;
     private readonly Logger _logger;
+    private readonly ChatLanguageData _chatLanguageData;
 
     public BossChatService(BotOptions options,
         DiscordClientService discordClientService,
         BossData bossData,
         OpenAIService openAiService,
+        ChatLanguageData chatLanguageData,
         Logger logger,
         ClearBossCommand clearBossCommand, 
         GetAllBossCommand getAllBossCommand, 
@@ -35,12 +37,14 @@ public class BossChatService
         RestartTimeCommand restartTimeCommand,
         SetUserTimeZoneCommand setUserTimeZoneCommand,
         RegisterChatCommand registerChatCommand,
-        UnregisterChatCommand unregisterChatCommand) 
+        UnregisterChatCommand unregisterChatCommand,
+        ChatLanguageCommand chatLanguageCommand) 
     {
         _logger = logger;
         _options = options;
         _discordClientService = discordClientService;
         _bossData = bossData;
+        _chatLanguageData = chatLanguageData;
         _openAiService = openAiService;
         _discordClientService.MessageReceivedEvent += async (sender, args) =>
         {
@@ -56,6 +60,7 @@ public class BossChatService
         _commands.Add(restartTimeCommand);
         _commands.Add(setUserTimeZoneCommand);
         _commands.Add(unregisterChatCommand);
+        _commands.Add(chatLanguageCommand);
         _registerChatCommand = registerChatCommand;
     }
 
@@ -83,7 +88,7 @@ public class BossChatService
             var image = message.Attachments.First();
             if (image.ContentType.StartsWith("image/"))
             {
-                var result = await ProcessImage(image.Url, channel.Id, timeZone);
+                var result = await ProcessImage(image.Url, channel.Id, timeZone, _chatLanguageData.GetLanguage(channel.Id));
                 _ = _discordClientService.ProcessAnswers(channel, [result]);
                 return;
             }
@@ -125,7 +130,7 @@ public class BossChatService
         await _discordClientService.ProcessAnswers(channel, [result]);
     }
 
-    private async Task<string> ProcessImage(string url, ulong chatId, string timeZone)
+    private async Task<string> ProcessImage(string url, ulong chatId, string timeZone, string language)
     {
         try
         {
@@ -133,7 +138,8 @@ public class BossChatService
             {
                 Url = url,
                 ChatId = chatId,
-                TimeZone = timeZone
+                TimeZone = timeZone,
+                Language = language
             };
             var jsonPayload = JsonSerializer.Serialize(requestData);
 

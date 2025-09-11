@@ -3,7 +3,7 @@ using CommonLib.Helpers;
 
 namespace BossBot.Commands.BossInfo;
 
-public class GetAllBossCommand(CosmoDb bossData, DateTimeHelper dateTimeHelper) : ICommand
+public class GetAllBossCommand(CosmoDb bossData, DateTimeHelper dateTimeHelper, BossUtils bossUtils) : ICommand
 {
     public string[] Keys { get; } =
     [
@@ -25,7 +25,7 @@ public class GetAllBossCommand(CosmoDb bossData, DateTimeHelper dateTimeHelper) 
     private async Task<List<string>> GetBossInformation(ulong chatId)
     {
         var bosses = await bossData.GetAllLoggedBossInfoAsync(chatId);
-        return await BossUtils.PopulateBossInformationString(bosses, dateTimeHelper);
+        return await bossUtils.PopulateBossInformationString(chatId, bosses, dateTimeHelper);
     }
 
     private async Task<List<string>> GetFirstLoggedBossInfo(ulong chatId, int count)
@@ -36,6 +36,6 @@ public class GetAllBossCommand(CosmoDb bossData, DateTimeHelper dateTimeHelper) 
         }
 
         var bosses = await bossData.GetFirstLoggedBossInfoAsync(chatId, count);
-        return await BossUtils.PopulateBossInformationString(bosses, dateTimeHelper);
+        return await bossUtils.PopulateBossInformationString(chatId, bosses, dateTimeHelper);
     }
 }

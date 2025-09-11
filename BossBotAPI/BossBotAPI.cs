@@ -25,7 +25,7 @@ public class BossBotApi(ILogger<BossBotApi> logger, ImageWork imageWork)
                 return new BadRequestObjectResult("Invalid request. Please provide both TimeZone and Image.");
             }
 
-            var result = await imageWork.ProcessImage(requestData.Image, requestData.ChatId, requestData.TimeZone);
+            var result = await imageWork.ProcessImage(requestData.Image, requestData.ChatId, requestData.TimeZone, requestData.Language);
             return new OkObjectResult(result);
         }
         catch (Exception ex)
@@ -51,7 +51,7 @@ public class BossBotApi(ILogger<BossBotApi> logger, ImageWork imageWork)
                 return new BadRequestObjectResult("Invalid request. Please provide both TimeZone and Image.");
             }
 
-            var result = await imageWork.ProcessImageByUrl(requestData.Url, requestData.ChatId, requestData.TimeZone);
+            var result = await imageWork.ProcessImageByUrl(requestData.Url, requestData.ChatId, requestData.TimeZone, requestData.Language);
             // Log the received data
             logger.LogInformation($"Received TimeZone: {requestData.TimeZone}");
             logger.LogInformation($"Received Image url: {requestData.Url.Length}");

@@ -4,7 +4,7 @@ using CommonLib.Helpers;
 
 namespace BossBot.Commands.BossInfo
 {
-    public class LogKillBossCommand(CosmoDb bossData, DateTimeHelper dateTimeHelper) : ICommand
+    public class LogKillBossCommand(CosmoDb bossData, DateTimeHelper dateTimeHelper, ILanguage localization) : ICommand
     {
         public string[] Keys { get; } = ["k", "к"];
 
@@ -15,7 +15,7 @@ namespace BossBot.Commands.BossInfo
             stringBuilders.Add(sb);
             if (commands.Length is 1 or > 4)
             {
-                sb.AppendLine("Не правильный формат");
+                sb.AppendLine(localization.IncorrectFormat(chatId));
             }
             else
             {
@@ -35,7 +35,7 @@ namespace BossBot.Commands.BossInfo
 
                 if (!dateTime.HasValue)
                 {
-                    sb.AppendLine("Не правильный формат");
+                    sb.AppendLine(localization.IncorrectFormat(chatId));
                 }
 
                 if (dateTime > dateTimeHelper.CurrentTime.AddHours(1))
@@ -43,15 +43,14 @@ namespace BossBot.Commands.BossInfo
                 var boss = await bossData.LogKillBossInformationAsync(chatId, id, dateTime.Value);
                 if (boss == null)
                 {
-                    sb.AppendLine($"Босс с номером {id} не был найден");
+                    sb.AppendLine(localization.BossNotFound(chatId, id));
                 }
                 else
                 {
                     var nextRespawnTime = boss.KillTime.AddHours(boss.RespawnTime);
                     var timeToRespawn = nextRespawnTime - dateTimeHelper.CurrentTime;
 
-                    sb.AppendLine(
-                        $"Босс убит **{boss.Id}** **{boss.NickName.ToUpper()}** респавн {nextRespawnTime:HH:mm} через {timeToRespawn.ToString(@"hh\:mm")}");
+                    sb.AppendLine(localization.BossLogged(chatId, boss, nextRespawnTime, timeToRespawn));
                 }
             }
 

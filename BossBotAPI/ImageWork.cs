@@ -20,19 +20,19 @@ namespace BossBotAPI
             _imageAnalysisKey = imageAnalysisKey;
         }
 
-        public async Task<string> ProcessImageByUrl(string url, ulong chatId, string timeZone)
+        public async Task<string> ProcessImageByUrl(string url, ulong chatId, string timeZone, string localization)
         {
-            return await ProcessImageInternal(url, null, chatId, timeZone);
+            return await ProcessImageInternal(url, null, chatId, timeZone, localization);
         }
 
-        public async Task<string> ProcessImage(byte[] image, ulong chatId, string timeZone)
+        public async Task<string> ProcessImage(byte[] image, ulong chatId, string timeZone, string localization)
         {
-            return await ProcessImageInternal(null, image, chatId, timeZone);
+            return await ProcessImageInternal(null, image, chatId, timeZone, localization);
         }
 
         public Task<List<string>> GetBossStatistic(string url) => ReadTextAzure(url);
 
-        private async Task<string> ProcessImageInternal(string? url, byte[]? image, ulong chatId, string timeZone)
+        private async Task<string> ProcessImageInternal(string? url, byte[]? image, ulong chatId, string timeZone, string localization)
         {
             // Read text from Azure using the appropriate input (URL or byte array)
             var bossInformationList = url != null
@@ -48,8 +48,14 @@ namespace BossBotAPI
             {
                 var nextRespawnTime = bossModel.KillTime.AddHours(bossModel.RespawnTime);
                 var timeToRespawn = nextRespawnTime - _dateTimeHelper.CurrentTime;
-                stringBuilder.AppendLine(
-                    $"Босс убит **{bossModel.Id}** **{bossModel.NickName.ToUpper()}** респавн {nextRespawnTime:HH:mm} через {timeToRespawn:hh\\:mm}");
+                if (localization.ToLower() == "ua")
+                {
+                    stringBuilder.AppendLine(
+                        $"Боса вбито **{bossModel.Id}** **{bossModel.NickName.ToUpper()}** респавн {nextRespawnTime:HH:mm} через {timeToRespawn:hh\\:mm}");
+                }
+                else
+                    stringBuilder.AppendLine(
+                        $"Босс убит **{bossModel.Id}** **{bossModel.NickName.ToUpper()}** респавн {nextRespawnTime:HH:mm} через {timeToRespawn:hh\\:mm}");
             }
 
             return stringBuilder.ToString();

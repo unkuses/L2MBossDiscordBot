@@ -5,7 +5,7 @@ using CommonLib.Models;
 
 namespace BossBot.Commands.BossInfo
 {
-    public class RestartTimeCommand(CosmoDb bossData, DateTimeHelper dateTimeHelper) : ICommand
+    public class RestartTimeCommand(CosmoDb bossData, DateTimeHelper dateTimeHelper, ILanguage localization) : ICommand
     {
         public string[] Keys { get; } = ["r", "р"];
 
@@ -14,13 +14,13 @@ namespace BossBot.Commands.BossInfo
             var list = new List<string>();
             if (commands.Length is 1 or > 3)
             {
-                list.Add("Не правильный формат");
+                list.Add(localization.IncorrectFormat(chatId));
                 return list;
             }
             var time = commands.Length == 2 ? dateTimeHelper.ParseCommand(commands[1]) : dateTimeHelper.ParseCommand(commands[1], commands[2]);
             if (!time.HasValue)
             {
-                list.Add("Не правильный формат");
+                list.Add(localization.IncorrectFormat(chatId));
                 return list;
             }
 

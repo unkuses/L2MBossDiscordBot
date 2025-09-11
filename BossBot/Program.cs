@@ -2,10 +2,12 @@
 using BossBot.Commands.ActivityLogger;
 using BossBot.Commands.BossInfo;
 using BossBot.Commands.Event;
+using BossBot.Interfaces;
 using BossBot.Options;
 using BossBot.Service;
 using CommonLib.Helpers;
 using CommonLib.Options;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
@@ -15,16 +17,15 @@ namespace BossBot;
 internal class Program
 {
     private static async Task Main(string[] args)
-    {
+    {        
         var options = JsonConvert.DeserializeObject<BotOptions>(File.ReadAllText("Options.ini"));
 
-        if (options == null || string.IsNullOrWhiteSpace(options.BotToken) ||
-            string.IsNullOrWhiteSpace(options.ChatName))
+        if (options == null || string.IsNullOrWhiteSpace(options.BotToken))
         {
             Console.WriteLine("Cannot find options or they are empty");
             return;
         }
-        
+
         var builder = Host.CreateApplicationBuilder(args);
         builder.Services.AddSingleton(options);
         builder.Services.AddSingleton(new DateTimeHelperOptions() { TimeZone = options.TimeZone });
@@ -39,6 +40,9 @@ internal class Program
         builder.Services.AddSingleton<Logger>();
         builder.Services.AddSingleton<ActivityService>();
         builder.Services.AddSingleton<UserStatisticData>();
+        builder.Services.AddSingleton<ChatLanguageData>();
+        builder.Services.AddSingleton<BossUtils>();
+        builder.Services.AddSingleton<ILanguage, Service.Localization>();
 
         #region Commands
         builder.Services.AddSingleton<RegisterChatCommand>();
@@ -62,6 +66,7 @@ internal class Program
         builder.Services.AddSingleton<RegisterUser>();
         builder.Services.AddSingleton<MergeUsersCommand>();
         builder.Services.AddSingleton<UnregisterChatCommand>();
+        builder.Services.AddSingleton<ChatLanguageCommand>();
         #endregion
 
         var serviceProvider = builder.Services.BuildServiceProvider();

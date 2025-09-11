@@ -14,11 +14,11 @@ public class OpenAIService
     private readonly CosmoDb _cosmoDb;
     public OpenAIService(BotOptions options, CosmoDb cosmoDb, DateTimeHelper dateTimeHelper)
     {
-        _dateTimeHelper = dateTimeHelper;
-        _cosmoDb = cosmoDb;
-        var credential = new AzureKeyCredential(options.openAIKey);
-        var azureClient = new AzureOpenAIClient(new Uri(options.OpenAIEnpoint), credential);
-        _chatClient = azureClient.GetChatClient("o4-mini");
+        //_dateTimeHelper = dateTimeHelper;
+        //_cosmoDb = cosmoDb;
+        //var credential = new AzureKeyCredential(options.openAIKey);
+        //var azureClient = new AzureOpenAIClient(new Uri(options.OpenAIEnpoint), credential);
+        //_chatClient = azureClient.GetChatClient("o4-mini");
     }
 
     public async Task<string> GetEventResponseAsync(string prompt)

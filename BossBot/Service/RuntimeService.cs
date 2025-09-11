@@ -1,10 +1,11 @@
 ﻿using CommonLib.Helpers;
 using CommonLib.Models;
 using System.Text;
+using BossBot.Interfaces;
 
 namespace BossBot.Service;
 
-public class RuntimeService(CosmoDb cosmoDb, BossData bossData, DiscordClientService discordClientService, DateTimeHelper dateTimeHelper)
+public class RuntimeService(CosmoDb cosmoDb, BossData bossData, DiscordClientService discordClientService, DateTimeHelper dateTimeHelper, ILanguage localization)
 {
     public async Task MaintenanceTask()
     {
@@ -43,8 +44,8 @@ public class RuntimeService(CosmoDb cosmoDb, BossData bossData, DiscordClientSer
                 {
                     var nextRespawnTime = item.KillTime.AddHours(item.RespawnTime);
                     var timeToRespawn = nextRespawnTime - dateTimeHelper.CurrentTime;
-                    builder.AppendLine(
-                        $"Босс **{StringHelper.PopulateWithWhiteSpaces(item.Id, 2)}** **{item.NickName.ToUpper()}** не был залогирован. Новое время {nextRespawnTime:HH:mm} через {timeToRespawn.ToString(@"hh\:mm")}");
+                    builder.AppendLine(localization.BossNewTime(i, item.Id, item.NickName, nextRespawnTime,
+                        timeToRespawn));
                 }
 
                 var channel = discordClientService.GetChannel(i);
@@ -72,7 +73,7 @@ public class RuntimeService(CosmoDb cosmoDb, BossData bossData, DiscordClientSer
             foreach (var i in dictionary.Keys)
             {
                 var builder = new StringBuilder();
-                builder.AppendLine("@here Ближайшие боссы");
+                builder.AppendLine(localization.UpcomingBossesAnnouncement(i));
                 foreach (var item in dictionary[i])
                 {
                     var nextRespawnTime = item.KillTime.AddHours(item.RespawnTime);
@@ -120,13 +121,12 @@ public class RuntimeService(CosmoDb cosmoDb, BossData bossData, DiscordClientSer
             foreach (var i in dictionary.Keys)
             {
                 var builder = new StringBuilder();
-                builder.AppendLine("Время респавна боссов были обновлены");
+                builder.AppendLine(localization.BossRespawnTimeUpdatedAnnouncement(i));
                 foreach (var item in dictionary[i])
                 {
                     var nextRespawnTime = item.KillTime.AddHours(item.RespawnTime);
                     var timeToRespawn = nextRespawnTime - dateTimeHelper.CurrentTime;
-                    builder.AppendLine(
-                        $"Босс убит **{item.Id}** **{item.NickName.ToUpper()}** респавн {nextRespawnTime:HH:mm} через {timeToRespawn.ToString(@"hh\:mm")}");
+                    builder.AppendLine(localization.BossLogged(i, item, nextRespawnTime, timeToRespawn));
                 }
 
                 var channel = discordClientService.GetChannel(i);
