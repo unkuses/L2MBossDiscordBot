@@ -1,4 +1,5 @@
 ﻿using BossBot.Interfaces;
+using CommonLib.Helpers;
 using CommonLib.Models;
 
 namespace BossBot.Localization;
@@ -18,6 +19,9 @@ public class UALanguage : ILanguage
     
     public string BossNewTime(ulong chatId, string id, BossModel bossModel, DateTime newTime, TimeSpan timeToRespawn)
         => $"Бос **{id}** **{bossModel.Name.ToUpper()}** не був залогований. Новий час {newTime:HH:mm} через {timeToRespawn.ToString(@"hh\:mm")}";
+
+    public string AppendingBoss(ulong chatId, BossModel bossModel, DateTime nextRespawnTime, TimeSpan timeToRespawn) =>
+        $"**{StringHelper.PopulateWithWhiteSpaces(bossModel.Id, 2)}**|{nextRespawnTime:HH:mm}|**{bossModel.Name.ToUpper()}**| через {timeToRespawn.ToString(@"hh\:mm")} | {bossModel.Chance} {BossUtils.GetChanceStatus(bossModel.Chance)}{BossUtils.AppendEggPlant(bossModel.PurpleDrop)}";
 
     public string UpcomingBossesAnnouncement(ulong chatId) => "@here Найближчі боси";
 

@@ -16,6 +16,8 @@ public interface ILanguage
 
     string BossNewTime(ulong chatId, string id, BossModel bossModel, DateTime newTime, TimeSpan timeToRespawn);
 
+    string AppendingBoss(ulong chatId, BossModel bossModel, DateTime nextRespawnTime, TimeSpan timeToRespawn);
+
     string UpcomingBossesAnnouncement(ulong chatId);
 
     string BossRespawnTimeUpdatedAnnouncement(ulong chatId);

@@ -1,6 +1,7 @@
 ﻿using BossBot.Interfaces;
 using CommonLib.Helpers;
 using CommonLib.Models;
+using Discord;
 
 namespace BossBot.Localization;
 
@@ -18,6 +19,9 @@ public class RuLanguage : ILanguage
     
     public string BossNewTime(ulong chatId, string id, BossModel bossModel, DateTime newTime, TimeSpan timeToRespawn)
     => $"Босс **{StringHelper.PopulateWithWhiteSpaces(id, 2)}** **{bossModel.NickName.ToUpper()}** не был залогирован. Новое время {newTime:HH:mm} через {timeToRespawn.ToString(@"hh\:mm")}";
+
+    public string AppendingBoss(ulong chatId, BossModel bossModel, DateTime nextRespawnTime, TimeSpan timeToRespawn) =>
+        $"**{StringHelper.PopulateWithWhiteSpaces(bossModel.Id, 2)}**|{nextRespawnTime:HH:mm}|**{bossModel.NickName.ToUpper()}**| через {timeToRespawn.ToString(@"hh\:mm")} | {bossModel.Chance} {BossUtils.GetChanceStatus(bossModel.Chance)}{BossUtils.AppendEggPlant(bossModel.PurpleDrop)}";
 
     public string UpcomingBossesAnnouncement(ulong chatId) => "@here Ближайшие боссы";
 

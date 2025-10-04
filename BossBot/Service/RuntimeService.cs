@@ -78,8 +78,7 @@ public class RuntimeService(CosmoDb cosmoDb, BossData bossData, DiscordClientSer
                 {
                     var nextRespawnTime = item.KillTime.AddHours(item.RespawnTime);
                     var timeToRespawn = nextRespawnTime - dateTimeHelper.CurrentTime;
-                    builder.AppendLine(
-                        $"**{StringHelper.PopulateWithWhiteSpaces(item.Id, 2)}**|{nextRespawnTime:HH:mm}|**{item.NickName.ToUpper()}**| через {timeToRespawn.ToString(@"hh\:mm")} | {item.Chance} {BossUtils.GetChanceStatus(item.Chance)}{BossUtils.AppendEggPlant(item.PurpleDrop)}");
+                    builder.AppendLine(localization.AppendingBoss(i, item, nextRespawnTime, timeToRespawn));
                 }
 
                 var channel = discordClientService.GetChannel(i);
