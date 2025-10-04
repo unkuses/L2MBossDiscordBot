@@ -44,7 +44,7 @@ public class RuntimeService(CosmoDb cosmoDb, BossData bossData, DiscordClientSer
                 {
                     var nextRespawnTime = item.KillTime.AddHours(item.RespawnTime);
                     var timeToRespawn = nextRespawnTime - dateTimeHelper.CurrentTime;
-                    builder.AppendLine(localization.BossNewTime(i, item.Id, item.NickName, nextRespawnTime,
+                    builder.AppendLine(localization.BossNewTime(i, item.Id, item, nextRespawnTime,
                         timeToRespawn));
                 }
 

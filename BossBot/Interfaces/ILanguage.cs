@@ -14,7 +14,7 @@ public interface ILanguage
 
     string ChatDeleted(ulong chatId);
 
-    string BossNewTime(ulong chatId, string id, string name, DateTime newTime, TimeSpan timeToRespawn);
+    string BossNewTime(ulong chatId, string id, BossModel bossModel, DateTime newTime, TimeSpan timeToRespawn);
 
     string UpcomingBossesAnnouncement(ulong chatId);
 

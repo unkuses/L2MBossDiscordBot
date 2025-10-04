@@ -16,8 +16,8 @@ public class RuLanguage : ILanguage
 
     public string ChatDeleted(ulong chatId) => "Чат был удален, информация о боссах очищена";
     
-    public string BossNewTime(ulong chatId, string id, string name, DateTime newTime, TimeSpan timeToRespawn)
-    => $"Босс **{StringHelper.PopulateWithWhiteSpaces(id, 2)}** **{name.ToUpper()}** не был залогирован. Новое время {newTime:HH:mm} через {timeToRespawn.ToString(@"hh\:mm")}";
+    public string BossNewTime(ulong chatId, string id, BossModel bossModel, DateTime newTime, TimeSpan timeToRespawn)
+    => $"Босс **{StringHelper.PopulateWithWhiteSpaces(id, 2)}** **{bossModel.NickName.ToUpper()}** не был залогирован. Новое время {newTime:HH:mm} через {timeToRespawn.ToString(@"hh\:mm")}";
 
     public string UpcomingBossesAnnouncement(ulong chatId) => "@here Ближайшие боссы";
 

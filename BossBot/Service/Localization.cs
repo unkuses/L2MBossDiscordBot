@@ -64,14 +64,14 @@ public class Localization(ChatLanguageData chatLanguageData) : ILanguage
         };
     }
 
-    public string BossNewTime(ulong chatId, string id, string name, DateTime newTime, TimeSpan timeToRespawn)
+    public string BossNewTime(ulong chatId, string id, BossModel bossModel, DateTime newTime, TimeSpan timeToRespawn)
     {
         var language = chatLanguageData.GetLanguage(chatId);
         return language.ToLower() switch
         {
-            "ru" => _ruLanguage.BossNewTime(chatId, id, name, newTime, timeToRespawn),
-            "ua" => _uaLanguage.BossNewTime(chatId, id, name, newTime, timeToRespawn),
-            _ => _ruLanguage.BossNewTime(chatId, id, name, newTime, timeToRespawn)
+            "ru" => _ruLanguage.BossNewTime(chatId, id, bossModel, newTime, timeToRespawn),
+            "ua" => _uaLanguage.BossNewTime(chatId, id, bossModel, newTime, timeToRespawn),
+            _ => _ruLanguage.BossNewTime(chatId, id, bossModel, newTime, timeToRespawn)
         };
     }
 

@@ -12,12 +12,12 @@ public class UALanguage : ILanguage
     public string BossNotFound(ulong chatId, string bossId) => $"Бос з номером {bossId} не був знайдений";
     
     public string BossLogged(ulong chatId, BossModel boss, DateTime nextRespawnTime, TimeSpan timeToRespawn) =>
-        $"Бос вбитий **{boss.Id}** **{boss.NickName.ToUpper()}** респавн {nextRespawnTime:HH:mm} через {timeToRespawn.ToString(@"hh\:mm")}";
+        $"Бос вбитий **{boss.Id}** **{boss.Name.ToUpper()}** респавн {nextRespawnTime:HH:mm} через {timeToRespawn.ToString(@"hh\:mm")}";
     
     public string ChatDeleted(ulong chatId) => "Чат був видалений, інформація про босів очищена";
     
-    public string BossNewTime(ulong chatId, string id, string name, DateTime newTime, TimeSpan timeToRespawn)
-        => $"Бос **{id}** **{name.ToUpper()}** не був залогований. Новий час {newTime:HH:mm} через {timeToRespawn.ToString(@"hh\:mm")}";
+    public string BossNewTime(ulong chatId, string id, BossModel bossModel, DateTime newTime, TimeSpan timeToRespawn)
+        => $"Бос **{id}** **{bossModel.Name.ToUpper()}** не був залогований. Новий час {newTime:HH:mm} через {timeToRespawn.ToString(@"hh\:mm")}";
 
     public string UpcomingBossesAnnouncement(ulong chatId) => "@here Найближчі боси";
 
