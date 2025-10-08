@@ -38,7 +38,7 @@ public class EventChatService
 
     private async Task ProcessMessage(IMessage message, ISocketMessageChannel channel, string timeZone)
     {
-        if (message.Content == null || channel.Name != _options.ChatEvent || channel.Name.ToLower() != "оголошення".ToLower())
+        if (message.Content == null || (channel.Name != _options.ChatEvent && channel.Name.ToLower() != "оголошення".ToLower()))
             return;
 
         await ProcessEventMessages(message, channel);
