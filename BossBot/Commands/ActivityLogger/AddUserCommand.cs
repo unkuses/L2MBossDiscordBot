@@ -26,7 +26,7 @@ public class AddUserCommand(BotOptions options, UserStatisticData userStatisticD
             var responseData = JsonSerializer.Deserialize<List<string>>(responseString);
             responseData.ForEach(userName =>
             {
-                var user = userStatisticData.AddUserStatistic(chatId, userName);
+                var user = userStatisticData.AddUserStatistic(chatId, userName.Replace(" ", ""));
                 if(user != null)
                 {
                     userList.Add(user);
