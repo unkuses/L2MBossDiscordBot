@@ -10,10 +10,18 @@ public class SetUserTimeZoneCommand(BossData bossData) : ICommand
     {
         var tzList = commands.Where(s => s != "tz").ToList();
         var timeZoneId = string.Join(" ", tzList);
-        var timeZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+        TimeZoneInfo timeZone;
+        try
+        {
+            timeZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+        }
+        catch
+        {
+            return Task.FromResult(new List<string> { "Time Zone was not found" });
+        }
         var response = timeZone != null
             ? bossData.SetUserTimeZone(userId, timeZoneId)
-            : "Incorrect format";
+            : "Time Zone was not found";
 
         return Task.FromResult(new List<string> { response});
     }
