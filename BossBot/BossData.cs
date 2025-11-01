@@ -78,11 +78,6 @@ public class BossData
 
     public bool AddEvent(EventInformationDBModel eventInfo)
     {
-        if (_eventInfoData.EventInformationDbModels.Any(e => e.EventName == eventInfo.EventName))
-        {
-            return false; // Event already exists
-        }
-
         _eventInfoData.EventInformationDbModels.Add(eventInfo);
         _eventInfoData.SaveChanges();
         return true;
@@ -91,9 +86,9 @@ public class BossData
     public int LastEventNumber() =>
         _eventInfoData.EventInformationDbModels.OrderBy(e => e.EventNumber).LastOrDefault()?.EventNumber ?? 0;
 
-    public bool RemoveEventById(int eventId)
+    public bool RemoveEventById(int eventId, ulong chatId)
     {
-        var eventInfo = _eventInfoData.EventInformationDbModels.FirstOrDefault(e => e.EventNumber == eventId);
+        var eventInfo = _eventInfoData.EventInformationDbModels.FirstOrDefault(e => e.EventNumber == eventId && e.ChatId == chatId);
         if (eventInfo != null)
         {
             _eventInfoData.EventInformationDbModels.Remove(eventInfo);
