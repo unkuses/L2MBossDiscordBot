@@ -9,7 +9,7 @@ public class RemoveEventCommand(BossData bossData) : IEventCommand
     public string[] Keys { get; } = ["remove", "удалить", "r", "у"];
     public async Task<IEnumerable<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands)
     {
-        if (RemoveEvent(commands))
+        if (RemoveEvent(commands, chatId))
             return ["Event removed successfully."];
         return ["Failed to remove event. Please check the command format."];
     }
@@ -17,10 +17,10 @@ public class RemoveEventCommand(BossData bossData) : IEventCommand
     public async Task<IEnumerable<string>> ExecuteAsync(ulong chatId, ulong userId, string jsonCommand)
     {
         var model = JsonConvert.DeserializeObject<EventModel<RemoveEventModel>>(jsonCommand);
-        if(bossData.RemoveEventById(model.EventCommand.EventNumber))
+        if(bossData.RemoveEventById(model.EventCommand.EventNumber, chatId))
             return ["Event removed successfully."];
         return ["Failed to remove event. Please check the command format."];
     }
 
-    private bool RemoveEvent(string[] commands) => int.TryParse(commands[1], out var result) && bossData.RemoveEventById(result);
+    private bool RemoveEvent(string[] commands, ulong chatId) => int.TryParse(commands[1], out var result) && bossData.RemoveEventById(result, chatId);
 }
