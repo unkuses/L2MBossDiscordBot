@@ -66,7 +66,7 @@ public class BossChatService
 
     private async Task ProcessMessage(IMessage message, ISocketMessageChannel channel, string timeZone)
     {
-        if (message.Content == null || channel.Name == "активность" || channel.Name == _options.ChatEvent || channel.Name.ToLower() == "оголошення".ToLower())
+        if (message.Content == null || channel.Name == "активность" || channel.Name == _options.ChatEvent || channel.Name.ToLower() == "активності".ToLower())
             return;
 
         if (_bossData.ChatIsRegistered(channel.Id))
