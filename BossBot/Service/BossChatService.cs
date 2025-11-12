@@ -85,12 +85,15 @@ public class BossChatService
 
         if (message.Attachments.Any())
         {
-            var image = message.Attachments.First();
-            if (image.ContentType.StartsWith("image/"))
+            foreach (var attachment in message.Attachments)
             {
-                var result = await ProcessImage(image.Url, channel.Id, timeZone, _chatLanguageData.GetLanguage(channel.Id));
-                _ = _discordClientService.ProcessAnswers(channel, [result]);
-                return;
+                if (attachment.ContentType.StartsWith("image/"))
+                {
+                    var result = await ProcessImage(attachment.Url, channel.Id, timeZone,
+                        _chatLanguageData.GetLanguage(channel.Id));
+                    _ = _discordClientService.ProcessAnswers(channel, [result]);
+                    return;
+                }
             }
         }
 

@@ -51,7 +51,7 @@ namespace BossBotAPI
                             .Any(b => b.BossNames
                                 .Any(name => lines[i].Contains(name.Name, StringComparison.CurrentCultureIgnoreCase)));
 
-                        if ((isNextBoss || i == lines.Count - 1) && dateTimes.Count > 1)
+                        if (isNextBoss || i == lines.Count - 1)
                         {
                             // Log the kill information and add it to the result
                             var bossModel = await LogKillBossInformationAsync(chatId, boss.Id, dateTimes.Min(), wasMentioned);
