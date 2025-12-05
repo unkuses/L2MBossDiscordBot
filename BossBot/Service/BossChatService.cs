@@ -85,15 +85,19 @@ public class BossChatService
 
         if (message.Attachments.Any())
         {
+            var isImage = false;
             foreach (var attachment in message.Attachments)
             {
                 if (attachment.ContentType.StartsWith("image/"))
                 {
-                    var result = await ProcessImage(attachment.Url, channel.Id, timeZone,
-                        _chatLanguageData.GetLanguage(channel.Id));
-                    _ = _discordClientService.ProcessAnswers(channel, [result]);
-                    return;
+                    isImage = true;
+                    _ = ProcessAttachment(attachment.Url, channel, timeZone);
                 }
+            }
+
+            if (!isImage)
+            {
+                return;
             }
         }
 
@@ -125,6 +129,13 @@ public class BossChatService
         {
             await _discordClientService.ProcessAnswers(channel, answers);
         }
+    }
+
+    private async Task ProcessAttachment(string url, ISocketMessageChannel channel, string timeZone)
+    {
+        var result = await ProcessImage(url, channel.Id, timeZone,
+            _chatLanguageData.GetLanguage(channel.Id));
+        _ = _discordClientService.ProcessAnswers(channel, [result]);
     }
 
     private async Task OpenAiBossMessage(IMessage message, ISocketMessageChannel channel, string text)
