@@ -7,7 +7,6 @@ using BossBot.Options;
 using BossBot.Service;
 using CommonLib.Helpers;
 using CommonLib.Options;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
@@ -32,6 +31,7 @@ internal class Program
         builder.Services.AddSingleton<DiscordRuntime>();
         builder.Services.AddSingleton<RuntimeService>();
         builder.Services.AddSingleton<DateTimeHelper>();
+        builder.Services.AddSingleton<UserStatusAggregatorService>();
         builder.Services.AddSingleton(new CosmoDbOptions() { Endpoint = options.CosmoDbUrl, AccountKey = options.CosmoDbKey});
         builder.Services.AddSingleton<CosmoDb>();
         builder.Services.AddSingleton<OpenAIService>();

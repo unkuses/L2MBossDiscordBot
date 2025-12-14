@@ -21,4 +21,6 @@ public class BotOptions(string chatName, string botToken, string imageAnalysisUR
     public string OpenAIEnpoint { get; set; } = openAIEndpoint;
 
     public string openAIKey { get; set; } = openAIKey;
+
+    public string GoogleSheetId { get; set; }
 }

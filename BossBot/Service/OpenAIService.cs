@@ -1,9 +1,10 @@
-﻿using System.Text.Json;
-using Azure;
+﻿using Azure;
 using Azure.AI.OpenAI;
 using BossBot.Options;
-using OpenAI.Chat;
 using CommonLib.Helpers;
+using Microsoft.Identity.Client;
+using OpenAI.Chat;
+using System.Text.Json;
 
 namespace BossBot.Service;
 
@@ -45,6 +46,71 @@ public class OpenAIService
 
         return string.Empty;
     }
+
+    public async Task<string> GetUserStatisticJsonAsync(string textToParse)
+    {
+        // Create a list of chat messages
+        List<ChatMessage> messagesQueue =
+        [
+            ChatMessage.CreateAssistantMessage(textToParse)
+        ];
+        messagesQueue.AddRange(CreateSystemMessageForPlayerStatistic());
+
+        try
+        {
+            ChatCompletion completion = await _chatClient.CompleteChatAsync(messagesQueue);
+            if (completion != null)
+            {
+                return completion.Content[0].Text;
+            }
+        }
+        catch (Exception ex)
+        {
+            return string.Empty;
+        }
+
+        return string.Empty;
+    }
+
+    private List<ChatMessage> CreateSystemMessageForPlayerStatistic() =>
+    [
+        ChatMessage.CreateSystemMessage("Response only in Json"),
+        ChatMessage.CreateSystemMessage("Analyze provided text and create stats from it"),
+        ChatMessage.CreateSystemMessage("You are given screenshots of game stats (Russian labels + numeric values)." +
+                                        "Extract the stats and return ONLY valid JSON that matches this schema exactly." +
+                                        "Rules:" +
+                                        "- Use the exact JSON field names from the schema below." +
+                                        "- If the value has a percent sign (%), return the integer number WITHOUT the percent sign." +
+                                        "- If the value has no percent sign, return it as an integer." +
+                                        "- If a stat is not present in the screenshots, return null for that field." +
+                                        "- Do not include extra fields. Do not include explanations. JSON only." +
+                                        "Schema / fields:" +
+                                        " \"Damage\": int|null," +
+                                        " \"Accuracy\": int|null,  " +
+                                        " \"CritAtkPercent\": int|null," +
+                                        " \"bonusCritDamage\": int|null," +
+                                        " \"doubleDamageChancePercent\": int|null," +
+                                        " \"tripleDamageChancePercent\": int|null," +
+                                        " \"weaponBlockPercent\": int|null," +
+                                        " \"defense\": int|null," +
+                                        " \"skillResistance\": int|null," +
+                                        " \"weaponDamageIncreasePercent\": int|null," +
+                                        " \"weaponDamageResistancePercent\": int|null," +
+                                        " \"skillDamageIncreasePercent\": int|null," +
+                                        " \"skillDamageResistancePercent\": int|null," +
+                                        " \"doubleDamageResistancePercent\": int|null," +
+                                        " \"tripleDamageResistancePercent\": int|null," +
+                                        " \"blockPenetrationPercent\": int|null," +
+                                        " \"ignoreDamageReduction\": int|null," +
+                                        " \"stunChancePercent\": int|null," +
+                                        " \"stunResistancePercent\": int|null," +
+                                        " \"holdResistancePercent\": int|null," +
+                                        " \"aggroResistancePercent\": int|null," +
+                                        " \"silenceResistancePercent\": int|null," +
+                                        " \"abnormalStatusChancePercent\": int|null," +
+                                        " \"abnormalStatusResistancePercent\": int|null," +
+                                        " \"abnormalStatusDurationReductionPercent\": int|null"),
+    ];
 
     private List<ChatMessage> CreateSystemMessageForEvent() =>
         [
