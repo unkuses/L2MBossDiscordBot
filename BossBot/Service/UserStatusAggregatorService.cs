@@ -7,7 +7,6 @@ using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
-using Newtonsoft.Json;
 using System.Text;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
@@ -51,9 +50,10 @@ public class UserStatusAggregatorService
 
     private async Task ReadSheet(ISocketMessageChannel dbChannel, List<string> attachmentUrls, string discordNick)
     {
+        CharacterStatsModel model = null;
         try
         {
-            StringBuilder imageServiceResponse = new();
+            List<string> subStrings = [];
             foreach (var attachmentUrl in attachmentUrls)
             {
                 var requestData = new RequestParseImageUrl
@@ -65,18 +65,17 @@ public class UserStatusAggregatorService
                 var imageAnalyzeResponse = await httpClient.PostAsync(_options.ImageStatisticAnalysisUrl,
                     new StringContent(jsonPayload, Encoding.UTF8, "application/json"));
                 var stringResponse = await imageAnalyzeResponse.Content.ReadAsStringAsync();
-                imageServiceResponse.AppendLine(stringResponse);
+                subStrings.AddRange(stringResponse.Split(","));
             }
 
-            var json = await _openAiService.GetUserStatisticJsonAsync(imageServiceResponse.ToString());
-            var eventModel = JsonConvert.DeserializeObject<CharacterStatsModel>(json);
+            model = CreateModel(subStrings);
 
-            await MergeUpsertAsync(discordNick, string.Empty, eventModel);
-            await _discordClientService.ProcessAnswers(dbChannel, ["Информация была обновлена"]);
+            await MergeUpsertAsync(discordNick, string.Empty, model);
+            await _discordClientService.ProcessAnswers(dbChannel, [$"Информация была обновлена {model.ToString()}"]);
         }
         catch(Exception ex)
         {
-            await _discordClientService.ProcessAnswers(dbChannel, ["Информация не была обновлена"]);
+            await _discordClientService.ProcessAnswers(dbChannel, [$"Информация не была обновлена {model?.ToString() ?? "модель не была создана"}"]);
         }
     }
 
@@ -253,5 +252,164 @@ public class UserStatusAggregatorService
 
         var digits = new string(a1.Where(char.IsDigit).ToArray());
         return int.TryParse(digits, out var row) ? row : null;
+    }
+
+    private CharacterStatsModel CreateModel(List<string> strings)
+    {
+        CharacterStatsModel model = new();
+        var clearResult = strings.Select(NormalizeString);
+        var previous = string.Empty;
+        foreach (var s in clearResult)
+        {
+            if (Int32.TryParse(s, out var value))
+            {
+                PopulateModel(model, previous, value);
+            }
+
+            previous = s;
+        }
+
+        return model;
+    }
+
+    static string NormalizeString(string s)
+    {
+        if (string.IsNullOrWhiteSpace(s))
+            return string.Empty;
+
+        var sb = new StringBuilder(s.Length);
+
+        foreach (var c in s)
+        {
+            // оставляем только буквы и цифры (RU + EN)
+            if (char.IsLetterOrDigit(c))
+                sb.Append(char.ToLowerInvariant(c));
+        }
+
+        return sb.ToString();
+    }
+
+    private void PopulateModel(CharacterStatsModel model, string name, int value)
+    {
+        name = name.Trim().ToLowerInvariant().Replace(" ", "");
+        switch (name)
+        {
+            case "уронвближн.бою":
+            case "meleedamage":
+            case "маг.урон":
+            case "magicdamage":
+                model.Damage = value; break;
+
+            case "маг.точность":
+            case "magicaccuracy":
+            case "точностьвближн.бою":
+            case "meleeaccuracy":
+                model.Accuracy = value; break;
+
+            case "маг.крит.атк.":
+            case "крит.атк.вближн.бою":
+            case "magiccriticalhit":
+            case "meleecriticalhit":
+                model.CritAtkPercent = value; break;
+
+            // ===== EXTRA / CRIT =====
+
+            case "доп.уронкрит.атк.":
+            case "extradamage(oncriticalhit)":
+                model.BonusCritDamage = value; break;
+
+            // ===== DOUBLE / TRIPLE =====
+            case "шансдвойногоурона":
+            case "doublechance":
+                model.DoubleDamageChancePercent = value; break;
+
+            case "шанстройногоурона":
+            case "triplechance":
+                model.TripleDamageChancePercent = value; break;
+
+            case "сопротивлениедвойномуурону":
+            case "doubleresistance":
+                model.DoubleDamageResistancePercent = value; break;
+
+            case "сопротивлениетройномуурону":
+            case "tripleresistance":
+                model.TripleDamageResistancePercent = value; break;
+
+            // ===== BLOCK =====
+            case "блокировкаоружия":
+            case "weaponblock":
+                model.WeaponBlockPercent = value; break;
+
+            case "пробиваниеблока":
+            case "blockpenetration":
+                model.BlockPenetrationPercent = value; break;
+
+            // ===== DAMAGE BOOST =====
+            case "увеличениеуронаоторужия":
+            case "weapondamageboost":
+                model.WeaponDamageIncreasePercent = value; break;
+
+            case "увеличениеуронаотумений":
+            case "skilldamageboost":
+                model.SkillDamageIncreasePercent = value; break;
+
+            // ===== DEFENSE =====
+            case "защита":
+            case "defense":
+                model.Defense = value; break;
+
+            case "сопротивлениеумениям":
+            case "skillresistance":
+                model.SkillResistance = value; break;
+
+            case "сопротивлениеуроноторужия":
+            case "weapondefense":
+                model.WeaponDamageResistancePercent = value; break;
+
+            case "сопротивлениеуронотумений":
+            case "skilldefense":
+                model.SkillDamageResistancePercent = value; break;
+
+            // ===== IGNORE =====
+            case "игнорированиесниженияурона":
+            case "ignoredamagereduction":
+                model.IgnoreDamageReduction = value; break;
+
+            // ===== CC / STUN =====
+            case "шансоглушения":
+            case "stunaccuracy":
+                model.StunChancePercent = value; break;
+
+            case "сопротивлениеоглушению":
+            case "stunresistance":
+                model.StunResistancePercent = value; break;
+
+            case "сопротивлениеудержанию":
+            case "holdresistance":
+                model.HoldResistancePercent = value; break;
+
+            case "сопротивлениеагрессии":
+            case "aggressionresistance":
+                model.AggroResistancePercent = value; break;
+
+            case "сопротивлениебезмолвию":
+            case "silenceresistance":
+                model.SilenceResistancePercent = value; break;
+
+            case "ccaccuracy":
+            case "шансаномальныхсостояний":
+                model.AbnormalStatusChancePercent = value; break;
+
+            case "ccresistance":
+            case "сопр.аномальнымсостояниям":
+                model.AbnormalStatusResistancePercent = value; break;
+
+            case "ccdurationreduction":
+            case "уменьш.длит.аномальныхсостояний":
+                model.AbnormalStatusDurationReductionPercent = value; break;
+            default:
+                // неизвестный стат — игнор или лог
+                break;
+        }
     }
 }
