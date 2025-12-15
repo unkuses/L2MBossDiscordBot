@@ -44,7 +44,7 @@ public class UserStatusAggregatorService
     {
         if(e.Item2 is IDMChannel channel)
         {
-            _ = ReadSheet(e.Item2, e.Item1.Attachments.Select(a => a.Url).ToList(), e.Item1.Author.GlobalName);
+            _ = ReadSheet(e.Item2, e.Item1.Attachments.Select(a => a.Url).ToList(), e.Item1.Author.GlobalName ?? e.Item1.Author.Username);
         }
     }
 
