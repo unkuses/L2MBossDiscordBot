@@ -7,7 +7,6 @@ using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
-using Newtonsoft.Json.Linq;
 using System.Text;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
@@ -293,19 +292,19 @@ public class UserStatusAggregatorService
 
     private void PopulateModel(CharacterStatsModel model, string name, int value)
     {
-        if (LevenshteinWithin(name, "уронвближнбою", "meleedamage", "магурон", "magicdamage"))
+        if (LevenshteinWithin(name, "уронвдальнбою", "rangeddamage", "уронвближнбою", "meleedamage", "магурон", "magicdamage"))
         {
             model.Damage = value;
             return;
         }
 
-        if (LevenshteinWithin(name, "магточность", "magicaccuracy", "точностьвближнбою", "meleeaccuracy"))
+        if (LevenshteinWithin(name, "точностьвдальнбою", "rangedaccuracy", "магточность", "magicaccuracy", "точностьвближнбою", "meleeaccuracy"))
         {
             model.Accuracy = value; 
             return;
         }
 
-        if (LevenshteinWithin(name, "магкритатк", "критатквближнбою", "magiccriticalhit", "meleecriticalhit"))
+        if (LevenshteinWithin(name, "критатквдальнбою", "rangedcriticalhit", "магкритатк", "критатквближнбою", "magiccriticalhit", "meleecriticalhit"))
         {
             model.CritAtkPercent = value;
             return;
@@ -446,17 +445,17 @@ public class UserStatusAggregatorService
 
     private bool IsValidParameter(string name)
     {
-        if (LevenshteinWithin(name, "уронвближнбою", "meleedamage", "магурон", "magicdamage"))
+        if (LevenshteinWithin(name, "уронвдальнбою", "rangeddamage", "уронвближнбою", "meleedamage", "магурон", "magicdamage"))
         {
             return true;
         }
 
-        if (LevenshteinWithin(name, "магточность", "magicaccuracy", "точностьвближнбою", "meleeaccuracy"))
+        if (LevenshteinWithin(name, "точностьвдальнбою", "rangedaccuracy", "магточность", "magicaccuracy", "точностьвближнбою", "meleeaccuracy"))
         {
             return true;
         }
 
-        if (LevenshteinWithin(name, "магкритатк", "критатквближнбою", "magiccriticalhit", "meleecriticalhit"))
+        if (LevenshteinWithin(name, "критатквдальнбою", "rangedcriticalhit", "магкритатк", "критатквближнбою", "magiccriticalhit", "meleecriticalhit"))
         {
             return true;
         }
