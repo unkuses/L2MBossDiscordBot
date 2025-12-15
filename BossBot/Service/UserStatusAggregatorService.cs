@@ -436,7 +436,7 @@ public class UserStatusAggregatorService
             return;
         }
 
-        if (LevenshteinWithin(name, "ccdurationreduction", "уменьшдлитаномальныхсостояний"))
+        if (LevenshteinWithin(name, "ccdurationreduction", "уменьшдлитаномальныхсостояний", "умендлитаномальныхсостояний"))
         {
             model.AbnormalStatusDurationReductionPercent = value;
             return;
@@ -565,7 +565,7 @@ public class UserStatusAggregatorService
             return true;
         }
 
-        if (LevenshteinWithin(name, "ccdurationreduction", "уменьшдлитаномальныхсостояний"))
+        if (LevenshteinWithin(name, "ccdurationreduction", "уменьшдлитаномальныхсостояний", "умендлитаномальныхсостояний"))
         {
             return true;
         }
