@@ -23,6 +23,7 @@ public class UserStatusAggregatorService
     private readonly SheetsService _sheetsService;
     private readonly OpenAIService _openAiService;
     private readonly BotOptions _options;
+
     public UserStatusAggregatorService(DiscordClientService discordClientService, OpenAIService openAiService, BotOptions options)
     {
         _discordClientService = discordClientService;
@@ -606,7 +607,7 @@ public class UserStatusAggregatorService
 
             for (var j = from; j <= to; j++)
             {
-                var cost = s[i - 1] == t[j - 1] ? 0 : 1;
+                var cost = AreSimilar(s[i - 1], t[j - 1]) ? 0 : 1;
 
                 var del = prev[j] + 1;
                 var ins = curr[j - 1] + 1;
@@ -623,4 +624,55 @@ public class UserStatusAggregatorService
 
         return prev[m] <= maxDistance;
     }
+
+    private bool AreSimilar(char a, char b)
+    {
+        if (a == b) return true;
+
+        a = char.ToLowerInvariant(a);
+        b = char.ToLowerInvariant(b);
+
+        if (a == b) return true;
+
+        if (SimilarChars.TryGetValue(a, out var listA) && listA.Contains(b))
+            return true;
+
+        if (SimilarChars.TryGetValue(b, out var listB) && listB.Contains(a))
+            return true;
+
+        return false;
+    }
+
+    private readonly Dictionary<char, char[]> SimilarChars = new()
+    {
+        // Latin -> Cyrillic
+        ['a'] = ['а'],
+        ['b'] = ['в'],
+        ['c'] = ['с'],
+        ['e'] = ['е'],
+        ['h'] = ['н'],
+        ['k'] = ['к'],
+        ['m'] = ['м'],
+        ['o'] = ['о'],
+        ['p'] = ['р'],
+        ['t'] = ['т'],
+        ['x'] = ['х'],
+        ['y'] = ['у'],
+        ['r'] = ['г'], // OCR часто путает
+
+        // Cyrillic -> Latin (симметрия)
+        ['а'] = ['a'],
+        ['в'] = ['b'],
+        ['с'] = ['c'],
+        ['е'] = ['e'],
+        ['н'] = ['h'],
+        ['к'] = ['k'],
+        ['м'] = ['m'],
+        ['о'] = ['o'],
+        ['р'] = ['p'],
+        ['т'] = ['t'],
+        ['х'] = ['x'],
+        ['у'] = ['y'],
+        ['г'] = ['r'],
+    };
 }
