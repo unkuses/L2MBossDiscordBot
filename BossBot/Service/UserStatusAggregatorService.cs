@@ -7,6 +7,7 @@ using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
+using Newtonsoft.Json.Linq;
 using System.Text;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
@@ -265,8 +266,9 @@ public class UserStatusAggregatorService
             {
                 PopulateModel(model, previous, value);
             }
-
-            previous = s;
+            else
+                if (IsValidParameter(s))
+                    previous = s;
         }
 
         return model;
@@ -291,125 +293,335 @@ public class UserStatusAggregatorService
 
     private void PopulateModel(CharacterStatsModel model, string name, int value)
     {
-        name = name.Trim().ToLowerInvariant().Replace(" ", "");
-        switch (name)
+        if (LevenshteinWithin(name, "уронвближнбою", "meleedamage", "магурон", "magicdamage"))
         {
-            case "уронвближн.бою":
-            case "meleedamage":
-            case "маг.урон":
-            case "magicdamage":
-                model.Damage = value; break;
-
-            case "маг.точность":
-            case "magicaccuracy":
-            case "точностьвближн.бою":
-            case "meleeaccuracy":
-                model.Accuracy = value; break;
-
-            case "маг.крит.атк.":
-            case "крит.атк.вближн.бою":
-            case "magiccriticalhit":
-            case "meleecriticalhit":
-                model.CritAtkPercent = value; break;
-
-            // ===== EXTRA / CRIT =====
-
-            case "доп.уронкрит.атк.":
-            case "extradamage(oncriticalhit)":
-                model.BonusCritDamage = value; break;
-
-            // ===== DOUBLE / TRIPLE =====
-            case "шансдвойногоурона":
-            case "doublechance":
-                model.DoubleDamageChancePercent = value; break;
-
-            case "шанстройногоурона":
-            case "triplechance":
-                model.TripleDamageChancePercent = value; break;
-
-            case "сопротивлениедвойномуурону":
-            case "doubleresistance":
-                model.DoubleDamageResistancePercent = value; break;
-
-            case "сопротивлениетройномуурону":
-            case "tripleresistance":
-                model.TripleDamageResistancePercent = value; break;
-
-            // ===== BLOCK =====
-            case "блокировкаоружия":
-            case "weaponblock":
-                model.WeaponBlockPercent = value; break;
-
-            case "пробиваниеблока":
-            case "blockpenetration":
-                model.BlockPenetrationPercent = value; break;
-
-            // ===== DAMAGE BOOST =====
-            case "увеличениеуронаоторужия":
-            case "weapondamageboost":
-                model.WeaponDamageIncreasePercent = value; break;
-
-            case "увеличениеуронаотумений":
-            case "skilldamageboost":
-                model.SkillDamageIncreasePercent = value; break;
-
-            // ===== DEFENSE =====
-            case "защита":
-            case "defense":
-                model.Defense = value; break;
-
-            case "сопротивлениеумениям":
-            case "skillresistance":
-                model.SkillResistance = value; break;
-
-            case "сопротивлениеуроноторужия":
-            case "weapondefense":
-                model.WeaponDamageResistancePercent = value; break;
-
-            case "сопротивлениеуронотумений":
-            case "skilldefense":
-                model.SkillDamageResistancePercent = value; break;
-
-            // ===== IGNORE =====
-            case "игнорированиесниженияурона":
-            case "ignoredamagereduction":
-                model.IgnoreDamageReduction = value; break;
-
-            // ===== CC / STUN =====
-            case "шансоглушения":
-            case "stunaccuracy":
-                model.StunChancePercent = value; break;
-
-            case "сопротивлениеоглушению":
-            case "stunresistance":
-                model.StunResistancePercent = value; break;
-
-            case "сопротивлениеудержанию":
-            case "holdresistance":
-                model.HoldResistancePercent = value; break;
-
-            case "сопротивлениеагрессии":
-            case "aggressionresistance":
-                model.AggroResistancePercent = value; break;
-
-            case "сопротивлениебезмолвию":
-            case "silenceresistance":
-                model.SilenceResistancePercent = value; break;
-
-            case "ccaccuracy":
-            case "шансаномальныхсостояний":
-                model.AbnormalStatusChancePercent = value; break;
-
-            case "ccresistance":
-            case "сопр.аномальнымсостояниям":
-                model.AbnormalStatusResistancePercent = value; break;
-
-            case "ccdurationreduction":
-            case "уменьш.длит.аномальныхсостояний":
-                model.AbnormalStatusDurationReductionPercent = value; break;
-            default:
-                // неизвестный стат — игнор или лог
-                break;
+            model.Damage = value;
+            return;
         }
+
+        if (LevenshteinWithin(name, "магточность", "magicaccuracy", "точностьвближнбою", "meleeaccuracy"))
+        {
+            model.Accuracy = value; 
+            return;
+        }
+
+        if (LevenshteinWithin(name, "магкритатк", "критатквближнбою", "magiccriticalhit", "meleecriticalhit"))
+        {
+            model.CritAtkPercent = value;
+            return;
+        }
+
+        if (LevenshteinWithin(name, "допуронкритатк", "extradamageoncriticalhit"))
+        {
+            model.BonusCritDamage = value;
+            return;
+        }
+
+        if (LevenshteinWithin(name, "шансдвойногоурона", "doublechance"))
+        {
+            model.DoubleDamageChancePercent = value;
+            return;
+        }
+
+        if (LevenshteinWithin(name, "шанстройногоурона", "triplechance"))
+        {
+            model.TripleDamageChancePercent = value;
+            return;
+        }
+
+        if (LevenshteinWithin(name, "сопротивлениедвойномуурону", "doubleresistance"))
+        {
+            model.DoubleDamageResistancePercent = value;
+            return;
+        }
+
+        if (LevenshteinWithin(name, "сопротивлениетройномуурону", "tripleresistance"))
+        {
+            model.TripleDamageResistancePercent = value;
+            return;
+        }
+
+        if (LevenshteinWithin(name, "блокировкаоружия", "weaponblock"))
+        {
+            model.WeaponBlockPercent = value;
+            return;
+        }
+
+        if (LevenshteinWithin(name, "пробиваниеблока", "blockpenetration"))
+        {
+            model.BlockPenetrationPercent = value;
+            return;
+        }
+
+        if (LevenshteinWithin(name, "увеличениеуронаоторужия", "weapondamageboost"))
+        {
+            model.WeaponDamageIncreasePercent = value;
+            return;
+        }
+
+        if (LevenshteinWithin(name, "увеличениеуронаотумений", "skilldamageboost"))
+        {
+            model.SkillDamageIncreasePercent = value;
+            return;
+        }
+
+        if (LevenshteinWithin(name, "защита", "defense"))
+        {
+            model.Defense = value;
+            return;
+        }
+
+        if (LevenshteinWithin(name, "сопротивлениеумениям", "skillresistance"))
+        {
+            model.SkillResistance = value;
+            return;
+        }
+
+        if (LevenshteinWithin(name, "сопротивлениеуроноторужия", "weapondefense"))
+        {
+            model.WeaponDamageResistancePercent = value;
+            return;
+        }
+
+        if (LevenshteinWithin(name, "сопротивлениеуронотумений", "skilldefense"))
+        {
+            model.SkillDamageResistancePercent = value;
+            return;
+        }
+
+        if (LevenshteinWithin(name, "игнорированиесниженияурона", "ignoredamagereduction"))
+        {
+            model.IgnoreDamageReduction = value;
+            return;
+        }
+
+        if (LevenshteinWithin(name, "шансоглушения", "stunaccuracy"))
+        {
+            model.StunChancePercent = value;
+            return;
+        }
+
+        if (LevenshteinWithin(name, "сопротивлениеоглушению", "stunresistance"))
+        {
+            model.StunResistancePercent = value;
+            return;
+        }
+
+        if (LevenshteinWithin(name, "сопротивлениеудержанию", "holdresistance"))
+        {
+            model.HoldResistancePercent = value;
+            return;
+        }
+
+        if (LevenshteinWithin(name, "сопротивлениеагрессии", "aggressionresistance"))
+        {
+            model.AggroResistancePercent = value;
+            return;
+        }
+
+        if (LevenshteinWithin(name, "сопротивлениебезмолвию", "silenceresistance"))
+        {
+            model.SilenceResistancePercent = value;
+            return;
+        }
+
+        if (LevenshteinWithin(name, "ccaccuracy", "шансаномальныхсостояний"))
+        {
+            model.AbnormalStatusChancePercent = value;
+            return;
+        }
+
+        if (LevenshteinWithin(name, "ccresistance", "сопраномальнымсостояниям"))
+        {
+            model.AbnormalStatusResistancePercent = value;
+            return;
+        }
+
+        if (LevenshteinWithin(name, "ccdurationreduction", "уменьшдлитаномальныхсостояний"))
+        {
+            model.AbnormalStatusDurationReductionPercent = value;
+            return;
+        }
+    }
+
+    private bool IsValidParameter(string name)
+    {
+        if (LevenshteinWithin(name, "уронвближнбою", "meleedamage", "магурон", "magicdamage"))
+        {
+            return true;
+        }
+
+        if (LevenshteinWithin(name, "магточность", "magicaccuracy", "точностьвближнбою", "meleeaccuracy"))
+        {
+            return true;
+        }
+
+        if (LevenshteinWithin(name, "магкритатк", "критатквближнбою", "magiccriticalhit", "meleecriticalhit"))
+        {
+            return true;
+        }
+
+        if (LevenshteinWithin(name, "допуронкритатк", "extradamageoncriticalhit"))
+        {
+            return true;
+        }
+
+        if (LevenshteinWithin(name, "шансдвойногоурона", "doublechance"))
+        {
+            return true;
+        }
+
+        if (LevenshteinWithin(name, "шанстройногоурона", "triplechance"))
+        {
+            return true;
+        }
+
+        if (LevenshteinWithin(name, "сопротивлениедвойномуурону", "doubleresistance"))
+        {
+            return true;
+        }
+
+        if (LevenshteinWithin(name, "сопротивлениетройномуурону", "tripleresistance"))
+        {
+            return true;
+        }
+
+        if (LevenshteinWithin(name, "блокировкаоружия", "weaponblock"))
+        {
+            return true;
+        }
+
+        if (LevenshteinWithin(name, "пробиваниеблока", "blockpenetration"))
+        {
+            return true;
+        }
+
+        if (LevenshteinWithin(name, "увеличениеуронаоторужия", "weapondamageboost"))
+        {
+            return true;
+        }
+
+        if (LevenshteinWithin(name, "увеличениеуронаотумений", "skilldamageboost"))
+        {
+            return true;
+        }
+
+        if (LevenshteinWithin(name, "защита", "defense"))
+        {
+            return true;
+        }
+
+        if (LevenshteinWithin(name, "сопротивлениеумениям", "skillresistance"))
+        {
+            return true;
+        }
+
+        if (LevenshteinWithin(name, "сопротивлениеуроноторужия", "weapondefense"))
+        {
+            return true;
+        }
+
+        if (LevenshteinWithin(name, "сопротивлениеуронотумений", "skilldefense"))
+        {
+            return true;
+        }
+
+        if (LevenshteinWithin(name, "игнорированиесниженияурона", "ignoredamagereduction"))
+        {
+            return true;
+        }
+
+        if (LevenshteinWithin(name, "шансоглушения", "stunaccuracy"))
+        {
+            return true;
+        }
+
+        if (LevenshteinWithin(name, "сопротивлениеоглушению", "stunresistance"))
+        {
+            return true;
+        }
+
+        if (LevenshteinWithin(name, "сопротивлениеудержанию", "holdresistance"))
+        {
+            return true;
+        }
+
+        if (LevenshteinWithin(name, "сопротивлениеагрессии", "aggressionresistance"))
+        {
+            return true;
+        }
+
+        if (LevenshteinWithin(name, "сопротивлениебезмолвию", "silenceresistance"))
+        {
+            return true;
+        }
+
+        if (LevenshteinWithin(name, "ccaccuracy", "шансаномальныхсостояний"))
+        {
+            return true;
+        }
+
+        if (LevenshteinWithin(name, "ccresistance", "сопраномальнымсостояниям"))
+        {
+            return true;
+        }
+
+        if (LevenshteinWithin(name, "ccdurationreduction", "уменьшдлитаномальныхсостояний"))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool LevenshteinWithin(string parameterName, params string[] parameters) =>
+        parameters.Any(p => LevenshteinWithin(parameterName, p, 1));
+
+    private bool LevenshteinWithin(string s, string t, int maxDistance)
+    {
+        // оптимизация: считаем только полосу шириной maxDistance
+        int n = s.Length, m = t.Length;
+        if (n == 0) return m <= maxDistance;
+        if (m == 0) return n <= maxDistance;
+
+        // гарантируем что t короче/равно (чтобы меньше памяти)
+        if (m > n) { (s, t) = (t, s); (n, m) = (m, n); }
+
+        var prev = new int[m + 1];
+        var curr = new int[m + 1];
+
+        for (var j = 0; j <= m; j++) prev[j] = j;
+
+        for (var i = 1; i <= n; i++)
+        {
+            curr[0] = i;
+
+            var from = Math.Max(1, i - maxDistance);
+            var to = Math.Min(m, i + maxDistance);
+
+            // outside band -> set big values
+            for (var j = 1; j < from; j++) curr[j] = maxDistance + 1;
+            for (var j = to + 1; j <= m; j++) curr[j] = maxDistance + 1;
+
+            var bestInRow = maxDistance + 1;
+
+            for (var j = from; j <= to; j++)
+            {
+                var cost = s[i - 1] == t[j - 1] ? 0 : 1;
+
+                var del = prev[j] + 1;
+                var ins = curr[j - 1] + 1;
+                var sub = prev[j - 1] + cost;
+
+                var v = Math.Min(Math.Min(del, ins), sub);
+                curr[j] = v;
+                if (v < bestInRow) bestInRow = v;
+            }
+
+            if (bestInRow > maxDistance) return false;
+            (prev, curr) = (curr, prev);
+        }
+
+        return prev[m] <= maxDistance;
     }
 }
