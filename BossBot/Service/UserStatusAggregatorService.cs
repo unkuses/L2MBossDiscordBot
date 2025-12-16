@@ -43,7 +43,7 @@ public class UserStatusAggregatorService
 
     private void DiscordMessageReceivedEvent(object? sender, Tuple<IMessage, ISocketMessageChannel> e)
     {
-        if(e.Item2 is IDMChannel channel)
+        if(e.Item2 is IDMChannel)
         {
             _ = ReadSheet(e.Item2, e.Item1.Attachments.Select(a => a.Url).ToList(), e.Item1.Author.GlobalName ?? e.Item1.Author.Username);
         }
@@ -265,6 +265,7 @@ public class UserStatusAggregatorService
             if (Int32.TryParse(s, out var value))
             {
                 PopulateModel(model, previous, value);
+                previous = string.Empty;
             }
             else
                 if (IsValidParameter(s))
