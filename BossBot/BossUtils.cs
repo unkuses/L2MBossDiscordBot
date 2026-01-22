@@ -80,7 +80,7 @@ public class BossUtils(ILanguage localization)
     {
         var nextRespawnTime = model.KillTime.AddHours(model.RespawnTime);
         var timeToRespawn = nextRespawnTime - dateTimeHelper.CurrentTime;
-        return $@"**{StringHelper.PopulateWithWhiteSpaces(model.Id, 2)}**|{nextRespawnTime:HH:mm}|**{StringHelper.PopulateWithWhiteSpaces(model.NickName.ToUpper(), maxLength)}** через {timeToRespawn:hh\:mm} | {model.Chance}{GetChanceStatus(model.Chance)}{AppendEggPlant(model.PurpleDrop)}";
+        return $@"{StringHelper.PopulateWithWhiteSpaces(model.Id, 2)}|{nextRespawnTime:HH:mm}|{StringHelper.PopulateWithWhiteSpaces(model.NickName.ToUpper(), maxLength)} через {timeToRespawn:hh\:mm} | {model.Chance}{GetChanceStatus(model.Chance)}{AppendEggPlant(model.PurpleDrop)}";
     }
 
     private static void PopulateString(List<StringBuilder> builders, ref StringBuilder stringBuilder, string str)

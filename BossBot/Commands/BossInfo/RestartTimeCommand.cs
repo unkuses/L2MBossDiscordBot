@@ -45,7 +45,7 @@ namespace BossBot.Commands.BossInfo
                 var nextRespawnTime = model.KillTime.AddHours(model.RespawnTime);
                 var timeToRespawn = nextRespawnTime - dateTimeHelper.CurrentTime;
                 var str =
-                    $@"**{StringHelper.PopulateWithWhiteSpaces(model.Id.ToString(), 2)}**|{nextRespawnTime:HH:mm}|**{StringHelper.PopulateWithWhiteSpaces(model.NickName.ToUpper(), maxLength)}** через {timeToRespawn.ToString(@"hh\:mm")} | {model.Chance}";
+                    $@"{StringHelper.PopulateWithWhiteSpaces(model.Id.ToString(), 2)}|{nextRespawnTime:HH:mm}|{StringHelper.PopulateWithWhiteSpaces(model.NickName.ToUpper(), maxLength)} через {timeToRespawn.ToString(@"hh\:mm")} | {model.Chance}";
                 if (stringBuilder.Length + str.Length > 2000)
                 {
                     stringBuilder = new StringBuilder();

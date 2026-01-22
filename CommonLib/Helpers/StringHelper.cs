@@ -2,8 +2,9 @@
 
 public static class StringHelper
 {
-    public static string PopulateWithWhiteSpaces(string str, int stringLength)
+    public static string PopulateWithWhiteSpaces(string str, int stringLength, bool makeBold = true)
     {
+        str = $"**{str}**";
         var whiteSpacesCount = stringLength - str.Length;
         if (whiteSpacesCount <= 0)
             return str;
