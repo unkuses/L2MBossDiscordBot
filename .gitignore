@@ -15,3 +15,5 @@
 /BossBotAPI/Properties
 /packages
 /BossLogger/bin/Release/net8.0
+/BossBot.Services/bin/Debug/net8.0
+/BossBot.Services/obj
