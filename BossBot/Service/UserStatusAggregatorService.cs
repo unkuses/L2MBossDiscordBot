@@ -26,19 +26,19 @@ public class UserStatusAggregatorService
 
     public UserStatusAggregatorService(DiscordClientService discordClientService, OpenAIService openAiService, BotOptions options)
     {
-        _discordClientService = discordClientService;
-        _openAiService = openAiService;
-        _options = options;
-        var credential = GoogleCredential
-            .FromFile("GoogleKeys.json")
-            .CreateScoped(SheetsService.Scope.Spreadsheets);
+        //_discordClientService = discordClientService;
+        //_openAiService = openAiService;
+        //_options = options;
+        //var credential = GoogleCredential
+        //    .FromFile("GoogleKeys.json")
+        //    .CreateScoped(SheetsService.Scope.Spreadsheets);
 
-        _sheetsService = new SheetsService(new BaseClientService.Initializer
-        {
-            HttpClientInitializer = credential,
-            ApplicationName = "DiscordBossBot"
-        });
-        _discordClientService.MessageReceivedEvent += DiscordMessageReceivedEvent;
+        //_sheetsService = new SheetsService(new BaseClientService.Initializer
+        //{
+        //    HttpClientInitializer = credential,
+        //    ApplicationName = "DiscordBossBot"
+        //});
+        //_discordClientService.MessageReceivedEvent += DiscordMessageReceivedEvent;
     }
 
     private void DiscordMessageReceivedEvent(object? sender, Tuple<IMessage, ISocketMessageChannel> e)

@@ -6,7 +6,7 @@ namespace BossBot.Commands.BossInfo
     public class GetAllNotLoggedBossesCommand(CosmoDb bossData) : ICommand
     {
         public string[] Keys { get; } = ["??"];
-        public async Task<List<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands)
+        public async Task<List<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands, string screenShotUrl = "")
         {
             var list = await bossData.GetAllNotLoggedBossInformationAsync(chatId);
             var stringBuilders = new List<StringBuilder>();

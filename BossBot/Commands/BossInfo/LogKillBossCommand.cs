@@ -8,7 +8,7 @@ namespace BossBot.Commands.BossInfo
     {
         public string[] Keys { get; } = ["k", "к"];
 
-        public async Task<List<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands)
+        public async Task<List<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands, string screenShotUrl = "")
         {
             List<StringBuilder> stringBuilders = [];
             var sb = new StringBuilder();

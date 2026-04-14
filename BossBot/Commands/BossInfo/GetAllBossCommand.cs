@@ -10,7 +10,7 @@ public class GetAllBossCommand(CosmoDb bossData, DateTimeHelper dateTimeHelper, 
         "l", "л"
     ]; 
     
-    public Task<List<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands)
+    public Task<List<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands, string screenShotUrl = "")
     {
         if (commands.Length == 1 || !int.TryParse(commands[1], out var count))
         {

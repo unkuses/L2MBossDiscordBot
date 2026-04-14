@@ -5,7 +5,7 @@ namespace BossBot.Commands.ActivityLogger;
 public class MergeUsersCommand(UserStatisticData userStatisticData) : ICommand
 {
     public string[] Keys { get; } = ["merge", "объединить", "m"];
-    public Task<List<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands)
+    public Task<List<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands, string screenShotUrl = "")
     {
         if (commands.Length < 3)
             return Task.FromResult<List<string>>(["Неверный формат команды. Используйте: merge <id1> <id2>"]);

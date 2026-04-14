@@ -9,7 +9,7 @@ namespace BossBot.Commands.BossInfo
     {
         public string[] Keys { get; } = ["r", "р"];
 
-        public async Task<List<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands)
+        public async Task<List<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands, string screenShotUrl = "")
         {
             var list = new List<string>();
             if (commands.Length is 1 or > 3)

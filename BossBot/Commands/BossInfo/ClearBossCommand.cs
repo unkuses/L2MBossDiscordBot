@@ -6,7 +6,7 @@ namespace BossBot.Commands.BossInfo
     {
         public string[] Keys { get; } = ["c", "о"];
 
-        public Task<List<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands)
+        public Task<List<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands, string screenShotUrl = "")
         {
             _ = bossData.ClearAllBossInformationAsync(chatId);
             List<string> answer = [language.ClearAllBosses(chatId)];

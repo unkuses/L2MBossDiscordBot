@@ -6,7 +6,7 @@ namespace BossBot.Commands.ActivityLogger;
 public class GetUserStatistics(UserStatisticData userStatisticData) : ICommand
 {
     public string[] Keys { get; } = ["all", "все"];
-    public async Task<List<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands)
+    public async Task<List<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands, string screenShotUrl = "")
     {
         var usersInfo = userStatisticData.GetUserStatistics(chatId);
         List<StringBuilder> resultList = [];

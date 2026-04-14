@@ -5,7 +5,7 @@ namespace BossBot.Commands.ActivityLogger;
 public class RemoveUserCommand(UserStatisticData userStatisticData) : ICommand
 {
     public string[] Keys { get; } = ["remove", "удалить", "r", "del", "d"];
-    public Task<List<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands)
+    public Task<List<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands, string screenShotUrl = "")
     {
         if (commands.Length == 2 && int.TryParse(commands[1], out var id))
         {

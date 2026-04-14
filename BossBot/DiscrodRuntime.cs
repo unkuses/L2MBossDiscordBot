@@ -2,8 +2,8 @@
 
 namespace BossBot;
 
-public class DiscordRuntime(RuntimeService runtimeService, 
-    ActivityService activityService, 
+public class DiscordRuntime(RuntimeService runtimeService,
+    NewActivityService activityService, 
     EventChatService eventChatService, 
     BossChatService bossChatService,
     UserStatusAggregatorService userStatusAggregatorService)

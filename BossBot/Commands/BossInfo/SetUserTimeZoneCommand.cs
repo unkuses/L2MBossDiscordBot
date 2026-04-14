@@ -6,7 +6,7 @@ namespace BossBot.Commands.BossInfo;
 public class SetUserTimeZoneCommand(BossData bossData) : ICommand
 {
     public string[] Keys { get; } = ["tz"];
-    public Task<List<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands)
+    public Task<List<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands, string screenShotUrl = "")
     {
         var tzList = commands.Where(s => s != "tz").ToList();
         var timeZoneId = string.Join(" ", tzList);

@@ -5,7 +5,7 @@ namespace BossBot.Commands.ActivityLogger;
 public class RegisterUser(UserStatisticData userStatisticData) : ICommand
 {
     public string[] Keys { get; } = ["reg", "рег"];
-    public Task<List<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands)
+    public Task<List<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands, string screenShotUrl = "")
     {
         var userName = commands[1];
         var count = 1;

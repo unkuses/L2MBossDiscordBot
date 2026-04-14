@@ -2,6 +2,7 @@
 using BossBot.Commands.ActivityLogger;
 using BossBot.Commands.BossInfo;
 using BossBot.Commands.Event;
+using BossBot.Commands.NewActivityLogger;
 using BossBot.Interfaces;
 using BossBot.Options;
 using BossBot.Service;
@@ -38,7 +39,7 @@ internal class Program
         builder.Services.AddSingleton<DiscordClientService>();
         builder.Services.AddSingleton<BossData>();
         builder.Services.AddSingleton<Logger>();
-        builder.Services.AddSingleton<ActivityService>();
+        builder.Services.AddSingleton<NewActivityService>();
         builder.Services.AddSingleton<UserStatisticData>();
         builder.Services.AddSingleton<ChatLanguageData>();
         builder.Services.AddSingleton<BossUtils>();
@@ -67,6 +68,13 @@ internal class Program
         builder.Services.AddSingleton<MergeUsersCommand>();
         builder.Services.AddSingleton<UnregisterChatCommand>();
         builder.Services.AddSingleton<ChatLanguageCommand>();
+        #endregion
+
+        #region NewActivityLog
+        builder.Services.AddSingleton<RegisterUsers>();
+        builder.Services.AddSingleton<ClearUsers>();
+        builder.Services.AddSingleton<RegisterActivity>();
+        builder.Services.AddSingleton<GetEventStatistic>();
         #endregion
 
         var serviceProvider = builder.Services.BuildServiceProvider();

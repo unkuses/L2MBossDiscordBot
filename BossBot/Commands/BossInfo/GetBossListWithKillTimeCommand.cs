@@ -8,7 +8,7 @@ namespace BossBot.Commands.BossInfo
     {
         public string[] Keys { get; } = ["kl"];
 
-        public async Task<List<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands) =>
+        public async Task<List<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands, string screenShotUrl = "") =>
             await GetAllBossStatus(await bossData.GetAllLoggedBossInfoAsync(chatId));
 
         private Task<List<string>> GetAllBossStatus(IList<BossModel> models)

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.8.34330.188
+# Visual Studio Version 18
+VisualStudioVersion = 18.3.11520.95 d18.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BossBot", "BossBot\BossBot.csproj", "{0E242B99-2769-4242-BD98-7E5F0E6AB5F6}"
 EndProject
@@ -10,6 +10,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonLib", "CommonLib\CommonLib.csproj", "{5D87A8A7-B235-4429-A73D-5F96FA8D0DBE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BossLogger", "BossLogger\BossLogger.csproj", "{10E3B790-D113-4258-8B54-07750C9ACCF0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BossBot.Services", "BossBot.Services\BossBot.Services.csproj", "{D7972231-1FBF-41E6-A234-BE03A7AA4986}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{10E3B790-D113-4258-8B54-07750C9ACCF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{10E3B790-D113-4258-8B54-07750C9ACCF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{10E3B790-D113-4258-8B54-07750C9ACCF0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7972231-1FBF-41E6-A234-BE03A7AA4986}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7972231-1FBF-41E6-A234-BE03A7AA4986}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7972231-1FBF-41E6-A234-BE03A7AA4986}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7972231-1FBF-41E6-A234-BE03A7AA4986}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

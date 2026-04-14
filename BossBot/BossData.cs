@@ -1,6 +1,5 @@
 ﻿using BossBot.DataSource;
 using BossBot.DBModel;
-using BossBot.Options;
 using CommonLib.Helpers;
 
 namespace BossBot;

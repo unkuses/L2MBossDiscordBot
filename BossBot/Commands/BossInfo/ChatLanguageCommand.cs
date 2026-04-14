@@ -5,7 +5,7 @@ namespace BossBot.Commands.BossInfo;
 public class ChatLanguageCommand(ChatLanguageData chatLanguageData) : ICommand
 {
     public string[] Keys { get; } = ["language", "мова"];
-    public Task<List<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands)
+    public Task<List<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands, string screenShotUrl = "")
     {
         if (commands[1].ToLower() == "ua")
         {
