@@ -140,6 +140,24 @@ public class BossBotApi(ILogger<BossBotApi> logger, PlayersActivityService playe
         catch (Exception ex)
         {
             logger.LogError($"Error processing request: {ex.Message}");
+            return new ObjectResult(ex);
+        }
+    }
+
+    [Function("GetStatisticInfo")]
+    public async Task<IActionResult> GetStatisticInfo([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req, string chatId)
+    {
+        logger.LogInformation("C# HTTP trigger function processed a request for statistics.");
+        try
+        {
+            var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+            var requestData = JsonSerializer.Deserialize<RequestParseImageUrl>(requestBody);
+            var users = await imageWork.GetBossStatistic(requestData.Url);
+            return new OkObjectResult(users);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError($"Error processing request: {ex.Message}");
             return new StatusCodeResult(StatusCodes.Status500InternalServerError);
         }
     }

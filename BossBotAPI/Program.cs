@@ -19,6 +19,7 @@ builder.ConfigureFunctionsWebApplication();
 
 builder.Services.AddDbContextFactory<BossDbContext>(options =>
     options.UseSqlServer(builder.Configuration["AzureSql"]));
+builder.Services.AddScoped<DatabaseService>();
 builder.Services.AddSingleton(new DateTimeHelperOptions() { TimeZone = builder.Configuration["TimeZone"] });
 builder.Services.AddSingleton<DateTimeHelper>();
 builder.Services.AddSingleton<PlayersActivityService>();
