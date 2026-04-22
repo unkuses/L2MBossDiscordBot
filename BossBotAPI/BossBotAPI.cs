@@ -70,7 +70,7 @@ public class BossBotApi(ILogger<BossBotApi> logger, PlayersActivityService playe
     }
 
     [Function("AddUsers")]
-    public async Task<IActionResult> GetStatisticInfo(
+    public async Task<IActionResult> AddUser(
         [HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req)
     {
         logger.LogInformation("C# HTTP trigger function processed a request for statistics.");
