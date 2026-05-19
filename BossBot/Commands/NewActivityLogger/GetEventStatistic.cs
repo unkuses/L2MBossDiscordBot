@@ -3,6 +3,7 @@ using BossBot.Options;
 using CommonLib.Models;
 using CommonLib.Requests;
 using System.Text;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 
 namespace BossBot.Commands.NewActivityLogger;
@@ -13,8 +14,11 @@ public class GetEventStatistic(BotOptions options) : ICommand
     public async Task<List<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands, string screenShotUrl = "")
     {
         RequestGetStatistic requestData = new() { ChatId = chatId, EventName = commands[0] };
-        var jsonPayload = JsonSerializer.Serialize(requestData);
-
+        var jsonOptions = new JsonSerializerOptions
+        {
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        };
+        var jsonPayload = JsonSerializer.Serialize(requestData, jsonOptions);
         using var httpClient = new HttpClient();
         var response = await httpClient.PostAsync($"{options.BaseFunctionPath}GetStatisticForEvent{options.FunctionSecret}", new StringContent(jsonPayload, Encoding.UTF8, "application/json"));
         if (response.IsSuccessStatusCode)
