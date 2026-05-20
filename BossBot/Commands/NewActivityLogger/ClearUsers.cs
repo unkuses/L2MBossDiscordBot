@@ -9,7 +9,7 @@ public class ClearUsers(BotOptions options) : ICommand
     public async Task<List<string>> ExecuteAsync(ulong chatId, ulong userId, string[] commands, string screenShotUrl = "")
     {
         using var httpClient = new HttpClient();
-        var response = await httpClient.DeleteAsync($"{options.BaseFunctionPath}CleanUsers/?chatId={chatId}{options.FunctionSecret}");
+        var response = await httpClient.DeleteAsync($"{options.BaseFunctionPath}CleanUsers/{options.FunctionSecret}&chatId={chatId}");
         if (response.IsSuccessStatusCode)
         {
             var result = await response.Content.ReadAsStringAsync();
