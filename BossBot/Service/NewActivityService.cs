@@ -45,7 +45,7 @@ public class NewActivityService
             return ["Комманда не найдена"];
 
         var commandParts = command.Split(' ');
-        var cmd = _commands.FirstOrDefault(c => c.Keys.Contains(commandParts[0]));
+        var cmd = _commands.FirstOrDefault(c => c.Keys.Contains(commandParts[0], StringComparer.OrdinalIgnoreCase));
         return cmd != null ? cmd.ExecuteAsync(chatId, userId, commandParts, url).Result.ToList() : ["Комманда не найдена"];
     }
 }

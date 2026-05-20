@@ -1,8 +1,9 @@
-﻿using System.Text;
-using System.Text.Json;
-using BossBot.Interfaces;
-using CommonLib.Requests;
+﻿using BossBot.Interfaces;
 using BossBot.Options;
+using CommonLib.Requests;
+using System.Text;
+using System.Text.Encodings.Web;
+using System.Text.Json;
 
 namespace BossBot.Commands.NewActivityLogger;
 
@@ -20,7 +21,11 @@ public class RegisterActivity(BotOptions options) : ICommand
         }
 
         RequestAddUserToEvent requestData = new() { ChatId = chatId, Url = screenShotUrl, EventName = eventName};
-        var jsonPayload = JsonSerializer.Serialize(requestData);
+        var jsonOptions = new JsonSerializerOptions
+        {
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        };
+        var jsonPayload = JsonSerializer.Serialize(requestData, jsonOptions);
 
         using var httpClient = new HttpClient();
         var response = await httpClient.PostAsync($"{options.BaseFunctionPath}AddUserToEvents{options.FunctionSecret}", new StringContent(jsonPayload, Encoding.UTF8, "application/json"));
