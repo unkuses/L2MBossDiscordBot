@@ -8,5 +8,12 @@ public class DiscordRuntime(RuntimeService runtimeService,
     BossChatService bossChatService,
     UserStatusAggregatorService userStatusAggregatorService)
 {
-    public Task MaintenanceTask() => runtimeService.MaintenanceTask();
+    public List<Task> MaintenanceTask()
+    {
+        return
+        [
+            runtimeService.StartDailyJob(),
+            runtimeService.MaintenanceTask()
+        ];
+    }
 }

@@ -80,7 +80,8 @@ internal class Program
         var serviceProvider = builder.Services.BuildServiceProvider();
         var discordRuntime = serviceProvider.GetRequiredService<DiscordRuntime>();
 
-        await discordRuntime.MaintenanceTask();
+        var tasks = discordRuntime.MaintenanceTask();
+        Task.WaitAll([.. tasks]);
         while (true)
         {
             Thread.Sleep(1000*60);
