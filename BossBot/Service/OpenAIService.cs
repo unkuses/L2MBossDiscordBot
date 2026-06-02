@@ -19,7 +19,7 @@ public class OpenAIService
         _cosmoDb = cosmoDb;
         var credential = new AzureKeyCredential(options.openAIKey);
         var azureClient = new AzureOpenAIClient(new Uri(options.OpenAIEnpoint), credential);
-        _chatClient = azureClient.GetChatClient("o4-mini");
+        _chatClient = azureClient.GetChatClient("gpt-5-chat");
     }
 
     public async Task<string> GetEventResponseAsync(string prompt)
