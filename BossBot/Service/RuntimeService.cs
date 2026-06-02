@@ -1,11 +1,17 @@
-﻿using CommonLib.Helpers;
-using CommonLib.Models;
-using System.Text;
+﻿using BossBot.DBModel;
 using BossBot.Interfaces;
+using CommonLib.Helpers;
+using CommonLib.Models;
+using Discord;
+using System.Text;
 
 namespace BossBot.Service;
 
-public class RuntimeService(CosmoDb cosmoDb, BossData bossData, DiscordClientService discordClientService, DateTimeHelper dateTimeHelper, ILanguage localization)
+public class RuntimeService(CosmoDb cosmoDb, 
+    BossData bossData, 
+    DiscordClientService discordClientService, 
+    DateTimeHelper dateTimeHelper, 
+    ILanguage localization)
 {
     public async Task MaintenanceTask()
     {
@@ -17,6 +23,57 @@ public class RuntimeService(CosmoDb cosmoDb, BossData bossData, DiscordClientSer
             UpcomingEvents();
 
             Thread.Sleep(60 * 1000);
+        }
+    }
+
+    public async Task StartDailyJob()
+    {
+        await Task.Delay(1000 * 60);
+        while (true)
+        {
+            var now = dateTimeHelper.CurrentTime;
+            var nextRun = now.Date.AddHours(9);
+            if (now > nextRun)
+                nextRun = nextRun.AddDays(1);
+
+            var delay = nextRun - now;
+            await Task.Delay(delay);
+            try
+            {
+                await GetAllDailyEvents();
+            }
+            catch (Exception)
+            {
+
+            }
+        }
+    }
+
+    private async Task GetAllDailyEvents()
+    {
+        var events = bossData.GetAllTodayEvents();
+        Dictionary<ulong, IList<EventInformationDBModel>> dictionary = new();
+        foreach (var e in events)
+        {
+            if (!dictionary.ContainsKey(e.ChatId))
+            {
+                dictionary[e.ChatId] = new List<EventInformationDBModel>();
+            }
+
+            dictionary[e.ChatId].Add(e);
+        }
+
+        foreach (var chatId in dictionary.Keys)
+        {
+            var builder = new StringBuilder();
+            builder.AppendLine("@here Ближайшие события:");
+            foreach (var item in dictionary[chatId])
+            {
+                var timeToEvent = item.Time - dateTimeHelper.CurrentTime;
+                builder.AppendLine($"**{item.EventName}** в {item.Time:HH:mm} через {timeToEvent.ToString(@"hh\:mm")}");
+            }
+            var channel = discordClientService.GetChannel(chatId);
+            channel?.SendMessageAsync(builder.ToString());
         }
     }
 
