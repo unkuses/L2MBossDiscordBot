@@ -8,7 +8,7 @@ public class EventCommandModel
 public class EventModel<T>
 {
     public EventType Event { get; set; }
-    public T EventCommand { get; set; }
+    public T EventCommand { get; set; } = default!;
 }
 
 public enum EventType

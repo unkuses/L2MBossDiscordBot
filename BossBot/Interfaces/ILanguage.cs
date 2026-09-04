@@ -27,4 +27,6 @@ public interface ILanguage
     string ChainBeginAnnouncement(ulong chatId, string location);
 
     string ChainEndAnnouncement(ulong chatId);
+
+    string ProcessingError(ulong chatId);
 }

@@ -27,10 +27,10 @@ public class EventChatService
         _openAiService = openAiService;
         _bossData = bossData;
         _discordClientService = discordClientService;
-        _discordClientService.MessageReceivedEvent += async (sender, args) =>
+        _discordClientService.MessageReceivedEvent += async (message, channel) =>
         {
-            var timeZone = bossData.GetUserTimeZone(args.Item1.Author.Id);
-            await ProcessMessage(args.Item1, args.Item2, timeZone);
+            var timeZone = bossData.GetUserTimeZone(message.Author.Id);
+            await ProcessMessage(message, channel, timeZone);
         };
         _eventCommands.AddRange(
         [ addEventCommand, removeEventCommand, getAllEventsCommand ] );
@@ -70,7 +70,13 @@ public class EventChatService
         var commandText = await _openAiService.GetEventResponseAsync(text);
 
         var eventModel = JsonConvert.DeserializeObject<EventCommandModel>(commandText);
+        if (eventModel == null)
+            return;
+
         var eventCommand = _eventCommands.FirstOrDefault(c => c.Keys.Contains(eventModel.Event.ToString().ToLower()));
+        if (eventCommand == null)
+            return;
+
         var result = await eventCommand.ExecuteAsync(channel.Id, message.Author.Id, commandText);
         await _discordClientService.ProcessAnswers(channel, [.. result]);
     }

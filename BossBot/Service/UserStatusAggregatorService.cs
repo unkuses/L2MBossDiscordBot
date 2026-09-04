@@ -41,17 +41,18 @@ public class UserStatusAggregatorService
         _discordClientService.MessageReceivedEvent += DiscordMessageReceivedEvent;
     }
 
-    private void DiscordMessageReceivedEvent(object? sender, Tuple<IMessage, ISocketMessageChannel> e)
+    private async Task DiscordMessageReceivedEvent(IMessage message, ISocketMessageChannel channel)
     {
-        if(e.Item2 is IDMChannel)
+        if(channel is IDMChannel)
         {
-            _ = ReadSheet(e.Item2, e.Item1.Attachments.Select(a => a.Url).ToList(), e.Item1.Author.GlobalName ?? e.Item1.Author.Username);
+            await ReadSheet(channel, message.Attachments.Select(a => a.Url).ToList(),
+                message.Author.GlobalName ?? message.Author.Username);
         }
     }
 
     private async Task ReadSheet(ISocketMessageChannel dbChannel, List<string> attachmentUrls, string discordNick)
     {
-        CharacterStatsModel model = null;
+        CharacterStatsModel? model = null;
         try
         {
             List<string> subStrings = [];
@@ -74,7 +75,7 @@ public class UserStatusAggregatorService
             await MergeUpsertAsync(discordNick, string.Empty, model);
             await _discordClientService.ProcessAnswers(dbChannel, [$"Информация была обновлена {model.ToString()}"]);
         }
-        catch(Exception ex)
+        catch(Exception)
         {
             await _discordClientService.ProcessAnswers(dbChannel, [$"Информация не была обновлена {model?.ToString() ?? "модель не была создана"}"]);
         }

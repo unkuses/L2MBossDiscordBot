@@ -21,7 +21,7 @@ public class BossBotApi(ILogger<BossBotApi> logger, PlayersActivityService playe
             var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var requestData = JsonSerializer.Deserialize<RequestData>(requestBody);
 
-            if (requestData == null || string.IsNullOrEmpty(requestData.TimeZone) || requestData.Image == null)
+            if (requestData == null || string.IsNullOrWhiteSpace(requestData.TimeZone) || requestData.Image.Length == 0)
             {
                 return new BadRequestObjectResult("Invalid request. Please provide both TimeZone and Image.");
             }
@@ -32,8 +32,8 @@ public class BossBotApi(ILogger<BossBotApi> logger, PlayersActivityService playe
         }
         catch (Exception ex)
         {
-            logger.LogError($"Error processing request: {ex.Message}");
-            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+            logger.LogError(ex, "Error processing image request.");
+            return DiagnosticError(ex);
         }
     }
 
@@ -48,7 +48,8 @@ public class BossBotApi(ILogger<BossBotApi> logger, PlayersActivityService playe
             var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var requestData = JsonSerializer.Deserialize<RequestParseImageUrl>(requestBody);
 
-            if (requestData == null || string.IsNullOrEmpty(requestData.Url))
+            if (requestData == null || string.IsNullOrWhiteSpace(requestData.Url) ||
+                string.IsNullOrWhiteSpace(requestData.TimeZone))
             {
                 return new BadRequestObjectResult("Invalid request. Please provide both TimeZone and Image.");
             }
@@ -64,8 +65,8 @@ public class BossBotApi(ILogger<BossBotApi> logger, PlayersActivityService playe
         }
         catch (Exception ex)
         {
-            logger.LogError($"Error processing request: {ex.Message}");
-            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+            logger.LogError(ex, "Error processing image URL request.");
+            return DiagnosticError(ex);
         }
     }
 
@@ -78,14 +79,17 @@ public class BossBotApi(ILogger<BossBotApi> logger, PlayersActivityService playe
         {
             var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var requestData = JsonSerializer.Deserialize<RequestAddUser>(requestBody);
+            if (requestData == null || string.IsNullOrWhiteSpace(requestData.Url))
+                return new BadRequestObjectResult("Invalid request. Please provide an image URL.");
+
             var users = await imageWork.GetBossStatistic(requestData.Url);
             var result = await playersActivityService.AddNewPlayerName(requestData.ChatId, users);
             return new OkObjectResult(result);
         }
         catch (Exception ex)
         {
-            logger.LogError($"Error processing request: {ex.Message}");
-            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+            logger.LogError(ex, "Error adding users.");
+            return DiagnosticError(ex);
         }
     }
 
@@ -101,8 +105,8 @@ public class BossBotApi(ILogger<BossBotApi> logger, PlayersActivityService playe
         }
         catch (Exception ex)
         {
-            logger.LogError($"Error processing request: {ex.Message}");
-            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+            logger.LogError(ex, "Error cleaning users.");
+            return DiagnosticError(ex);
         }
     }
 
@@ -114,6 +118,10 @@ public class BossBotApi(ILogger<BossBotApi> logger, PlayersActivityService playe
         {
             var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var requestData = JsonSerializer.Deserialize<RequestAddUserToEvent>(requestBody);
+            if (requestData == null || string.IsNullOrWhiteSpace(requestData.Url) ||
+                string.IsNullOrWhiteSpace(requestData.EventName))
+                return new BadRequestObjectResult("Invalid request. Please provide an image URL and event name.");
+
             var users = await imageWork.GetBossStatistic(requestData.Url);
             var result = await playersActivityService.PopulatePlayersActivityAsync(requestData.ChatId, users,
                 requestData.EventName);
@@ -121,8 +129,8 @@ public class BossBotApi(ILogger<BossBotApi> logger, PlayersActivityService playe
         }
         catch (Exception ex)
         {
-            logger.LogError($"Error processing request: {ex.Message}");
-            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+            logger.LogError(ex, "Error adding users to event.");
+            return DiagnosticError(ex);
         }
     }
 
@@ -134,13 +142,16 @@ public class BossBotApi(ILogger<BossBotApi> logger, PlayersActivityService playe
         {
             var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var requestData = JsonSerializer.Deserialize<RequestGetStatistic>(requestBody);
+            if (requestData == null || string.IsNullOrWhiteSpace(requestData.EventName))
+                return new BadRequestObjectResult("Invalid request. Please provide an event name.");
+
             var result = await playersActivityService.GetUserStatisticByEventName(requestData.ChatId, requestData.EventName);
             return new OkObjectResult(result);
         }
         catch (Exception ex)
         {
-            logger.LogError($"Error processing request: {ex.Message}");
-            return new ObjectResult(ex);
+            logger.LogError(ex, "Error getting event statistics.");
+            return DiagnosticError(ex);
         }
     }
 
@@ -152,13 +163,21 @@ public class BossBotApi(ILogger<BossBotApi> logger, PlayersActivityService playe
         {
             var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var requestData = JsonSerializer.Deserialize<RequestParseImageUrl>(requestBody);
+            if (requestData == null || string.IsNullOrWhiteSpace(requestData.Url))
+                return new BadRequestObjectResult("Invalid request. Please provide an image URL.");
+
             var users = await imageWork.GetBossStatistic(requestData.Url);
             return new OkObjectResult(users);
         }
         catch (Exception ex)
         {
-            logger.LogError($"Error processing request: {ex.Message}");
-            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+            logger.LogError(ex, "Error getting image statistics.");
+            return DiagnosticError(ex);
         }
     }
+
+    private static ObjectResult DiagnosticError(Exception exception) => new(exception.ToString())
+    {
+        StatusCode = StatusCodes.Status500InternalServerError
+    };
 }

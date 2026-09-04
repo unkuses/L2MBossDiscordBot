@@ -29,7 +29,7 @@ public class GetEventStatistic(BotOptions options) : ICommand
                 PropertyNameCaseInsensitive = true
             };
             var list = JsonSerializer.Deserialize<List<EventStatistic>>(responseJson, options);
-            var usersInfo = list.OrderByDescending(x => x.Count)
+            var usersInfo = (list ?? []).OrderByDescending(x => x.Count)
                 .ThenBy(x => x.PlayerName)
                 .ToList();
             List<StringBuilder> resultList = [];
@@ -52,7 +52,7 @@ public class GetEventStatistic(BotOptions options) : ICommand
                 var u = usersInfo[i];
 
                 var idStr = (i + 1).ToString().PadRight(3).Substring(0, 3);
-                var name = u.PlayerName;
+                var name = u.PlayerName ?? string.Empty;
                 var nameStr = name.PadRight(maxNameLength).Substring(0, maxNameLength);
                 var countStr = u.Count.ToString().PadRight(5).Substring(0, 5);
 

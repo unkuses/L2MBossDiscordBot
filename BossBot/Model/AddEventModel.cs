@@ -8,7 +8,7 @@ public class AddEventModel
 
     public DateTime Time { get; set; }
 
-    public string Description { get; set; }
+    public string Description { get; set; } = string.Empty;
 
     public int TimeBeforeNotification { get; set; }
 }

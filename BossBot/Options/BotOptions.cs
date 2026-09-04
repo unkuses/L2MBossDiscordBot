@@ -22,7 +22,7 @@ public class BotOptions(string chatName, string botToken, string imageAnalysisUR
 
     public string openAIKey { get; set; } = openAIKey;
 
-    public string GoogleSheetId { get; set; }
+    public string GoogleSheetId { get; set; } = string.Empty;
 
     public string BaseFunctionPath { get; set; } = "http://localhost:7071/api/";
 

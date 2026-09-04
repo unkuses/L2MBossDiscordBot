@@ -36,6 +36,7 @@ namespace BossBot.Commands.BossInfo
                 if (!dateTime.HasValue)
                 {
                     sb.AppendLine(localization.IncorrectFormat(chatId));
+                    return stringBuilders.Select(s => s.ToString()).ToList();
                 }
 
                 if (dateTime > dateTimeHelper.CurrentTime.AddHours(1))

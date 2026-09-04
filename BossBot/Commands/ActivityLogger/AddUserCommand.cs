@@ -24,14 +24,14 @@ public class AddUserCommand(BotOptions options, UserStatisticData userStatisticD
         {
             var responseString = await response.Content.ReadAsStringAsync();
             var responseData = JsonSerializer.Deserialize<List<string>>(responseString);
-            responseData.ForEach(userName =>
+            foreach (var userName in responseData ?? [])
             {
                 var user = userStatisticData.AddUserStatistic(chatId, userName.Replace(" ", ""));
                 if(user != null)
                 {
                     userList.Add(user);
                 }
-            });
+            }
         }
 
         if (userList.Count == 0)

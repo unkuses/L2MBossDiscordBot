@@ -14,6 +14,9 @@
 /BossBotAPI/Properties/ServiceDependencies/L2MBossInfoAPI - Zip Deploy
 /BossBotAPI/Properties
 /packages
+/artifacts
+**/bin/
+**/obj/
 /BossLogger/bin/Release/net8.0
 /BossBot.Services/bin/Debug/net8.0
 /BossBot.Services/obj

@@ -33,4 +33,6 @@ public class UALanguage : ILanguage
         $"\r\n--------Початок ** {location} ** чейну--------";
 
     public string ChainEndAnnouncement(ulong chatId) => "--------Кінець чейну-------- \r\n";
+
+    public string ProcessingError(ulong chatId) => "Не вдалося обробити запит. Будь ласка, спробуйте пізніше.";
 }

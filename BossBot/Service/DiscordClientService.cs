@@ -21,7 +21,7 @@ public class DiscordClientService
         _ = LogIn(options.BotToken);
     }
 
-    public event EventHandler<Tuple<IMessage, ISocketMessageChannel>> MessageReceivedEvent;
+    public event Func<IMessage, ISocketMessageChannel, Task>? MessageReceivedEvent;
 
     public async Task ProcessAnswers(ISocketMessageChannel channel, List<string> answers)
     {
@@ -36,28 +36,44 @@ public class DiscordClientService
 
             builder.AppendLine(answer);
         }
-        await channel.SendMessageAsync(builder.ToString());
+        if (builder.Length > 0)
+            await channel.SendMessageAsync(builder.ToString());
     }
 
     private async Task MessageReceived(SocketMessage arg)
     {
         var messages = await arg.Channel.GetMessagesAsync(10).ToListAsync();
-        if (messages != null)
+        foreach (var message in messages.SelectMany(batch => batch).OrderBy(message => message.CreatedAt))
         {
-            messages.ForEach(x =>
-            {
-                foreach (var message in x)
-                {
-                    if (!message.Author.IsBot)
-                    {
-                        if (_lastReadMessage.ContainsKey(arg.Channel.Id) &&
-                            message.CreatedAt <= _lastReadMessage[arg.Channel.Id]) continue;
-                        MessageReceivedEvent?.Invoke(this, new Tuple<IMessage, ISocketMessageChannel>(message, arg.Channel));
-                    }
+            if (message.Author.IsBot)
+                continue;
 
-                    _lastReadMessage[arg.Channel.Id] = message.CreatedAt;
-                }
-            });
+            if (_lastReadMessage.TryGetValue(arg.Channel.Id, out var lastRead) &&
+                message.CreatedAt <= lastRead)
+            {
+                continue;
+            }
+
+            _ = DispatchMessage(message, arg.Channel);
+            _lastReadMessage[arg.Channel.Id] = message.CreatedAt;
+        }
+    }
+
+    private async Task DispatchMessage(IMessage message, ISocketMessageChannel channel)
+    {
+        if (MessageReceivedEvent == null)
+            return;
+
+        try
+        {
+            var tasks = MessageReceivedEvent.GetInvocationList()
+                .Cast<Func<IMessage, ISocketMessageChannel, Task>>()
+                .Select(handler => handler(message, channel));
+            await Task.WhenAll(tasks);
+        }
+        catch (Exception ex)
+        {
+            await _logger.WriteLog($"Message handler failed: {ex}");
         }
     }
 

@@ -20,6 +20,9 @@ public class AddEventCommand(BossData bossData, DateTimeHelper dateTimeHelper) :
     public async Task<IEnumerable<string>> ExecuteAsync(ulong chatId, ulong userId, string jsonCommand)
     {
         var model = JsonConvert.DeserializeObject<EventModel<AddEventModel>>(jsonCommand);
+        if (model?.EventCommand == null)
+            return ["Failed to add new event. Please check the command format."];
+
         var eventInfo = new EventInformationDBModel
         {
             EventName = model.EventCommand.Description,
@@ -38,6 +41,9 @@ public class AddEventCommand(BossData bossData, DateTimeHelper dateTimeHelper) :
     {
         var i = 1;
         var days = ParseRepeatDays(commands, ref i);
+        if (i >= commands.Length)
+            return false;
+
         if (!ParseTime(commands[i], out var startTime))
         {
             return false; // Invalid date format
@@ -49,7 +55,7 @@ public class AddEventCommand(BossData bossData, DateTimeHelper dateTimeHelper) :
         }
         i++;
 
-        if (int.TryParse(commands[i], out var timeBeforeNotification))
+        if (i < commands.Length && int.TryParse(commands[i], out var timeBeforeNotification))
         {
             i++;
         }

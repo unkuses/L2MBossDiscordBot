@@ -23,7 +23,8 @@ These instructions apply to the entire repository. Preserve existing behavior un
 ## Implementation conventions
 
 - Target .NET 8, keep nullable reference types enabled, and follow the surrounding C# style.
-- Use asynchronous APIs for network, database, and Discord operations. Propagate `Task` results and avoid adding blocking waits or sleeps.
+- Use asynchronous APIs for network, database, and Discord operations. Avoid blocking waits or sleeps.
+- Preserve the bot's intentional fire-and-forget workflow for independent Discord handlers and outbound messages: start the task and continue processing other work. Await only when later logic depends on the result. Use an explicit discard (`_ = task`) for intentional background work, and log background failures where practical.
 - Use constructor injection and register new services or commands in the appropriate composition root (`BossBot/Program.cs` or `BossBotAPI/Program.cs`).
 - Keep Discord command parsing and responses in `BossBot/Commands/`; place reusable domain models and helpers in `CommonLib/`.
 - When changing shared models or contracts, inspect every consuming project and maintain serialization compatibility unless a breaking change is explicitly requested.
@@ -35,6 +36,7 @@ These instructions apply to the entire repository. Preserve existing behavior un
 
 - Treat Discord tokens, OpenAI/Azure keys, Cosmos DB credentials, function secrets, Google credentials, and connection strings as secrets.
 - Never commit real credentials or print them in logs, test output, examples, or error messages.
+- `BossBotAPI` is a private, single-consumer diagnostic API protected by function keys. Preserve detailed exception information in its HTTP error responses for debugging, but never include configuration values, API keys, tokens, or connection strings explicitly.
 - `BossBot/Options.ini` and Azure Functions local settings may contain machine-specific secrets. Do not modify or expose their values unless the user explicitly asks for a sanitized configuration change.
 - Prefer configuration/environment-based values over adding credentials to source code.
 

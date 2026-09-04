@@ -53,6 +53,12 @@ namespace BossBotAPI
 
                         if (isNextBoss || i == lines.Count - 1)
                         {
+                            if (dateTimes.Count == 0)
+                            {
+                                i--;
+                                break;
+                            }
+
                             // Log the kill information and add it to the result
                             var bossModel = await LogKillBossInformationAsync(chatId, boss.Id, dateTimes.Min(), wasMentioned);
                             dateTimes.Clear();
@@ -91,7 +97,7 @@ namespace BossBotAPI
                 .WithParameter("@bossId", bossId);
             var iterator = container.GetItemQueryIterator<BossInformationDbModel>(query);
 
-            BossInformationDbModel bossInfo = null;
+            BossInformationDbModel? bossInfo = null;
             if (iterator.HasMoreResults)
             {
                 var response = await iterator.ReadNextAsync();
@@ -126,7 +132,7 @@ namespace BossBotAPI
             return new BossModel(bossInfo);
         }
 
-        private async Task<BossDbModel> GetBossModelByIdAsync(string id)
+        private async Task<BossDbModel?> GetBossModelByIdAsync(string id)
         {
             var container = _cosmosClient.GetContainer(DatabaseId, ContainerId);
             try
