@@ -96,4 +96,35 @@ public class DatabaseService(IDbContextFactory<BossDbContext> factory)
             Count = e.Count
         }).ToList();
     }
+
+    public async Task<UserStatistic?> GetStatisticByUserNameAsync(ulong chatId, string userName)
+    {
+        var normalizedName = userName.Replace(" ", string.Empty).ToLowerInvariant();
+        await using var context = await factory.CreateDbContextAsync();
+        var player = await context.Players
+            .AsNoTracking()
+            .Include(p => p.EventActivities)
+            .FirstOrDefaultAsync(p => p.ChatId == chatId && p.Name == normalizedName);
+
+        if (player == null)
+            return null;
+
+        var events = player.EventActivities
+            .GroupBy(activity => activity.EventName)
+            .Select(group => new EventActivityStatistic
+            {
+                EventName = group.Key,
+                Count = group.Sum(activity => activity.Count)
+            })
+            .OrderByDescending(activity => activity.Count)
+            .ThenBy(activity => activity.EventName)
+            .ToList();
+
+        return new UserStatistic
+        {
+            PlayerName = player.Name,
+            TotalCount = events.Sum(activity => activity.Count),
+            Events = events
+        };
+    }
 }

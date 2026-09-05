@@ -176,6 +176,32 @@ public class BossBotApi(ILogger<BossBotApi> logger, PlayersActivityService playe
         }
     }
 
+    [Function("GetStatisticForUser")]
+    public async Task<IActionResult> GetStatisticForUser(
+        [HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req)
+    {
+        logger.LogInformation("C# HTTP trigger function processed a request for user statistics.");
+        try
+        {
+            var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+            var requestData = JsonSerializer.Deserialize<RequestGetUserStatistic>(requestBody);
+            if (requestData == null || string.IsNullOrWhiteSpace(requestData.UserName))
+                return new BadRequestObjectResult("Invalid request. Please provide a user name.");
+
+            var result = await playersActivityService.GetStatisticByUserNameAsync(
+                requestData.ChatId, requestData.UserName);
+
+            return result == null
+                ? new NotFoundObjectResult($"User '{requestData.UserName}' was not found in chat '{requestData.ChatId}'.")
+                : new OkObjectResult(result);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error getting user statistics.");
+            return DiagnosticError(ex);
+        }
+    }
+
     private static ObjectResult DiagnosticError(Exception exception) => new(exception.ToString())
     {
         StatusCode = StatusCodes.Status500InternalServerError
