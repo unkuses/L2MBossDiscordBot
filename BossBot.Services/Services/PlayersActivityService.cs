@@ -33,6 +33,9 @@ public class PlayersActivityService(DatabaseService databaseService)
     public Task<List<EventStatistic>> GetUserStatisticByEventName(ulong chatId, string eventName) =>
         databaseService.GetUserStatisticByEventName(chatId, eventName);
 
+    public Task<UserStatistic?> GetStatisticByUserNameAsync(ulong chatId, string userName) =>
+        databaseService.GetStatisticByUserNameAsync(chatId, userName);
+
     public Task CleanUsers(ulong chatId) =>
          databaseService.CleanUsersByChatId(chatId);
 }

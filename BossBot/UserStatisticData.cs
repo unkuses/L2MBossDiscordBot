@@ -11,7 +11,7 @@ public class UserStatisticData
         _userStatisticDataSource.Database.EnsureCreated();
     }
 
-    public UserStatisticDBModel AddUserStatistic(ulong chatId, string userName)
+    public UserStatisticDBModel? AddUserStatistic(ulong chatId, string userName)
     {
         var user = FindUserByName(chatId, userName);
         if (user == null) return null;
@@ -62,6 +62,9 @@ public class UserStatisticData
     public bool MergeUsers(ulong chatId, int firstUserId, List<int> secondUserIds)
     {
         var firstUser = _userStatisticDataSource.UserInfo.FirstOrDefault(u => u.UserId == firstUserId && u.ChatId == chatId);
+        if (firstUser == null)
+            return false;
+
         var secondUsers = _userStatisticDataSource.UserInfo.Where(u => secondUserIds.Contains(u.UserId)&& u.ChatId == chatId);
         if (!secondUsers.Any())
             return false;

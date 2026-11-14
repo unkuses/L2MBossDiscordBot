@@ -2,6 +2,6 @@
 
 public class CosmoDbOptions
 {
-    public string Endpoint { get; set; }
-    public string AccountKey { get; set; }
+    public string Endpoint { get; set; } = string.Empty;
+    public string AccountKey { get; set; } = string.Empty;
 }

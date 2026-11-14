@@ -335,6 +335,12 @@ public static class BossCollection
                 BossNames = new List<BossNamesDBModel>() { new("Гекатон"), new("Hecaton") }
             },
 
+            new BossDbModel(id: 57, location: "Goddard", name: "Shadis", nickName: "блевотрона", chance: 50, respawnTime: 24, 
+                purpleDrop: true, restartRespawnTime: 10 ) 
+            {
+                BossNames = new List<BossNamesDBModel>() { new("Shadis"), new("Шадис") }
+            },
+
             // Veora
             new BossDbModel(id: 53, location: "Veora", name: "Moof", nickName: "Муфа", chance: 100, respawnTime: 12,
                 restartRespawnTime: 14, purpleDrop: true)

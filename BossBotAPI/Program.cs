@@ -18,23 +18,23 @@ builder.ConfigureFunctionsWebApplication();
 //     .ConfigureFunctionsApplicationInsights();
 
 builder.Services.AddDbContextFactory<BossDbContext>(options =>
-    options.UseSqlServer(builder.Configuration["AzureSql"]));
+    options.UseSqlServer(GetRequiredSetting("AzureSql")));
 builder.Services.AddScoped<DatabaseService>();
-builder.Services.AddSingleton(new DateTimeHelperOptions() { TimeZone = builder.Configuration["TimeZone"] });
+builder.Services.AddSingleton(new DateTimeHelperOptions { TimeZone = GetRequiredSetting("TimeZone") });
 builder.Services.AddSingleton<DateTimeHelper>();
 builder.Services.AddSingleton<PlayersActivityService>();
 builder.Services.AddSingleton(provider =>
 {
-    var imageAnalyzeUrl = builder.Configuration["ImageAnalyzeUrl"];
-    var imageAnalyzeKey = builder.Configuration["ImageAnalyzeKey"];
+    var imageAnalyzeUrl = GetRequiredSetting("ImageAnalyzeUrl");
+    var imageAnalyzeKey = GetRequiredSetting("ImageAnalyzeKey");
     return new ImageWork(provider.GetRequiredService<CosmoDb>(), provider.GetRequiredService<DateTimeHelper>(),
         imageAnalyzeUrl, imageAnalyzeKey);
 });
 builder.Services.AddSingleton(provider =>
 {
     var configuration = builder.Configuration;
-    var endpoint = configuration["CosmosDbEndpoint"];
-    var accountKey = configuration["CosmosDbAccountKey"];
+    var endpoint = GetRequiredSetting("CosmosDbEndpoint");
+    var accountKey = GetRequiredSetting("CosmosDbAccountKey");
     return new CosmoDb(
         provider.GetRequiredService<DateTimeHelper>(),
         endpoint,
@@ -43,3 +43,6 @@ builder.Services.AddSingleton(provider =>
 });
 
 builder.Build().Run();
+
+string GetRequiredSetting(string name) =>
+    builder.Configuration[name] ?? throw new InvalidOperationException($"Required configuration '{name}' is missing.");

@@ -21,12 +21,14 @@ public class BossChatService
     private readonly OpenAIService _openAiService;
     private readonly Logger _logger;
     private readonly ChatLanguageData _chatLanguageData;
+    private readonly ILanguage _localization;
 
     public BossChatService(BotOptions options,
         DiscordClientService discordClientService,
         BossData bossData,
         OpenAIService openAiService,
         ChatLanguageData chatLanguageData,
+        ILanguage localization,
         Logger logger,
         ClearBossCommand clearBossCommand, 
         GetAllBossCommand getAllBossCommand, 
@@ -45,11 +47,12 @@ public class BossChatService
         _discordClientService = discordClientService;
         _bossData = bossData;
         _chatLanguageData = chatLanguageData;
+        _localization = localization;
         _openAiService = openAiService;
-        _discordClientService.MessageReceivedEvent += async (sender, args) =>
+        _discordClientService.MessageReceivedEvent += async (message, channel) =>
         {
-            var timeZone = bossData.GetUserTimeZone(args.Item1.Author.Id);
-            await ProcessMessage(args.Item1, args.Item2, timeZone);
+            var timeZone = bossData.GetUserTimeZone(message.Author.Id);
+            await ProcessMessage(message, channel, timeZone);
         };
         _commands.Add(clearBossCommand);
         _commands.Add(getAllBossCommand);
@@ -165,8 +168,8 @@ public class BossChatService
         }
         catch (Exception ex)
         {
-            _logger.WriteLog($"Error processing image: {ex.Message}");
-            return $"Error processing image: {ex.Message}";
+            await _logger.WriteLog($"Error processing image: {ex}");
+            return _localization.ProcessingError(chatId);
         }
     }
 }

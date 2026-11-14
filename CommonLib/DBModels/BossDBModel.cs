@@ -25,10 +25,10 @@ public class BossDbModel
     }
 
     [JsonProperty("id")]
-    public string Id { get; set; }
+    public string Id { get; set; } = string.Empty;
 
     [JsonProperty(nameof(BossId))]
-    public string BossId { get; set; }
+    public string BossId { get; set; } = string.Empty;
     public required string Name { get; set; }
     public required string NickName { get; set; }
     public required int Chance { get; set; }
@@ -37,6 +37,6 @@ public class BossDbModel
     public required bool PurpleDrop { get; set; }
         
     [DefaultValue(0)] public required int RestartRespawnTime { get; set; }
-    public ICollection<BossInformationDbModel> BossInformationDbModels { get; set; }
-    public ICollection<BossNamesDBModel> BossNames { get; set; }
+    public ICollection<BossInformationDbModel> BossInformationDbModels { get; set; } = [];
+    public ICollection<BossNamesDBModel> BossNames { get; set; } = [];
 }

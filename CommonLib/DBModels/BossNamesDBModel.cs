@@ -15,5 +15,5 @@ public class BossNamesDBModel
     
     public int BossId { get; set; }
     
-    public BossDbModel Boss { get; set; }
+    public BossDbModel Boss { get; set; } = null!;
 }

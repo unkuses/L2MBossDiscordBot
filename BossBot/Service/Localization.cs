@@ -140,4 +140,15 @@ public class Localization(ChatLanguageData chatLanguageData) : ILanguage
             _ => _ruLanguage.UpcomingBossesAnnouncement(chatId)
         };
     }
+
+    public string ProcessingError(ulong chatId)
+    {
+        var language = chatLanguageData.GetLanguage(chatId);
+        return language.ToLower() switch
+        {
+            "ru" => _ruLanguage.ProcessingError(chatId),
+            "ua" => _uaLanguage.ProcessingError(chatId),
+            _ => _ruLanguage.ProcessingError(chatId)
+        };
+    }
 }

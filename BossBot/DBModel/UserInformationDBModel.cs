@@ -6,5 +6,5 @@ public class UserInformationDBModel
     [Key]
     public ulong UserId { get; set; }
     
-    public string UserTimeZone { get; set; }
+    public string UserTimeZone { get; set; } = string.Empty;
 }

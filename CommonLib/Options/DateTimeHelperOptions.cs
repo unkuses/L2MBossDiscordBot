@@ -2,5 +2,5 @@
 
 public class DateTimeHelperOptions
 {
-    public string TimeZone { get; set; }
+    public string TimeZone { get; set; } = TimeZoneInfo.Utc.Id;
 }

@@ -8,7 +8,7 @@ public class DatabaseService(IDbContextFactory<BossDbContext> factory)
 {
     public async Task<List<string>> GetAllPlayersNamesAsync(ulong chatId)
     {
-        var context = await factory.CreateDbContextAsync();
+        await using var context = await factory.CreateDbContextAsync();
         return await context.Players
             .Where(p => p.ChatId == chatId)
             .Select(p => p.Name)
@@ -17,8 +17,10 @@ public class DatabaseService(IDbContextFactory<BossDbContext> factory)
 
     public async Task AddPlayerActivitiesAsync(ulong chatId, List<string> playersNames, string eventName)
     {
-        var context = await factory.CreateDbContextAsync();
-        var players = context.Players.Where(p => p.ChatId == chatId && playersNames.Contains(p.Name)).ToList();
+        await using var context = await factory.CreateDbContextAsync();
+        var players = await context.Players
+            .Where(p => p.ChatId == chatId && playersNames.Contains(p.Name))
+            .ToListAsync();
         foreach (var player in players)
         {
             var eventActivity = await context.EventActivities
@@ -46,7 +48,7 @@ public class DatabaseService(IDbContextFactory<BossDbContext> factory)
     public async Task<List<string>> AddNewPlayerNameAsync(ulong chatId, List<string> playerNames)
     {
         var result = new List<string>();
-        var context = await factory.CreateDbContextAsync();
+        await using var context = await factory.CreateDbContextAsync();
         foreach (var playerName in playerNames)
         {
             var playerNameSmall = playerName.Replace(" ", "").ToLower();
@@ -63,27 +65,26 @@ public class DatabaseService(IDbContextFactory<BossDbContext> factory)
                 Name = playerNameSmall
             });
             result.Add(playerNameSmall);
-            await context.SaveChangesAsync();
         }
 
+        await context.SaveChangesAsync();
         return result;
     }
 
     public async Task CleanUsersByChatId(ulong chatId)
     {
-        var context = await factory.CreateDbContextAsync();
-        var users = context.Players.Where(p => p.ChatId == chatId);
+        await using var context = await factory.CreateDbContextAsync();
+        var users = await context.Players.Where(p => p.ChatId == chatId).ToListAsync();
         var userIds = users.Select(u => u.Id).ToList();
         var eventActivities = context.EventActivities.Where(e => userIds.Contains(e.UserId));
         context.EventActivities.RemoveRange(eventActivities);
-        await context.SaveChangesAsync();
         context.Players.RemoveRange(users);
         await context.SaveChangesAsync();
     }
 
     public async Task<List<EventStatistic>> GetUserStatisticByEventName(ulong chatId, string eventName)
     {
-        var context = await factory.CreateDbContextAsync();
+        await using var context = await factory.CreateDbContextAsync();
         var result = await context.EventActivities
             .Include(p => p.User)
             .Where(e => e.EventName == eventName && e.User.ChatId == chatId)
@@ -94,5 +95,36 @@ public class DatabaseService(IDbContextFactory<BossDbContext> factory)
             PlayerName = e.User.Name,
             Count = e.Count
         }).ToList();
+    }
+
+    public async Task<UserStatistic?> GetStatisticByUserNameAsync(ulong chatId, string userName)
+    {
+        var normalizedName = userName.Replace(" ", string.Empty).ToLowerInvariant();
+        await using var context = await factory.CreateDbContextAsync();
+        var player = await context.Players
+            .AsNoTracking()
+            .Include(p => p.EventActivities)
+            .FirstOrDefaultAsync(p => p.ChatId == chatId && p.Name == normalizedName);
+
+        if (player == null)
+            return null;
+
+        var events = player.EventActivities
+            .GroupBy(activity => activity.EventName)
+            .Select(group => new EventActivityStatistic
+            {
+                EventName = group.Key,
+                Count = group.Sum(activity => activity.Count)
+            })
+            .OrderByDescending(activity => activity.Count)
+            .ThenBy(activity => activity.EventName)
+            .ToList();
+
+        return new UserStatistic
+        {
+            PlayerName = player.Name,
+            TotalCount = events.Sum(activity => activity.Count),
+            Events = events
+        };
     }
 }

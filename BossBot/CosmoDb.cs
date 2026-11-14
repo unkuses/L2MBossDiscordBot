@@ -221,7 +221,7 @@ public class CosmoDb
             .ToList();
     }
 
-    public async Task<BossModel> LogKillBossInformationAsync(ulong chatId, string bossId, DateTime time)
+    public async Task<BossModel?> LogKillBossInformationAsync(ulong chatId, string bossId, DateTime time)
     {
         var container = _cosmosClient.GetContainer(DatabaseId, "BossInformation");
         var boss = await GetBossModelByIdAsync(bossId);
@@ -232,7 +232,7 @@ public class CosmoDb
             .WithParameter("@bossId", bossId);
         var iterator = container.GetItemQueryIterator<BossInformationDbModel>(query);
 
-        BossInformationDbModel bossInfo = null;
+        BossInformationDbModel? bossInfo = null;
         if (iterator.HasMoreResults)
         {
             var response = await iterator.ReadNextAsync();
@@ -322,7 +322,7 @@ public class CosmoDb
         }
     }
 
-    private async Task<BossDbModel> GetBossModelByIdAsync(string id)
+    private async Task<BossDbModel?> GetBossModelByIdAsync(string id)
     {
         var container = _cosmosClient.GetContainer(DatabaseId, ContainerId);
         try

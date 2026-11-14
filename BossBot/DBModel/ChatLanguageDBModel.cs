@@ -7,5 +7,5 @@ public class ChatLanguageDBModel
     [Key]
     public int Id { get; set; }
     public ulong ChatId { get; set; }
-    public string LanguageCode { get; set; }
+    public string LanguageCode { get; set; } = string.Empty;
 }

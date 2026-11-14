@@ -13,7 +13,7 @@ public class EventInformationDBModel
     public int EventNumber { get;set; }
     public DateTime Time { get; set; }
 
-    public string EventName { get; set; }
+    public string EventName { get; set; } = string.Empty;
 
     public RepeatDays Days { get; set; }
 

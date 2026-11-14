@@ -24,10 +24,7 @@ public class ActivityService
         MergeUsersCommand mergeUsersCommand)
     {
         _discordClientService = discordClientService;
-        _discordClientService.MessageReceivedEvent += async (sender, args) =>
-        {
-            await ProcessMessage(args.Item1, args.Item2);
-        };
+        _discordClientService.MessageReceivedEvent += ProcessMessage;
 
         _addUserCommand = addUserCommand;
         _userStatisticData = userStatisticData;
@@ -46,7 +43,7 @@ public class ActivityService
         if (message.Attachments.Any())
         {
             var image = message.Attachments.First();
-            if (image.ContentType.StartsWith("image/"))
+            if (image.ContentType?.StartsWith("image/", StringComparison.OrdinalIgnoreCase) == true)
             {
                 var result = await AddUser(channel.Id, image.Url);
                 _ = _discordClientService.ProcessAnswers(channel, result);
@@ -55,20 +52,22 @@ public class ActivityService
         }
         else
         {
-            var result = CommandResponse(message.Content, channel.Id, message.Author.Id);
+            var result = await CommandResponse(message.Content, channel.Id, message.Author.Id);
             _ = _discordClientService.ProcessAnswers(channel, result);
             return;
         }
     }
 
-    public List<string> CommandResponse(string command, ulong chatId, ulong userId)
+    public async Task<List<string>> CommandResponse(string command, ulong chatId, ulong userId)
     {
         if(string.IsNullOrEmpty(command))
             return ["Комманда не найдена"];
 
         var commandParts = command.Split(' ');
         var cmd = _commands.FirstOrDefault(c => c.Keys.Contains(commandParts[0]));
-        return cmd != null ? cmd.ExecuteAsync(chatId, userId, commandParts).Result.ToList() : ["Комманда не найдена"];
+        return cmd != null
+            ? await cmd.ExecuteAsync(chatId, userId, commandParts)
+            : ["Комманда не найдена"];
     }
 
     public Task<List<string>> AddUser(ulong chatId, string url) 

@@ -31,4 +31,6 @@ public class RuLanguage : ILanguage
         $"\r\n--------Начало ** {location} ** чейна--------";
 
     public string ChainEndAnnouncement(ulong chatId) => "--------Конец чейна-------- \r\n";
+
+    public string ProcessingError(ulong chatId) => "Не удалось обработать запрос. Пожалуйста, попробуйте позже.";
 }

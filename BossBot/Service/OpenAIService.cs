@@ -39,7 +39,7 @@ public class OpenAIService
                 return completion.Content[0].Text;
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             return string.Empty;
         }
@@ -64,7 +64,7 @@ public class OpenAIService
                 return completion.Content[0].Text;
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             return string.Empty;
         }
@@ -171,7 +171,7 @@ public class OpenAIService
                 return completion.Content[0].Text;
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             return string.Empty;
         }

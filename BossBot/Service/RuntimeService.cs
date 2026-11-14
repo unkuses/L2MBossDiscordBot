@@ -22,7 +22,7 @@ public class RuntimeService(CosmoDb cosmoDb,
             await MentionAllNotAnnouncedBossesTask();
             UpcomingEvents();
 
-            Thread.Sleep(60 * 1000);
+            await Task.Delay(TimeSpan.FromMinutes(1));
         }
     }
 
@@ -73,7 +73,8 @@ public class RuntimeService(CosmoDb cosmoDb,
                 builder.AppendLine($"**{item.EventName}** в {item.Time:HH:mm} через {timeToEvent.ToString(@"hh\:mm")}");
             }
             var channel = discordClientService.GetChannel(chatId);
-            channel?.SendMessageAsync(builder.ToString());
+            if (channel != null)
+                _ = channel.SendMessageAsync(builder.ToString());
         }
     }
 
@@ -86,12 +87,15 @@ public class RuntimeService(CosmoDb cosmoDb,
             Dictionary<ulong, IList<BossModel>> dic = new();
             foreach (var postponeBoss in postponeBosses)
             {
-                if (!dic.ContainsKey(postponeBoss.ChatId.Value))
+                if (postponeBoss.ChatId is not { } chatId)
+                    continue;
+
+                if (!dic.ContainsKey(chatId))
                 {
-                    dic[postponeBoss.ChatId.Value] = new List<BossModel>();
+                    dic[chatId] = new List<BossModel>();
                 }
 
-                dic[postponeBoss.ChatId.Value].Add(postponeBoss);
+                dic[chatId].Add(postponeBoss);
             }
 
             foreach (var i in dic.Keys)
@@ -106,7 +110,8 @@ public class RuntimeService(CosmoDb cosmoDb,
                 }
 
                 var channel = discordClientService.GetChannel(i);
-                channel?.SendMessageAsync(builder.ToString());
+                if (channel != null)
+                    _ = channel.SendMessageAsync(builder.ToString());
             }
         }
     }
@@ -119,12 +124,15 @@ public class RuntimeService(CosmoDb cosmoDb,
             Dictionary<ulong, IList<BossModel>> dictionary = new();
             foreach (var appendBoss in appendBosses)
             {
-                if (!dictionary.ContainsKey(appendBoss.ChatId.Value))
+                if (appendBoss.ChatId is not { } chatId)
+                    continue;
+
+                if (!dictionary.ContainsKey(chatId))
                 {
-                    dictionary[appendBoss.ChatId.Value] = new List<BossModel>();
+                    dictionary[chatId] = new List<BossModel>();
                 }
 
-                dictionary[appendBoss.ChatId.Value].Add(appendBoss);
+                dictionary[chatId].Add(appendBoss);
             }
 
             foreach (var i in dictionary.Keys)
@@ -139,7 +147,8 @@ public class RuntimeService(CosmoDb cosmoDb,
                 }
 
                 var channel = discordClientService.GetChannel(i);
-                channel?.SendMessageAsync(builder.ToString());
+                if (channel != null)
+                    _ = channel.SendMessageAsync(builder.ToString());
             }
         }
     }
@@ -153,8 +162,9 @@ public class RuntimeService(CosmoDb cosmoDb,
         {
             var channel = discordClientService.GetChannel(upcomingEvent.ChatId);
 
-            channel?.SendMessageAsync(
-                $"@here **{upcomingEvent.EventName}** в {upcomingEvent.Time:HH:mm} через {TimeDifference(upcomingEvent.Time)} минут.");
+            if (channel != null)
+                _ = channel.SendMessageAsync(
+                    $"@here **{upcomingEvent.EventName}** в {upcomingEvent.Time:HH:mm} через {TimeDifference(upcomingEvent.Time)} минут.");
         }
     }
 
@@ -166,12 +176,15 @@ public class RuntimeService(CosmoDb cosmoDb,
             Dictionary<ulong, IList<BossModel>> dictionary = new();
             foreach (var appendBoss in result)
             {
-                if (!dictionary.ContainsKey(appendBoss.ChatId.Value))
+                if (appendBoss.ChatId is not { } chatId)
+                    continue;
+
+                if (!dictionary.ContainsKey(chatId))
                 {
-                    dictionary[appendBoss.ChatId.Value] = new List<BossModel>();
+                    dictionary[chatId] = new List<BossModel>();
                 }
 
-                dictionary[appendBoss.ChatId.Value].Add(appendBoss);
+                dictionary[chatId].Add(appendBoss);
             }
 
             foreach (var i in dictionary.Keys)
@@ -186,7 +199,8 @@ public class RuntimeService(CosmoDb cosmoDb,
                 }
 
                 var channel = discordClientService.GetChannel(i);
-                channel?.SendMessageAsync(builder.ToString());
+                if (channel != null)
+                    _ = channel.SendMessageAsync(builder.ToString());
             }
         }
     }
